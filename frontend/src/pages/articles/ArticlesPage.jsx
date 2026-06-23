@@ -135,11 +135,11 @@ export default function ArticlesPage() {
                           src={`http://localhost:5000/${art.image}`}
                           alt={art.designation}
                           className="w-8 h-8 rounded-lg object-cover
-                                     flex-shrink-0"
+                                     shrink-0"
                         />
                       ) : (
                         <div className="w-8 h-8 rounded-lg bg-gray-100
-                                        flex-shrink-0" />
+                                        shrink-0" />
                       )}
                       <div>
                         <p className="font-medium text-gray-900">
