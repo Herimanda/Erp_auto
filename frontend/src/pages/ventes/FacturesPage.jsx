@@ -68,7 +68,7 @@ export default function FacturesPage() {
       {impayes.length > 0 && (
         <div className="mb-6 p-4 bg-red-50 border border-red-200
                         rounded-xl flex items-center gap-3">
-          <AlertTriangle className="w-5 h-5 text-red-500 flex-shrink-0"/>
+          <AlertTriangle className="w-5 h-5 text-red-500 shrink-0"/>
           <div>
             <p className="text-sm font-medium text-red-800">
               {impayes.length} facture(s) impayée(s) —

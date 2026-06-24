@@ -42,7 +42,7 @@ const RapportCard = ({
                      hover:shadow-md transition-shadow ${colors[color]}`}>
       <div className="flex items-start gap-4 mb-4">
         <div className={`w-11 h-11 rounded-xl flex items-center
-                         justify-center flex-shrink-0 ${
+                         justify-center shrink-0 ${
           color === 'blue'   ? 'bg-blue-100'   :
           color === 'green'  ? 'bg-green-100'  :
           color === 'purple' ? 'bg-purple-100' : 'bg-orange-100'
