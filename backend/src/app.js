@@ -47,6 +47,9 @@ app.use('/api/commandes-fournisseur', commandeFournisseurRoutes);
 app.use('/api/devis', devisRoutes);
 app.use('/api/factures', factureRoutes);
 app.use('/api/avoirs', avoirRoutes);
+app.use('/api/dashboard', require('./routes/dashboardRoutes'));
+app.use('/api/rapports', require('./routes/rapportRoutes'));
+app.use('/api/audit', require('./routes/auditRoutes'));
 
 
 //uploads

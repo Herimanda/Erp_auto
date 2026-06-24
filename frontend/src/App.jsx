@@ -20,6 +20,8 @@ import FacturesPage from './pages/ventes/FacturesPage';
 import AvoirsPage from './pages/ventes/AvoirsPage';
 import UtilisateursPage from './pages/admin/UtilisateursPage';
 import MagasinsPage from './pages/admin/MagasinsPage';
+import RapportsPage from './pages/rapports/RapportsPage';
+import AuditPage    from './pages/admin/AuditPage';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -56,6 +58,9 @@ export default function App() {
               <Route path="/devis" element={<DevisPage />} />
               <Route path="/factures" element={<FacturesPage />} />
               <Route path="/avoirs" element={<AvoirsPage />} />
+              <Route path="/rapports" element={<RapportsPage />} />
+              <Route path="/audit"    element={<AuditPage />} />
+              
               <Route
                 path="/utilisateurs"
                 element={
