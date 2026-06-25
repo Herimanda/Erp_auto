@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, Edit2, UserX, UserCheck, Key } from 'lucide-react';
+import { Plus, Edit2, UserX, UserCheck, Key, Users } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '../../services/api';
 import toast from 'react-hot-toast';
@@ -14,27 +14,31 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { clsx } from 'clsx';
 
+// ── Config rôles ───────────────────────────────────────────────────────────
 const ROLES = [
   { v: 'administrateur', l: 'Administrateur',
-    color: 'bg-red-100 text-red-700'     },
+    color: 'bg-red-100 text-red-700'      },
   { v: 'gestionnaire',   l: 'Gestionnaire',
-    color: 'bg-purple-100 text-purple-700'},
+    color: 'bg-purple-100 text-purple-700' },
   { v: 'caissier',       l: 'Caissier',
-    color: 'bg-blue-100 text-blue-700'   },
+    color: 'bg-blue-100 text-blue-700'    },
   { v: 'magasinier',     l: 'Magasinier',
-    color: 'bg-green-100 text-green-700' },
+    color: 'bg-green-100 text-green-700'  },
 ];
 
 const getRoleConfig = (role) =>
-  ROLES.find((r) => r.v === role) || { l: role, color: 'bg-gray-100 text-gray-600' };
+  ROLES.find((r) => r.v === role) ||
+  { l: role, color: 'bg-gray-100 text-gray-600' };
 
-// ── Formulaire utilisateur ─────────────────────────────────────────────────
+// ── Schémas Zod ────────────────────────────────────────────────────────────
 const schemaCreate = z.object({
   nom:        z.string().min(1, 'Nom requis'),
   prenom:     z.string().min(1, 'Prénom requis'),
   email:      z.string().email('Email invalide'),
   motDePasse: z.string().min(6, 'Min 6 caractères'),
-  role:       z.enum(['administrateur','gestionnaire','caissier','magasinier']),
+  role:       z.enum([
+    'administrateur','gestionnaire','caissier','magasinier'
+  ]),
   magasins:   z.array(z.string()).optional(),
 });
 
@@ -42,12 +46,15 @@ const schemaUpdate = z.object({
   nom:      z.string().min(1, 'Nom requis'),
   prenom:   z.string().min(1, 'Prénom requis'),
   email:    z.string().email('Email invalide'),
-  role:     z.enum(['administrateur','gestionnaire','caissier','magasinier']),
+  role:     z.enum([
+    'administrateur','gestionnaire','caissier','magasinier'
+  ]),
   magasins: z.array(z.string()).optional(),
 });
 
+// ── Formulaire utilisateur ─────────────────────────────────────────────────
 function UserForm({ user, onSuccess }) {
-  const qc = useQueryClient();
+  const qc     = useQueryClient();
   const isEdit = !!user;
 
   const { data: magasinsData } = useQuery({
@@ -63,7 +70,9 @@ function UserForm({ user, onSuccess }) {
         : api.post('/users', data),
     onSuccess: () => {
       qc.invalidateQueries(['users']);
-      toast.success(isEdit ? 'Utilisateur modifié.' : 'Utilisateur créé.');
+      toast.success(
+        isEdit ? 'Utilisateur modifié.' : 'Utilisateur créé.'
+      );
       onSuccess();
     },
     onError: (err) => toast.error(err.message)
@@ -82,19 +91,23 @@ function UserForm({ user, onSuccess }) {
           role:     user.role,
           magasins: user.magasins?.map((m) => m._id || m) || [],
         }
-      : { role: 'caissier' }
+      : { role: 'caissier', magasins: [] }
   });
 
   return (
-    <form onSubmit={handleSubmit((d) => mutation.mutate(d))}
-      className="space-y-4">
+    <form
+      onSubmit={handleSubmit((d) => mutation.mutate(d))}
+      className="space-y-4"
+    >
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label className="label">Nom *</label>
           <input {...register('nom')} className="input-field"
             placeholder="Rakoto" />
           {errors.nom && (
-            <p className="text-red-500 text-xs mt-1">{errors.nom.message}</p>
+            <p className="text-red-500 text-xs mt-1">
+              {errors.nom.message}
+            </p>
           )}
         </div>
         <div>
@@ -128,8 +141,12 @@ function UserForm({ user, onSuccess }) {
         {!isEdit && (
           <div className="col-span-2">
             <label className="label">Mot de passe *</label>
-            <input {...register('motDePasse')} type="password"
-              className="input-field" placeholder="Min. 6 caractères" />
+            <input
+              {...register('motDePasse')}
+              type="password"
+              className="input-field"
+              placeholder="Min. 6 caractères"
+            />
             {errors.motDePasse && (
               <p className="text-red-500 text-xs mt-1">
                 {errors.motDePasse.message}
@@ -142,30 +159,42 @@ function UserForm({ user, onSuccess }) {
       {/* Magasins */}
       <div>
         <label className="label">Magasins accessibles</label>
-        <div className="grid grid-cols-2 gap-2 mt-1">
-          {magasins.map((m) => (
-            <label key={m._id}
-              className="flex items-center gap-2 p-2.5 rounded-lg
-                         border border-gray-200 hover:bg-gray-50
-                         cursor-pointer text-sm">
-              <input
-                type="checkbox"
-                value={m._id}
-                {...register('magasins')}
-                className="w-4 h-4 text-primary-600"
-              />
-              <span className="font-medium text-gray-700">{m.nom}</span>
-              <span className="text-xs text-gray-400 ml-auto">
-                {m.code}
-              </span>
-            </label>
-          ))}
-        </div>
+        {magasins.length === 0 ? (
+          <p className="text-sm text-gray-400">
+            Aucun magasin disponible
+          </p>
+        ) : (
+          <div className="grid grid-cols-2 gap-2 mt-1">
+            {magasins.map((m) => (
+              <label
+                key={m._id}
+                className="flex items-center gap-2 p-2.5 rounded-lg
+                           border border-gray-200 hover:bg-gray-50
+                           cursor-pointer text-sm"
+              >
+                <input
+                  type="checkbox"
+                  value={m._id}
+                  {...register('magasins')}
+                  className="w-4 h-4 text-primary-600"
+                />
+                <span className="font-medium text-gray-700">
+                  {m.nom}
+                </span>
+                <span className="text-xs text-gray-400 ml-auto">
+                  {m.code}
+                </span>
+              </label>
+            ))}
+          </div>
+        )}
       </div>
 
-      <button type="submit"
+      <button
+        type="submit"
         disabled={mutation.isPending}
-        className="btn-primary w-full">
+        className="btn-primary w-full"
+      >
         {mutation.isPending
           ? 'Enregistrement...'
           : isEdit ? 'Modifier' : 'Créer l\'utilisateur'}
@@ -174,17 +203,16 @@ function UserForm({ user, onSuccess }) {
   );
 }
 
-// ── Modal reset mot de passe ───────────────────────────────────────────────
+// ── Formulaire reset mot de passe ──────────────────────────────────────────
 function ResetPasswordForm({ userId, onSuccess }) {
-  const [mdp, setMdp]     = useState('');
+  const [mdp, setMdp]         = useState('');
   const [confirm, setConfirm] = useState('');
-  const qc = useQueryClient();
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (mdp.length < 6) {
-      return toast.error('Min. 6 caractères');
+      return toast.error('Min. 6 caractères.');
     }
     if (mdp !== confirm) {
       return toast.error('Les mots de passe ne correspondent pas.');
@@ -205,18 +233,31 @@ function ResetPasswordForm({ userId, onSuccess }) {
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
         <label className="label">Nouveau mot de passe *</label>
-        <input type="password" value={mdp}
+        <input
+          type="password"
+          value={mdp}
           onChange={(e) => setMdp(e.target.value)}
-          className="input-field" placeholder="Min. 6 caractères" />
+          className="input-field"
+          placeholder="Min. 6 caractères"
+          required
+        />
       </div>
       <div>
         <label className="label">Confirmer *</label>
-        <input type="password" value={confirm}
+        <input
+          type="password"
+          value={confirm}
           onChange={(e) => setConfirm(e.target.value)}
-          className="input-field" placeholder="Répéter le mot de passe" />
+          className="input-field"
+          placeholder="Répéter le mot de passe"
+          required
+        />
       </div>
-      <button type="submit" disabled={loading}
-        className="btn-primary w-full">
+      <button
+        type="submit"
+        disabled={loading}
+        className="btn-primary w-full"
+      >
         {loading ? 'Réinitialisation...' : 'Réinitialiser'}
       </button>
     </form>
@@ -225,22 +266,24 @@ function ResetPasswordForm({ userId, onSuccess }) {
 
 // ── Page principale ────────────────────────────────────────────────────────
 export default function UtilisateursPage() {
-  const [search, setSearch]         = useState('');
-  const [roleFiltre, setRole]       = useState('');
-  const [showForm, setShowForm]     = useState(false);
-  const [showReset, setShowReset]   = useState(false);
-  const [selected, setSelected]     = useState(null);
+  const [search, setSearch]       = useState('');
+  const [roleFiltre, setRole]     = useState('');
+  const [showForm, setShowForm]   = useState(false);
+  const [showReset, setShowReset] = useState(false);
+  const [selected, setSelected]   = useState(null);
   const qc = useQueryClient();
 
-  const { data, isLoading } = useQuery({
-    queryKey: ['users', { search, roleFiltre }],
+  const { data, isLoading, error: queryError } = useQuery({
+    queryKey: ['users', { roleFiltre }],
     queryFn:  () => api.get('/users', {
       params: {
-        role:   roleFiltre || undefined,
-        limit:  50
+        role:  roleFiltre || undefined,
+        limit: 100
       }
     })
   });
+
+
 
   const toggleMutation = useMutation({
     mutationFn: ({ id, isActive }) =>
@@ -252,11 +295,38 @@ export default function UtilisateursPage() {
     onError: (err) => toast.error(err.message)
   });
 
-  const users = (data?.data?.users || []).filter((u) =>
+  // Filtrage côté client par recherche
+  const allUsers = data?.data?.users     // structure normale
+  ?? data?.data                         // si backend renvoie un tableau direct
+  ?? data?.users                        // si axios unwrap
+  ?? [];
+
+  const users    = allUsers.filter((u) =>
     !search ||
     `${u.nom} ${u.prenom} ${u.email}`
-      .toLowerCase().includes(search.toLowerCase())
+      .toLowerCase()
+      .includes(search.toLowerCase())
   );
+
+  // Affichage erreur éventuelle
+  if (queryError) {
+    return (
+      <div>
+        <PageHeader title="Utilisateurs" />
+        <div className="card text-center py-12">
+          <p className="text-red-500 font-medium">
+            Erreur de chargement : {queryError.message}
+          </p>
+          <button
+            onClick={() => qc.invalidateQueries(['users'])}
+            className="btn-primary mt-4"
+          >
+            Réessayer
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -290,19 +360,20 @@ export default function UtilisateursPage() {
                 'px-3 py-2 rounded-lg text-sm font-medium',
                 !roleFiltre
                   ? 'bg-primary-600 text-white'
-                  : 'bg-gray-100 text-gray-600'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
               )}
             >
               Tous
             </button>
             {ROLES.map((r) => (
-              <button key={r.v}
+              <button
+                key={r.v}
                 onClick={() => setRole(r.v)}
                 className={clsx(
                   'px-3 py-2 rounded-lg text-sm font-medium',
                   roleFiltre === r.v
                     ? 'bg-primary-600 text-white'
-                    : 'bg-gray-100 text-gray-600'
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                 )}
               >
                 {r.l}
@@ -317,7 +388,12 @@ export default function UtilisateursPage() {
         {isLoading ? (
           <div className="flex justify-center py-12">
             <div className="w-8 h-8 border-4 border-primary-600
-                            border-t-transparent rounded-full animate-spin"/>
+                            border-t-transparent rounded-full animate-spin" />
+          </div>
+        ) : users.length === 0 ? (
+          <div className="text-center py-16 text-gray-400">
+            <Users className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+            <p className="font-medium">Aucun utilisateur trouvé</p>
           </div>
         ) : (
           <Table>
@@ -339,10 +415,10 @@ export default function UtilisateursPage() {
                   <Tr key={u._id}>
                     <Td>
                       <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-full
-                                        bg-primary-600 flex items-center
-                                        justify-center text-white text-xs
-                                        font-bold shrink-0">
+                        <div className="w-9 h-9 rounded-full bg-primary-600
+                                        flex items-center justify-center
+                                        text-white text-xs font-bold
+                                        flex-shrink-0">
                           {u.prenom?.[0]}{u.nom?.[0]}
                         </div>
                         <div>
@@ -363,14 +439,16 @@ export default function UtilisateursPage() {
                     </Td>
                     <Td>
                       <div className="flex flex-wrap gap-1">
-                        {u.magasins?.slice(0, 2).map((m) => (
-                          <span key={m._id || m}
+                        {u.magasins?.slice(0, 2).map((m, i) => (
+                          <span
+                            key={m._id || i}
                             className="text-xs bg-gray-100 text-gray-600
-                                       px-1.5 py-0.5 rounded font-mono">
+                                       px-1.5 py-0.5 rounded font-mono"
+                          >
                             {m.code || m}
                           </span>
                         ))}
-                        {u.magasins?.length > 2 && (
+                        {(u.magasins?.length || 0) > 2 && (
                           <span className="text-xs text-gray-400">
                             +{u.magasins.length - 2}
                           </span>
@@ -383,8 +461,9 @@ export default function UtilisateursPage() {
                         : 'Jamais'}
                     </Td>
                     <Td>
-                      <span className={u.isActive
-                        ? 'badge-success' : 'badge-danger'}>
+                      <span className={
+                        u.isActive ? 'badge-success' : 'badge-danger'
+                      }>
                         {u.isActive ? 'Actif' : 'Inactif'}
                       </span>
                     </Td>
@@ -392,7 +471,8 @@ export default function UtilisateursPage() {
                       <div className="flex items-center justify-end gap-1">
                         <button
                           onClick={() => {
-                            setSelected(u); setShowForm(true);
+                            setSelected(u);
+                            setShowForm(true);
                           }}
                           className="p-1.5 rounded-lg hover:bg-gray-100
                                      text-gray-400 hover:text-blue-600"
@@ -402,7 +482,8 @@ export default function UtilisateursPage() {
                         </button>
                         <button
                           onClick={() => {
-                            setSelected(u); setShowReset(true);
+                            setSelected(u);
+                            setShowReset(true);
                           }}
                           className="p-1.5 rounded-lg hover:bg-gray-100
                                      text-gray-400 hover:text-yellow-600"
@@ -412,7 +493,8 @@ export default function UtilisateursPage() {
                         </button>
                         <button
                           onClick={() => toggleMutation.mutate({
-                            id: u._id, isActive: !u.isActive
+                            id:       u._id,
+                            isActive: !u.isActive
                           })}
                           className={clsx(
                             'p-1.5 rounded-lg hover:bg-gray-100',
@@ -436,22 +518,30 @@ export default function UtilisateursPage() {
         )}
       </div>
 
-      <Modal isOpen={showForm}
-        onClose={() => setShowForm(false)}
-        title={selected ? 'Modifier l\'utilisateur' : 'Nouvel utilisateur'}
-        size="lg">
+      {/* Modal formulaire */}
+      <Modal
+        isOpen={showForm}
+        onClose={() => { setShowForm(false); setSelected(null); }}
+        title={selected
+          ? 'Modifier l\'utilisateur'
+          : 'Nouvel utilisateur'}
+        size="lg"
+      >
         <UserForm
           user={selected}
-          onSuccess={() => setShowForm(false)}
+          onSuccess={() => { setShowForm(false); setSelected(null); }}
         />
       </Modal>
 
-      <Modal isOpen={showReset}
-        onClose={() => setShowReset(false)}
-        title="Réinitialiser le mot de passe">
+      {/* Modal reset mdp */}
+      <Modal
+        isOpen={showReset}
+        onClose={() => { setShowReset(false); setSelected(null); }}
+        title="Réinitialiser le mot de passe"
+      >
         <ResetPasswordForm
           userId={selected?._id}
-          onSuccess={() => setShowReset(false)}
+          onSuccess={() => { setShowReset(false); setSelected(null); }}
         />
       </Modal>
     </div>

@@ -1,226 +1,193 @@
 import { useState } from 'react';
-import { Download, FileText, Table, Filter } from 'lucide-react';
-import PageHeader from '../../components/ui/PageHeader';
 import { useQuery } from '@tanstack/react-query';
 import api from '../../services/api';
-import toast from 'react-hot-toast';
+import PageHeader from '../../components/ui/PageHeader';
+import Pagination from '../../components/ui/Pagination';
+import { Table, Thead, Th, Tbody, Tr, Td }
+  from '../../components/ui/Table';
+import { formatDateTime } from '../../utils/format';
+import { clsx } from 'clsx';
+import { Shield } from 'lucide-react';
 
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-
-const downloadRapport = async (url, filename) => {
-  const token = localStorage.getItem('token');
-  try {
-    const res = await fetch(`${API_BASE}${url}`, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-    if (!res.ok) throw new Error('Erreur génération rapport');
-    const blob = await res.blob();
-    const link = document.createElement('a');
-    link.href  = URL.createObjectURL(blob);
-    link.download = filename;
-    link.click();
-    URL.revokeObjectURL(link.href);
-    toast.success('Rapport téléchargé !');
-  } catch (err) {
-    toast.error(err.message);
-  }
+const ACTION_CONFIG = {
+  connexion:        { label: 'Connexion',
+                      color: 'bg-blue-100 text-blue-700'    },
+  deconnexion:      { label: 'Déconnexion',
+                      color: 'bg-gray-100 text-gray-600'    },
+  creation:         { label: 'Création',
+                      color: 'bg-green-100 text-green-700'  },
+  modification:     { label: 'Modification',
+                      color: 'bg-yellow-100 text-yellow-700'},
+  suppression:      { label: 'Suppression',
+                      color: 'bg-red-100 text-red-700'      },
+  vente:            { label: 'Vente',
+                      color: 'bg-purple-100 text-purple-700'},
+  ajustement_stock: { label: 'Ajust. stock',
+                      color: 'bg-orange-100 text-orange-700'},
+  transfert:        { label: 'Transfert',
+                      color: 'bg-indigo-100 text-indigo-700'},
 };
 
-const RapportCard = ({
-  title, description, icon: Icon,
-  color, onPDF, onExcel, filters
-}) => {
-  const colors = {
-    blue:   'bg-blue-50 text-blue-600 border-blue-100',
-    green:  'bg-green-50 text-green-600 border-green-100',
-    purple: 'bg-purple-50 text-purple-600 border-purple-100',
-    orange: 'bg-orange-50 text-orange-600 border-orange-100',
-  };
+export default function AuditPage() {
+  const [page, setPage]       = useState(1);
+  const [action, setAction]   = useState('');
+  const [dateDebut, setDebut] = useState('');
+  const [dateFin,   setFin]   = useState('');
 
-  return (
-    <div className={`bg-white rounded-2xl border p-5 shadow-sm
-                     hover:shadow-md transition-shadow ${colors[color]}`}>
-      <div className="flex items-start gap-4 mb-4">
-        <div className={`w-11 h-11 rounded-xl flex items-center
-                         justify-center shrink-0 ${
-          color === 'blue'   ? 'bg-blue-100'   :
-          color === 'green'  ? 'bg-green-100'  :
-          color === 'purple' ? 'bg-purple-100' : 'bg-orange-100'
-        }`}>
-          <Icon className="w-5 h-5" />
-        </div>
-        <div>
-          <h3 className="font-semibold text-gray-900">{title}</h3>
-          <p className="text-sm text-gray-500 mt-0.5">{description}</p>
-        </div>
-      </div>
-
-      {filters && (
-        <div className="mb-4">{filters}</div>
-      )}
-
-      <div className="flex gap-2">
-        {onPDF && (
-          <button onClick={onPDF}
-            className="flex-1 flex items-center justify-center gap-2
-                       py-2 px-3 bg-red-50 hover:bg-red-100 text-red-700
-                       rounded-lg text-sm font-medium transition-colors">
-            <FileText className="w-4 h-4" />
-            PDF
-          </button>
-        )}
-        {onExcel && (
-          <button onClick={onExcel}
-            className="flex-1 flex items-center justify-center gap-2
-                       py-2 px-3 bg-green-50 hover:bg-green-100
-                       text-green-700 rounded-lg text-sm font-medium
-                       transition-colors">
-            <Table className="w-4 h-4" />
-            Excel
-          </button>
-        )}
-      </div>
-    </div>
-  );
-};
-
-export default function RapportsPage() {
-  const [dateDebut, setDateDebut] = useState('');
-  const [dateFin,   setDateFin]   = useState('');
-  const [magasin,   setMagasin]   = useState('');
-
-  const { data: magasinsData } = useQuery({
-    queryKey: ['magasins'],
-    queryFn:  () => api.get('/magasins')
+  const { data, isLoading, error: queryError } = useQuery({
+    queryKey: ['audit', { action, dateDebut, dateFin, page }],
+    queryFn:  () => api.get('/audit', {
+      params: {
+        action:    action    || undefined,
+        dateDebut: dateDebut || undefined,
+        dateFin:   dateFin   || undefined,
+        page,
+        limit: 25
+      }
+    })
   });
-  const magasins = magasinsData?.data || [];
 
-  const params = (extra = {}) => {
-    const p = new URLSearchParams();
-    if (dateDebut) p.append('dateDebut', dateDebut);
-    if (dateFin)   p.append('dateFin',   dateFin);
-    if (magasin)   p.append('magasin',   magasin);
-    Object.entries(extra).forEach(([k, v]) => v && p.append(k, v));
-    return p.toString() ? '?' + p.toString() : '';
-  };
+  const logs       = data?.data?.logs       || [];
+  const pagination = data?.data?.pagination;
 
-  const FiltrePeriode = () => (
-    <div className="grid grid-cols-3 gap-2">
+  if (queryError) {
+    return (
       <div>
-        <label className="label text-xs">Du</label>
-        <input type="date" value={dateDebut}
-          onChange={(e) => setDateDebut(e.target.value)}
-          className="input-field text-xs" />
+        <PageHeader title="Journal d'audit" />
+        <div className="card text-center py-12">
+          <p className="text-red-500 font-medium">
+            Erreur : {queryError.message}
+          </p>
+        </div>
       </div>
-      <div>
-        <label className="label text-xs">Au</label>
-        <input type="date" value={dateFin}
-          onChange={(e) => setDateFin(e.target.value)}
-          className="input-field text-xs" />
-      </div>
-      <div>
-        <label className="label text-xs">Magasin</label>
-        <select value={magasin}
-          onChange={(e) => setMagasin(e.target.value)}
-          className="input-field text-xs">
-          <option value="">Tous</option>
-          {magasins.map((m) => (
-            <option key={m._id} value={m._id}>{m.nom}</option>
-          ))}
-        </select>
-      </div>
-    </div>
-  );
+    );
+  }
 
   return (
     <div>
       <PageHeader
-        title="Rapports"
-        subtitle="Exportez vos données en PDF ou Excel"
+        title="Journal d'audit"
+        subtitle="Traçabilité complète de toutes les actions"
       />
 
-      {/* Filtres globaux */}
+      {/* Filtres */}
       <div className="card mb-6">
-        <div className="flex items-center gap-2 mb-3">
-          <Filter className="w-4 h-4 text-gray-500" />
-          <h3 className="text-sm font-semibold text-gray-700">
-            Filtres globaux
-          </h3>
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div>
-            <label className="label">Date début</label>
-            <input type="date" value={dateDebut}
-              onChange={(e) => setDateDebut(e.target.value)}
-              className="input-field" />
+        <div className="flex flex-col sm:flex-row gap-3 flex-wrap">
+          <select
+            value={action}
+            onChange={(e) => { setAction(e.target.value); setPage(1); }}
+            className="input-field w-full sm:w-48"
+          >
+            <option value="">Toutes actions</option>
+            {Object.entries(ACTION_CONFIG).map(([k, v]) => (
+              <option key={k} value={k}>{v.label}</option>
+            ))}
+          </select>
+          <div className="flex gap-2 flex-wrap">
+            <div>
+              <label className="label text-xs">Du</label>
+              <input
+                type="date"
+                value={dateDebut}
+                onChange={(e) => { setDebut(e.target.value); setPage(1); }}
+                className="input-field"
+              />
+            </div>
+            <div>
+              <label className="label text-xs">Au</label>
+              <input
+                type="date"
+                value={dateFin}
+                onChange={(e) => { setFin(e.target.value); setPage(1); }}
+                className="input-field"
+              />
+            </div>
           </div>
-          <div>
-            <label className="label">Date fin</label>
-            <input type="date" value={dateFin}
-              onChange={(e) => setDateFin(e.target.value)}
-              className="input-field" />
-          </div>
-          <div>
-            <label className="label">Magasin</label>
-            <select value={magasin}
-              onChange={(e) => setMagasin(e.target.value)}
-              className="input-field">
-              <option value="">Tous les magasins</option>
-              {magasins.map((m) => (
-                <option key={m._id} value={m._id}>{m.nom}</option>
-              ))}
-            </select>
-          </div>
+          <span className="text-sm text-gray-400 self-end pb-2">
+            {pagination?.total || 0} entrée(s)
+          </span>
         </div>
       </div>
 
-      {/* Rapports */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-
-        {/* Ventes */}
-        <RapportCard
-          title="Rapport des ventes"
-          description="Toutes les factures avec totaux et paiements"
-          icon={FileText}
-          color="blue"
-          onPDF={() => downloadRapport(
-            `/rapports/ventes/pdf${params()}`,
-            `rapport-ventes-${Date.now()}.pdf`
-          )}
-          onExcel={() => downloadRapport(
-            `/rapports/ventes/excel${params()}`,
-            `rapport-ventes-${Date.now()}.xlsx`
-          )}
-        />
-
-        {/* Stocks */}
-        <RapportCard
-          title="Rapport des stocks"
-          description="État détaillé du stock par article et magasin"
-          icon={Download}
-          color="green"
-          onPDF={() => downloadRapport(
-            `/rapports/stocks/pdf${params()}`,
-            `rapport-stocks-${Date.now()}.pdf`
-          )}
-          onExcel={() => downloadRapport(
-            `/rapports/stocks/excel${params()}`,
-            `rapport-stocks-${Date.now()}.xlsx`
-          )}
-        />
-
-        {/* Clients */}
-        <RapportCard
-          title="Rapport clients"
-          description="Liste complète des clients avec soldes"
-          icon={Table}
-          color="purple"
-          onExcel={() => downloadRapport(
-            `/rapports/clients/excel`,
-            `rapport-clients-${Date.now()}.xlsx`
-          )}
-        />
-
+      {/* Table */}
+      <div className="card p-0">
+        {isLoading ? (
+          <div className="flex justify-center py-12">
+            <div className="w-8 h-8 border-4 border-primary-600
+                            border-t-transparent rounded-full animate-spin"/>
+          </div>
+        ) : logs.length === 0 ? (
+          <div className="text-center py-16 text-gray-400">
+            <Shield className="w-12 h-12 mx-auto mb-3 text-gray-300"/>
+            <p className="font-medium">Aucune entrée dans le journal</p>
+          </div>
+        ) : (
+          <Table>
+            <Thead>
+              <tr>
+                <Th>Date & Heure</Th>
+                <Th>Utilisateur</Th>
+                <Th>Rôle</Th>
+                <Th>Action</Th>
+                <Th>Entité</Th>
+                <Th>Magasin</Th>
+                <Th>IP</Th>
+              </tr>
+            </Thead>
+            <Tbody>
+              {logs.map((log) => {
+                const cfg = ACTION_CONFIG[log.action];
+                return (
+                  <Tr key={log._id}>
+                    <Td className="text-xs text-gray-500 whitespace-nowrap">
+                      {formatDateTime(log.createdAt)}
+                    </Td>
+                    <Td>
+                      <p className="font-medium text-sm text-gray-900">
+                        {log.utilisateur?.prenom}{' '}
+                        {log.utilisateur?.nom}
+                      </p>
+                      <p className="text-xs text-gray-400">
+                        {log.utilisateur?.email}
+                      </p>
+                    </Td>
+                    <Td>
+                      <span className="text-xs capitalize badge-gray">
+                        {log.utilisateur?.role}
+                      </span>
+                    </Td>
+                    <Td>
+                      <span className={clsx(
+                        'text-xs font-medium px-2 py-0.5 rounded-full',
+                        cfg?.color || 'bg-gray-100 text-gray-600'
+                      )}>
+                        {cfg?.label || log.action}
+                      </span>
+                    </Td>
+                    <Td className="text-sm text-gray-600">
+                      {log.entite || '—'}
+                    </Td>
+                    <Td className="text-sm text-gray-500">
+                      {log.magasin?.nom || '—'}
+                    </Td>
+                    <Td className="text-xs text-gray-400 font-mono">
+                      {log.ip || '—'}
+                    </Td>
+                  </Tr>
+                );
+              })}
+            </Tbody>
+          </Table>
+        )}
+        {pagination && (
+          <div className="p-4 border-t border-gray-100">
+            <Pagination
+              page={pagination.page}
+              totalPages={pagination.totalPages}
+              onPageChange={setPage}
+            />
+          </div>
+        )}
       </div>
     </div>
   );

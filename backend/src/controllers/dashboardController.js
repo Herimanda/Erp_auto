@@ -1,30 +1,47 @@
-const Facture = require('../models/Facture');
-const Article = require('../models/Article');
-const Stock = require('../models/Stock');
-const Client = require('../models/Client');
+const Facture      = require('../models/Facture');
+const Article      = require('../models/Article');
+const Stock        = require('../models/Stock');
+const Client       = require('../models/Client');
 const MouvementStock = require('../models/MouvementStock');
 const CommandeFournisseur = require('../models/CommandeFournisseur');
-const Transfert = require('../models/Transfert');
+const Transfert    = require('../models/Transfert');
+const mongoose     = require('mongoose');
 const { success, error } = require('../utils/apiResponse');
 
 // Helpers dates
-const debutJour    = () => { const d = new Date(); d.setHours(0,0,0,0); return d; };
+const debutJour    = () => {
+  const d = new Date(); d.setHours(0,0,0,0); return d;
+};
 const debutSemaine = () => {
   const d = new Date();
   d.setDate(d.getDate() - d.getDay());
   d.setHours(0,0,0,0);
   return d;
 };
-const debutMois  = () => new Date(new Date().getFullYear(), new Date().getMonth(), 1);
-const debutAnnee = () => new Date(new Date().getFullYear(), 0, 1);
+const debutMois  = () =>
+  new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+const debutAnnee = () =>
+  new Date(new Date().getFullYear(), 0, 1);
+
+// Convertir magasinId en ObjectId proprement
+const toObjectId = (id) => {
+  try {
+    return id && mongoose.Types.ObjectId.isValid(id)
+      ? new mongoose.Types.ObjectId(id)
+      : null;
+  } catch {
+    return null;
+  }
+};
 
 // @desc    KPIs principaux
 // @route   GET /api/dashboard/kpis
 const getKpis = async (req, res) => {
   try {
-    const { magasin } = req.query;
+    const magasinOId = toObjectId(req.query.magasin);
+
     const filtreBase = { statut: { $ne: 'annulee' } };
-    if (magasin) filtreBase.magasin = magasin;
+    if (magasinOId) filtreBase.magasin = magasinOId;
 
     // CA du jour
     const caJour = await Facture.aggregate([
@@ -46,7 +63,7 @@ const getKpis = async (req, res) => {
       { $group: { _id: null, total: { $sum: '$totalTTC' } } }
     ]);
 
-    // Mois précédent (comparaison)
+    // Mois précédent
     const debutMoisPrec = new Date(
       new Date().getFullYear(), new Date().getMonth() - 1, 1
     );
@@ -68,11 +85,12 @@ const getKpis = async (req, res) => {
       : 0;
 
     // Impayés
+    const filtreImpaye = {
+      statut: { $in: ['en_attente', 'partiellement_payee'] }
+    };
+    if (magasinOId) filtreImpaye.magasin = magasinOId;
     const impayes = await Facture.aggregate([
-      { $match: {
-          ...filtreBase,
-          statut: { $in: ['en_attente', 'partiellement_payee'] }
-      }},
+      { $match: filtreImpaye },
       { $group: { _id: null, total: { $sum: '$montantRestant' },
                   count: { $sum: 1 } } }
     ]);
@@ -83,41 +101,50 @@ const getKpis = async (req, res) => {
     });
 
     // Stocks en alerte
-    const articles = await Article.find({ isDeleted: false, isActive: true });
+    const articles = await Article.find({
+      isDeleted: false, isActive: true
+    });
     let stocksEnAlerte = 0;
     let stocksRupture  = 0;
 
     for (const art of articles) {
       const filtreStock = { article: art._id };
-      if (magasin) filtreStock.magasin = magasin;
+      if (magasinOId) filtreStock.magasin = magasinOId;
       const stocks = await Stock.find(filtreStock);
       const total  = stocks.reduce((s, st) => s + st.quantite, 0);
       if (total === 0) stocksRupture++;
       else if (total <= art.stockMinimum) stocksEnAlerte++;
     }
 
-    // Commandes fournisseur en cours
-    const commandesEnCours = await CommandeFournisseur.countDocuments({
-      statut: { $in: ['brouillon', 'validee', 'en_cours'] },
-      ...(magasin && { magasin })
-    });
+    // Commandes en cours
+    const filtreCom = {
+      statut: { $in: ['brouillon', 'validee', 'en_cours'] }
+    };
+    if (magasinOId) filtreCom.magasin = magasinOId;
+    const commandesEnCours = await CommandeFournisseur.countDocuments(filtreCom);
 
     // Transferts en attente
-    const transfertsEnAttente = await Transfert.countDocuments({
-      statut: { $in: ['en_attente', 'valide'] },
-      ...(magasin && {
-        $or: [{ magasinSource: magasin }, { magasinDestination: magasin }]
-      })
-    });
+    const filtreTransfert = {
+      statut: { $in: ['en_attente', 'valide'] }
+    };
+    if (magasinOId) {
+      filtreTransfert.$or = [
+        { magasinSource: magasinOId },
+        { magasinDestination: magasinOId }
+      ];
+    }
+    const transfertsEnAttente =
+      await Transfert.countDocuments(filtreTransfert);
 
     return success(res, {
-      caJour:      { total: caJour[0]?.total  || 0, count: caJour[0]?.count  || 0 },
-      caSemaine:   { total: 0 },
-      caMois:      { total: totalMois, count: caMois[0]?.count || 0,
-                     evolution: evolutionMois },
-      caAnnee:     { total: caAnnee[0]?.total || 0 },
-      impayes:     { total: impayes[0]?.total || 0,
-                     count: impayes[0]?.count || 0 },
+      caJour:    { total: caJour[0]?.total  || 0,
+                   count: caJour[0]?.count  || 0 },
+      caMois:    { total: totalMois,
+                   count: caMois[0]?.count  || 0,
+                   evolution: evolutionMois },
+      caAnnee:   { total: caAnnee[0]?.total || 0 },
+      impayes:   { total: impayes[0]?.total || 0,
+                   count: impayes[0]?.count || 0 },
       nouveauxClients,
       stocksEnAlerte,
       stocksRupture,
@@ -125,52 +152,52 @@ const getKpis = async (req, res) => {
       transfertsEnAttente
     });
   } catch (err) {
+    console.error('getKpis error:', err);
     return error(res, err.message);
   }
 };
 
 // @desc    CA par jour (30 derniers jours)
-// @route   GET /api/dashboard/ca-journalier
 const getCaJournalier = async (req, res) => {
   try {
-    const { magasin } = req.query;
+    const magasinOId = toObjectId(req.query.magasin);
     const debut = new Date();
     debut.setDate(debut.getDate() - 29);
     debut.setHours(0, 0, 0, 0);
 
-    const filtre = { statut: { $ne: 'annulee' }, createdAt: { $gte: debut } };
-    if (magasin) filtre.magasin = magasin;
+    const filtre = {
+      statut: { $ne: 'annulee' },
+      createdAt: { $gte: debut }
+    };
+    if (magasinOId) filtre.magasin = magasinOId;
 
     const data = await Facture.aggregate([
       { $match: filtre },
       { $group: {
           _id: {
-            jour: { $dayOfMonth: '$createdAt' },
-            mois: { $month: '$createdAt' },
+            jour:  { $dayOfMonth: '$createdAt' },
+            mois:  { $month: '$createdAt' },
             annee: { $year: '$createdAt' }
           },
-          totalTTC: { $sum: '$totalTTC' },
-          totalPaye: { $sum: '$montantPaye' },
+          totalTTC:   { $sum: '$totalTTC' },
+          totalPaye:  { $sum: '$montantPaye' },
           nbFactures: { $sum: 1 }
       }},
       { $sort: { '_id.annee': 1, '_id.mois': 1, '_id.jour': 1 } }
     ]);
 
-    // Remplir les jours manquants
     const result = [];
     for (let i = 29; i >= 0; i--) {
-      const date = new Date();
+      const date  = new Date();
       date.setDate(date.getDate() - i);
       const jour  = date.getDate();
       const mois  = date.getMonth() + 1;
       const annee = date.getFullYear();
-
       const found = data.find(
         (d) => d._id.jour === jour &&
                d._id.mois === mois &&
                d._id.annee === annee
       );
-
       result.push({
         date: `${String(jour).padStart(2,'0')}/${String(mois).padStart(2,'0')}`,
         dateComplete: date.toISOString().split('T')[0],
@@ -182,22 +209,25 @@ const getCaJournalier = async (req, res) => {
 
     return success(res, result);
   } catch (err) {
+    console.error('getCaJournalier error:', err);
     return error(res, err.message);
   }
 };
 
 // @desc    CA par mois (12 derniers mois)
-// @route   GET /api/dashboard/ca-mensuel
 const getCaMensuel = async (req, res) => {
   try {
-    const { magasin } = req.query;
+    const magasinOId = toObjectId(req.query.magasin);
     const debut = new Date();
     debut.setMonth(debut.getMonth() - 11);
     debut.setDate(1);
     debut.setHours(0, 0, 0, 0);
 
-    const filtre = { statut: { $ne: 'annulee' }, createdAt: { $gte: debut } };
-    if (magasin) filtre.magasin = magasin;
+    const filtre = {
+      statut: { $ne: 'annulee' },
+      createdAt: { $gte: debut }
+    };
+    if (magasinOId) filtre.magasin = magasinOId;
 
     const data = await Facture.aggregate([
       { $match: filtre },
@@ -237,15 +267,16 @@ const getCaMensuel = async (req, res) => {
 
     return success(res, result);
   } catch (err) {
+    console.error('getCaMensuel error:', err);
     return error(res, err.message);
   }
 };
 
 // @desc    Top produits vendus
-// @route   GET /api/dashboard/top-produits
 const getTopProduits = async (req, res) => {
   try {
-    const { magasin, limit = 10, periode = 'mois' } = req.query;
+    const magasinOId = toObjectId(req.query.magasin);
+    const { limit = 10, periode = 'mois' } = req.query;
 
     const debut = periode === 'jour'    ? debutJour()
                 : periode === 'semaine' ? debutSemaine()
@@ -256,117 +287,148 @@ const getTopProduits = async (req, res) => {
       statut: { $ne: 'annulee' },
       createdAt: { $gte: debut }
     };
-    if (magasin) filtre.magasin = magasin;
+    if (magasinOId) filtre.magasin = magasinOId;
 
     const topVentes = await Facture.aggregate([
       { $match: filtre },
       { $unwind: '$lignes' },
       { $group: {
-          _id: '$lignes.article',
-          designation:  { $first: '$lignes.designation' },
+          _id:           '$lignes.article',
+          designation:   { $first: '$lignes.designation' },
           quantiteTotal: { $sum: '$lignes.quantite' },
           caTotal:       { $sum: '$lignes.montantTTC' }
       }},
       { $sort: { quantiteTotal: -1 } },
       { $limit: Number(limit) },
-      { $lookup: {
-          from: 'articles',
-          localField: '_id',
+      {
+        $lookup: {
+          from:         'articles',
+          localField:   '_id',
           foreignField: '_id',
-          as: 'article'
-      }},
-      { $unwind: { path: '$article', preserveNullAndEmpty: true } }
+          as:           'article'
+        }
+      },
+      {
+        $unwind: {
+          path: '$article',
+          preserveNullAndEmptyArrays: true
+        }
+      }
     ]);
 
     return success(res, topVentes);
   } catch (err) {
+    console.error('getTopProduits error:', err);
     return error(res, err.message);
   }
 };
 
-// @desc    Répartition CA par catégorie
-// @route   GET /api/dashboard/ca-categories
+// @desc    CA par catégorie
 const getCaParCategorie = async (req, res) => {
   try {
-    const { magasin } = req.query;
+    const magasinOId = toObjectId(req.query.magasin);
+
     const filtre = {
       statut: { $ne: 'annulee' },
       createdAt: { $gte: debutMois() }
     };
-    if (magasin) filtre.magasin = magasin;
+    if (magasinOId) filtre.magasin = magasinOId;
 
     const data = await Facture.aggregate([
       { $match: filtre },
       { $unwind: '$lignes' },
-      { $lookup: {
-          from: 'articles',
-          localField: 'lignes.article',
+      {
+        $lookup: {
+          from:         'articles',
+          localField:   'lignes.article',
           foreignField: '_id',
-          as: 'articleInfo'
-      }},
-      { $unwind: { path: '$articleInfo', preserveNullAndEmpty: true } },
-      { $lookup: {
-          from: 'categories',
-          localField: 'articleInfo.categorie',
+          as:           'articleInfo'
+        }
+      },
+      {
+        $unwind: {
+          path: '$articleInfo',
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      {
+        $lookup: {
+          from:         'categories',
+          localField:   'articleInfo.categorie',
           foreignField: '_id',
-          as: 'categorieInfo'
-      }},
-      { $unwind: { path: '$categorieInfo', preserveNullAndEmpty: true } },
-      { $group: {
-          _id: '$categorieInfo._id',
+          as:           'categorieInfo'
+        }
+      },
+      {
+        $unwind: {
+          path: '$categorieInfo',
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      {
+        $group: {
+          _id:   '$categorieInfo._id',
           nom:   { $first: '$categorieInfo.nom' },
           total: { $sum: '$lignes.montantTTC' }
-      }},
+        }
+      },
+      { $match: { nom: { $ne: null } } },
       { $sort: { total: -1 } }
     ]);
 
     return success(res, data);
   } catch (err) {
+    console.error('getCaParCategorie error:', err);
     return error(res, err.message);
   }
 };
 
 // @desc    Dernières ventes
-// @route   GET /api/dashboard/dernieres-ventes
 const getDernieresVentes = async (req, res) => {
   try {
-    const { magasin, limit = 8 } = req.query;
+    const magasinOId = toObjectId(req.query.magasin);
+    const { limit = 8 } = req.query;
+
     const filtre = { statut: { $ne: 'annulee' } };
-    if (magasin) filtre.magasin = magasin;
+    if (magasinOId) filtre.magasin = magasinOId;
 
     const factures = await Facture.find(filtre)
-      .populate('client', 'nom prenom numeroClient')
+      .populate('client',  'nom prenom numeroClient')
       .populate('magasin', 'nom code')
       .sort({ createdAt: -1 })
       .limit(Number(limit));
 
     return success(res, factures);
   } catch (err) {
+    console.error('getDernieresVentes error:', err);
     return error(res, err.message);
   }
 };
 
 // @desc    Alertes groupées
-// @route   GET /api/dashboard/alertes
 const getAlertes = async (req, res) => {
   try {
-    const { magasin } = req.query;
+    const magasinOId = toObjectId(req.query.magasin);
 
-    // Stock faible
+    // Stocks faibles
     const articles = await Article.find({
       isDeleted: false, isActive: true
     });
     const stocksFaibles = [];
+
     for (const art of articles) {
       const filtreStock = { article: art._id };
-      if (magasin) filtreStock.magasin = magasin;
+      if (magasinOId) filtreStock.magasin = magasinOId;
       const stocks = await Stock.find(filtreStock)
         .populate('magasin', 'nom code');
       const total = stocks.reduce((s, st) => s + st.quantite, 0);
       if (total <= art.stockMinimum) {
         stocksFaibles.push({
-          article:      { _id: art._id, designation: art.designation,
-                          reference: art.reference },
+          article: {
+            _id:         art._id,
+            designation: art.designation,
+            reference:   art.reference
+          },
           stockTotal:   total,
           stockMinimum: art.stockMinimum,
           rupture:      total === 0,
@@ -379,7 +441,7 @@ const getAlertes = async (req, res) => {
     const filtreImpaye = {
       statut: { $in: ['en_attente', 'partiellement_payee'] }
     };
-    if (magasin) filtreImpaye.magasin = magasin;
+    if (magasinOId) filtreImpaye.magasin = magasinOId;
     const impayes = await Facture.find(filtreImpaye)
       .populate('client', 'nom prenom telephone')
       .sort({ createdAt: 1 })
@@ -387,7 +449,7 @@ const getAlertes = async (req, res) => {
 
     // Commandes à réceptionner
     const filtreCom = { statut: { $in: ['validee', 'en_cours'] } };
-    if (magasin) filtreCom.magasin = magasin;
+    if (magasinOId) filtreCom.magasin = magasinOId;
     const commandesAttente = await CommandeFournisseur.find(filtreCom)
       .populate('fournisseur', 'raisonSociale')
       .sort({ dateLivraisonPrevue: 1 })
@@ -395,14 +457,14 @@ const getAlertes = async (req, res) => {
 
     // Transferts en attente
     const filtreTransfert = { statut: 'en_attente' };
-    if (magasin) {
+    if (magasinOId) {
       filtreTransfert.$or = [
-        { magasinSource: magasin },
-        { magasinDestination: magasin }
+        { magasinSource:      magasinOId },
+        { magasinDestination: magasinOId }
       ];
     }
     const transfertsAttente = await Transfert.find(filtreTransfert)
-      .populate('magasinSource', 'nom')
+      .populate('magasinSource',      'nom')
       .populate('magasinDestination', 'nom')
       .limit(5);
 
@@ -420,6 +482,7 @@ const getAlertes = async (req, res) => {
       }
     });
   } catch (err) {
+    console.error('getAlertes error:', err);
     return error(res, err.message);
   }
 };
