@@ -21,7 +21,8 @@ import AvoirsPage from './pages/ventes/AvoirsPage';
 import UtilisateursPage from './pages/admin/UtilisateursPage';
 import MagasinsPage from './pages/admin/MagasinsPage';
 import RapportsPage from './pages/rapports/RapportsPage';
-import AuditPage    from './pages/admin/AuditPage';
+import AuditPage    from './pages/admin/AudtiPage';
+import ParametresPage  from './pages/admin/ParametresPage';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -59,7 +60,7 @@ export default function App() {
               <Route path="/factures" element={<FacturesPage />} />
               <Route path="/avoirs" element={<AvoirsPage />} />
               <Route path="/rapports" element={<RapportsPage />} />
-              <Route path="/audit"    element={<AuditPage />} />
+              <Route path="/parametres" element={<ParametresPage />} />
               
               <Route
                 path="/utilisateurs"
@@ -74,6 +75,14 @@ export default function App() {
                 element={
                   <ProtectedRoute roles={['administrateur']}>
                     <MagasinsPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/audit"
+                element={
+                  <ProtectedRoute roles={['administrateur']}>
+                    <AuditPage />
                   </ProtectedRoute>
                 }
               />

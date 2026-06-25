@@ -2,7 +2,7 @@ import {
   LayoutDashboard, Package, Warehouse, Users, Truck,
   FileText, ShoppingCart, BarChart3, Settings,
   ArrowLeftRight, ClipboardList, Receipt, FileMinus,
-  Building2, UserCog, History
+  Building2, UserCog, History, Shield
 } from 'lucide-react';
 
 export const navigation = [
@@ -122,6 +122,12 @@ export const navigation = [
         icon: BarChart3,
         path: '/rapports',
         roles: ['administrateur', 'gestionnaire']
+      },
+      {
+        label: 'Journal d\'audit',
+        icon:  Shield,
+        path:  '/audit',
+        roles: ['administrateur']
       },
       {
         label: 'Magasins',

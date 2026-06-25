@@ -2,6 +2,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '../services/api';
 import toast from 'react-hot-toast';
 
+// ── ARTICLES ───────────────────────────────────────────────────────────────
+
 export const useArticles = (params = {}) => {
   return useQuery({
     queryKey: ['articles', params],
@@ -18,17 +20,17 @@ export const useArticle = (id) => {
   });
 };
 
-export const useCategories = () => {
-  return useQuery({
-    queryKey: ['categories'],
-    queryFn: () => api.get('/categories')
-  });
-};
-
 export const useMarques = () => {
   return useQuery({
     queryKey: ['marques'],
     queryFn: () => api.get('/articles/meta/marques')
+  });
+};
+
+export const useStockFaible = (params = {}) => {
+  return useQuery({
+    queryKey: ['articles', 'stock-faible', params],
+    queryFn: () => api.get('/articles/alertes/stock-faible', { params })
   });
 };
 
@@ -72,9 +74,55 @@ export const useDeleteArticle = () => {
   });
 };
 
-export const useStockFaible = (params = {}) => {
+// ── CATÉGORIES ─────────────────────────────────────────────────────────────
+
+export const useCategories = () => {
   return useQuery({
-    queryKey: ['articles', 'stock-faible', params],
-    queryFn: () => api.get('/articles/alertes/stock-faible', { params })
+    queryKey: ['categories'],
+    queryFn: () => api.get('/categories')
+  });
+};
+
+export const useCategorie = (id) => {
+  return useQuery({
+    queryKey: ['categories', id],
+    queryFn: () => api.get(`/categories/${id}`),
+    enabled: !!id
+  });
+};
+
+export const useCreateCategorie = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data) => api.post('/categories', data),
+    onSuccess: () => {
+      qc.invalidateQueries(['categories']);
+      toast.success('Catégorie créée.');
+    },
+    onError: (err) => toast.error(err.message)
+  });
+};
+
+export const useUpdateCategorie = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, data }) => api.put(`/categories/${id}`, data),
+    onSuccess: () => {
+      qc.invalidateQueries(['categories']);
+      toast.success('Catégorie modifiée.');
+    },
+    onError: (err) => toast.error(err.message)
+  });
+};
+
+export const useDeleteCategorie = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id) => api.delete(`/categories/${id}`),
+    onSuccess: () => {
+      qc.invalidateQueries(['categories']);
+      toast.success('Catégorie supprimée.');
+    },
+    onError: (err) => toast.error(err.message)
   });
 };
