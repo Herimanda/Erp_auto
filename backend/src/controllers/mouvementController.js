@@ -39,8 +39,8 @@ const updateStock = async (articleId, magasinId, quantite, type) => {
   return { quantiteAvant, quantiteApres: stock.quantite };
 };
 
-// @desc    Entrée de stock manuelle
-// @route   POST /api/mouvements/entree
+// Entrée de stock manuelle
+
 const entreeStock = async (req, res) => {
   try {
     const {
@@ -91,8 +91,8 @@ const entreeStock = async (req, res) => {
   }
 };
 
-// @desc    Sortie de stock manuelle
-// @route   POST /api/mouvements/sortie
+//Sortie de stock manuelle
+
 const sortieStock = async (req, res) => {
   try {
     const {
@@ -142,8 +142,8 @@ const sortieStock = async (req, res) => {
   }
 };
 
-// @desc    Ajustement de stock avec motif
-// @route   POST /api/mouvements/ajustement
+// Ajustement de stock avec motif
+
 const ajustementStock = async (req, res) => {
   try {
     const {
@@ -202,8 +202,8 @@ const ajustementStock = async (req, res) => {
   }
 };
 
-// @desc    Historique des mouvements
-// @route   GET /api/mouvements
+// Historique des mouvements
+
 const getHistorique = async (req, res) => {
   try {
     const {

@@ -5,8 +5,6 @@ const generateNumero = require('../utils/generateNumero');
 const { calculerTotaux } = require('../utils/calculLignes');
 const { success, error } = require('../utils/apiResponse');
 
-// @desc    Créer un devis
-// @route   POST /api/devis
 const creerDevis = async (req, res) => {
   try {
     const {
@@ -59,8 +57,7 @@ const creerDevis = async (req, res) => {
   }
 };
 
-// @desc    Liste des devis
-// @route   GET /api/devis
+
 const getDevisList = async (req, res) => {
   try {
     const {
@@ -105,8 +102,7 @@ const getDevisList = async (req, res) => {
   }
 };
 
-// @desc    Détail d'un devis
-// @route   GET /api/devis/:id
+
 const getDevis = async (req, res) => {
   try {
     const devis = await Devis.findById(req.params.id)
@@ -122,8 +118,7 @@ const getDevis = async (req, res) => {
   }
 };
 
-// @desc    Modifier un devis brouillon
-// @route   PUT /api/devis/:id
+
 const modifierDevis = async (req, res) => {
   try {
     const devis = await Devis.findById(req.params.id);
@@ -170,8 +165,7 @@ const modifierDevis = async (req, res) => {
   }
 };
 
-// @desc    Changer statut devis
-// @route   PUT /api/devis/:id/statut
+
 const changerStatutDevis = async (req, res) => {
   try {
     const { statut } = req.body;
@@ -194,8 +188,7 @@ const changerStatutDevis = async (req, res) => {
   }
 };
 
-// @desc    Convertir devis en facture
-// @route   POST /api/devis/:id/convertir
+
 const convertirEnFacture = async (req, res) => {
   try {
     const devis = await Devis.findById(req.params.id)

@@ -4,8 +4,7 @@ const MouvementStock = require('../models/MouvementStock');
 const generateNumero = require('../utils/generateNumero');
 const { success, error } = require('../utils/apiResponse');
 
-// @desc    Créer une demande de transfert
-// @route   POST /api/transferts
+
 const creerTransfert = async (req, res) => {
   try {
     const {
@@ -61,8 +60,7 @@ const creerTransfert = async (req, res) => {
   }
 };
 
-// @desc    Valider un transfert
-// @route   PUT /api/transferts/:id/valider
+
 const validerTransfert = async (req, res) => {
   try {
     const transfert = await Transfert.findById(req.params.id);
@@ -83,8 +81,7 @@ const validerTransfert = async (req, res) => {
   }
 };
 
-// @desc    Expédier un transfert (déduire stock source)
-// @route   PUT /api/transferts/:id/expedier
+
 const expedierTransfert = async (req, res) => {
   try {
     const transfert = await Transfert.findById(req.params.id);
@@ -136,8 +133,7 @@ const expedierTransfert = async (req, res) => {
   }
 };
 
-// @desc    Réceptionner un transfert (ajouter stock destination)
-// @route   PUT /api/transferts/:id/receptionner
+
 const receptionnerTransfert = async (req, res) => {
   try {
     const { quantitesRecues } = req.body;
@@ -202,8 +198,7 @@ const receptionnerTransfert = async (req, res) => {
   }
 };
 
-// @desc    Annuler un transfert
-// @route   PUT /api/transferts/:id/annuler
+
 const annulerTransfert = async (req, res) => {
   try {
     const transfert = await Transfert.findById(req.params.id);
@@ -236,8 +231,7 @@ const annulerTransfert = async (req, res) => {
   }
 };
 
-// @desc    Liste des transferts
-// @route   GET /api/transferts
+
 const getTransferts = async (req, res) => {
   try {
     const {

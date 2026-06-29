@@ -34,8 +34,7 @@ const toObjectId = (id) => {
   }
 };
 
-// @desc    KPIs principaux
-// @route   GET /api/dashboard/kpis
+
 const getKpis = async (req, res) => {
   try {
     const magasinOId = toObjectId(req.query.magasin);
@@ -157,7 +156,7 @@ const getKpis = async (req, res) => {
   }
 };
 
-// @desc    CA par jour (30 derniers jours)
+//CA par jour (30 derniers jours)
 const getCaJournalier = async (req, res) => {
   try {
     const magasinOId = toObjectId(req.query.magasin);
@@ -214,7 +213,7 @@ const getCaJournalier = async (req, res) => {
   }
 };
 
-// @desc    CA par mois (12 derniers mois)
+//   CA par mois (12 derniers mois)
 const getCaMensuel = async (req, res) => {
   try {
     const magasinOId = toObjectId(req.query.magasin);
@@ -272,7 +271,7 @@ const getCaMensuel = async (req, res) => {
   }
 };
 
-// @desc    Top produits vendus
+//  Top produits vendus
 const getTopProduits = async (req, res) => {
   try {
     const magasinOId = toObjectId(req.query.magasin);
@@ -323,7 +322,7 @@ const getTopProduits = async (req, res) => {
   }
 };
 
-// @desc    CA par catégorie
+//    CA par catégorie
 const getCaParCategorie = async (req, res) => {
   try {
     const magasinOId = toObjectId(req.query.magasin);
@@ -383,7 +382,7 @@ const getCaParCategorie = async (req, res) => {
   }
 };
 
-// @desc    Dernières ventes
+//    Dernières ventes
 const getDernieresVentes = async (req, res) => {
   try {
     const magasinOId = toObjectId(req.query.magasin);
@@ -405,7 +404,7 @@ const getDernieresVentes = async (req, res) => {
   }
 };
 
-// @desc    Alertes groupées
+//    Alertes groupées
 const getAlertes = async (req, res) => {
   try {
     const magasinOId = toObjectId(req.query.magasin);

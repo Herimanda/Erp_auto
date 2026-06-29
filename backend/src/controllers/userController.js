@@ -1,8 +1,7 @@
 const User = require('../models/User');
 const { success, error } = require('../utils/apiResponse');
 
-// @desc    Créer un utilisateur
-// @route   POST /api/users
+
 const creerUser = async (req, res) => {
   try {
     const { nom, prenom, email, motDePasse, role, magasins } = req.body;
@@ -22,8 +21,7 @@ const creerUser = async (req, res) => {
   }
 };
 
-// @desc    Liste des utilisateurs
-// @route   GET /api/users
+
 const getUsers = async (req, res) => {
   try {
     const { role, isActive, page = 1, limit = 20 } = req.query;
@@ -48,8 +46,7 @@ const getUsers = async (req, res) => {
   }
 };
 
-// @desc    Détail d'un utilisateur
-// @route   GET /api/users/:id
+
 const getUser = async (req, res) => {
   try {
     const user = await User.findById(req.params.id).populate('magasins');
@@ -60,9 +57,7 @@ const getUser = async (req, res) => {
   }
 };
 
-// @desc    Modifier un utilisateur
-// @route   PUT /api/users/:id
-// Modifier la fonction modifierUser pour supporter le reset mdp
+
 const modifierUser = async (req, res) => {
   try {
     const { nom, prenom, email, role, magasins, isActive, motDePasse } = req.body;
@@ -103,8 +98,7 @@ const modifierUser = async (req, res) => {
     return error(res, err.message);
   }
 };
-// @desc    Désactiver un utilisateur
-// @route   DELETE /api/users/:id
+
 const supprimerUser = async (req, res) => {
   try {
     const user = await User.findByIdAndUpdate(

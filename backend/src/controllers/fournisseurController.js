@@ -6,8 +6,7 @@ const Article = require('../models/Article');
 const generateNumero = require('../utils/generateNumero');
 const { success, error } = require('../utils/apiResponse');
 
-// @desc    Créer un fournisseur
-// @route   POST /api/fournisseurs
+
 const creerFournisseur = async (req, res) => {
   try {
     const {
@@ -31,8 +30,7 @@ const creerFournisseur = async (req, res) => {
   }
 };
 
-// @desc    Liste des fournisseurs
-// @route   GET /api/fournisseurs
+
 const getFournisseurs = async (req, res) => {
   try {
     const { search, page = 1, limit = 20 } = req.query;
@@ -66,8 +64,7 @@ const getFournisseurs = async (req, res) => {
   }
 };
 
-// @desc    Détail fournisseur
-// @route   GET /api/fournisseurs/:id
+
 const getFournisseur = async (req, res) => {
   try {
     const fournisseur = await Fournisseur.findById(req.params.id);
@@ -78,8 +75,7 @@ const getFournisseur = async (req, res) => {
   }
 };
 
-// @desc    Modifier un fournisseur
-// @route   PUT /api/fournisseurs/:id
+
 const modifierFournisseur = async (req, res) => {
   try {
     const fournisseur = await Fournisseur.findByIdAndUpdate(
@@ -93,8 +89,7 @@ const modifierFournisseur = async (req, res) => {
   }
 };
 
-// @desc    Supprimer un fournisseur
-// @route   DELETE /api/fournisseurs/:id
+
 const supprimerFournisseur = async (req, res) => {
   try {
     const commandesActives = await CommandeFournisseur.countDocuments({
@@ -117,8 +112,7 @@ const supprimerFournisseur = async (req, res) => {
   }
 };
 
-// @desc    Historique fournisseur
-// @route   GET /api/fournisseurs/:id/historique
+
 const getHistoriqueFournisseur = async (req, res) => {
   try {
     const fournisseur = await Fournisseur.findById(req.params.id);

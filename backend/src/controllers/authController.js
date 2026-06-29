@@ -4,8 +4,7 @@ const generateToken = require('../utils/generateToken');
 const AuditLog = require('../models/AuditLog');
 const { success, error } = require('../utils/apiResponse');
 
-// @desc    Connexion utilisateur
-// @route   POST /api/auth/login
+
 const login = async (req, res) => {
   try {
     const { email, motDePasse } = req.body;
@@ -57,8 +56,7 @@ const login = async (req, res) => {
   }
 };
 
-// @desc    Profil utilisateur connecté
-// @route   GET /api/auth/me
+
 const getMe = async (req, res) => {
   try {
     const user = await User.findById(req.user._id).populate('magasins');
@@ -68,8 +66,6 @@ const getMe = async (req, res) => {
   }
 };
 
-// @desc    Changer mot de passe
-// @route   PUT /api/auth/change-password
 const changePassword = async (req, res) => {
   try {
     const { ancienMdp, nouveauMdp } = req.body;

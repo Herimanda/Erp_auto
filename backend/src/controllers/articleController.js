@@ -5,8 +5,7 @@ const { success, error } = require('../utils/apiResponse');
 const fs = require('fs');
 const path = require('path');
 
-// @desc    Créer un article
-// @route   POST /api/articles
+//  Créer un article
 const creerArticle = async (req, res) => {
   try {
     const {
@@ -63,8 +62,7 @@ const creerArticle = async (req, res) => {
   }
 };
 
-// @desc    Liste des articles avec filtres & pagination
-// @route   GET /api/articles
+// Liste des articles miaraka @filtre sy pagination
 const getArticles = async (req, res) => {
   try {
     const {
@@ -75,7 +73,7 @@ const getArticles = async (req, res) => {
 
     const filtre = { isDeleted: false };
 
-    // Recherche texte
+    // Recherche
     if (search) {
       filtre.$or = [
         { designation: { $regex: search, $options: 'i' } },
@@ -110,8 +108,8 @@ const getArticles = async (req, res) => {
   }
 };
 
-// @desc    Détail d'un article avec stocks par magasin
-// @route   GET /api/articles/:id
+// Détail  article avec stocks par magasin
+
 const getArticle = async (req, res) => {
   try {
     const article = await Article.findOne({
@@ -137,8 +135,7 @@ const getArticle = async (req, res) => {
   }
 };
 
-// @desc    Recherche par code-barres
-// @route   GET /api/articles/barcode/:code
+//Recherche par code-barres fa mbola tsy OK
 const getArticleByBarcode = async (req, res) => {
   try {
     const article = await Article.findOne({
@@ -153,8 +150,8 @@ const getArticleByBarcode = async (req, res) => {
   }
 };
 
-// @desc    Modifier un article
-// @route   PUT /api/articles/:id
+// Modifier un article
+
 const modifierArticle = async (req, res) => {
   try {
     const article = await Article.findOne({
@@ -179,7 +176,7 @@ const modifierArticle = async (req, res) => {
       if (existant) return error(res, 'Cette référence existe déjà.', 400);
     }
 
-    // Supprimer ancienne image si nouvelle uploadée
+    // Supprimer ancienne image raha misy vaovoa
     if (req.file && article.image) {
       const oldPath = path.join(__dirname, '../../', article.image);
       if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
@@ -215,8 +212,8 @@ const modifierArticle = async (req, res) => {
   }
 };
 
-// @desc    Supprimer un article (logique)
-// @route   DELETE /api/articles/:id
+//  Supprimer 
+
 const supprimerArticle = async (req, res) => {
   try {
     const article = await Article.findOneAndUpdate(
@@ -231,8 +228,8 @@ const supprimerArticle = async (req, res) => {
   }
 };
 
-// @desc    Articles en stock faible
-// @route   GET /api/articles/alertes/stock-faible
+//  Articles en stock faible
+
 const getArticlesStockFaible = async (req, res) => {
   try {
     const { magasin } = req.query;
@@ -265,8 +262,7 @@ const getArticlesStockFaible = async (req, res) => {
   }
 };
 
-// @desc    Marques disponibles
-// @route   GET /api/articles/meta/marques
+//  Marques disponibles
 const getMarques = async (req, res) => {
   try {
     const marques = await Article.distinct('marque', {

@@ -4,8 +4,7 @@ const MouvementStock = require('../models/MouvementStock');
 const Magasin = require('../models/Magasin');
 const { success, error } = require('../utils/apiResponse');
 
-// @desc    Stock d'un article par magasin
-// @route   GET /api/stocks/article/:articleId
+// Stock na article par magasin
 const getStockParArticle = async (req, res) => {
   try {
     const stocks = await Stock.find({ article: req.params.articleId })
@@ -20,8 +19,8 @@ const getStockParArticle = async (req, res) => {
   }
 };
 
-// @desc    Stock d'un magasin (tous les articles)
-// @route   GET /api/stocks/magasin/:magasinId
+//    Stock d'un magasin (article rehetra)
+
 const getStockParMagasin = async (req, res) => {
   try {
     const {
@@ -91,8 +90,8 @@ const getStockParMagasin = async (req, res) => {
   }
 };
 
-// @desc    Vue globale tous magasins
-// @route   GET /api/stocks/global
+//  Vue globale tous magasins
+
 const getStockGlobal = async (req, res) => {
   try {
     const magasins = await Magasin.find({ isActive: true });

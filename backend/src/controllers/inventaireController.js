@@ -3,8 +3,7 @@ const Article = require('../models/Article');
 const MouvementStock = require('../models/MouvementStock');
 const { success, error } = require('../utils/apiResponse');
 
-// @desc    Générer une feuille d'inventaire
-// @route   GET /api/inventaire/:magasinId
+
 const genererFeuille = async (req, res) => {
   try {
     const { categorie } = req.query;

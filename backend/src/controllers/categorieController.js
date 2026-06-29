@@ -2,8 +2,7 @@ const Categorie = require('../models/Categorie');
 const Article = require('../models/Article');
 const { success, error } = require('../utils/apiResponse');
 
-// @desc    Créer une catégorie
-// @route   POST /api/categories
+
 const creerCategorie = async (req, res) => {
   try {
     const { code, nom, description } = req.body;
@@ -18,8 +17,7 @@ const creerCategorie = async (req, res) => {
   }
 };
 
-// @desc    Liste des catégories
-// @route   GET /api/categories
+
 const getCategories = async (req, res) => {
   try {
     const categories = await Categorie.find({ isActive: true }).sort({ nom: 1 });
@@ -41,8 +39,7 @@ const getCategories = async (req, res) => {
   }
 };
 
-// @desc    Détail d'une catégorie
-// @route   GET /api/categories/:id
+
 const getCategorie = async (req, res) => {
   try {
     const categorie = await Categorie.findById(req.params.id);
@@ -53,8 +50,7 @@ const getCategorie = async (req, res) => {
   }
 };
 
-// @desc    Modifier une catégorie
-// @route   PUT /api/categories/:id
+
 const modifierCategorie = async (req, res) => {
   try {
     const categorie = await Categorie.findByIdAndUpdate(
@@ -69,8 +65,6 @@ const modifierCategorie = async (req, res) => {
   }
 };
 
-// @desc    Supprimer une catégorie
-// @route   DELETE /api/categories/:id
 const supprimerCategorie = async (req, res) => {
   try {
     // Vérifier si des articles utilisent cette catégorie

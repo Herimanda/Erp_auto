@@ -20,7 +20,6 @@ const fmtNum  = (n) =>
 
 // ── VENTES ─────────────────────────────────────────────────────────────────
 
-// @route GET /api/rapports/ventes/pdf
 const rapportVentesPDF = async (req, res) => {
   try {
     const {
@@ -119,7 +118,7 @@ const rapportVentesPDF = async (req, res) => {
   }
 };
 
-// @route GET /api/rapports/ventes/excel
+
 const rapportVentesExcel = async (req, res) => {
   try {
     const { dateDebut, dateFin, magasin, type, statut } = req.query;
@@ -169,7 +168,7 @@ const rapportVentesExcel = async (req, res) => {
       { header: 'Statut',       key: 'statut',     width: 16 },
     ];
 
-    // Appliquer style en-tête
+  
     ws.getRow(1).eachCell((cell) => {
       Object.assign(cell, headerStyle);
     });
@@ -247,7 +246,7 @@ const rapportVentesExcel = async (req, res) => {
 
 // ── STOCKS ─────────────────────────────────────────────────────────────────
 
-// @route GET /api/rapports/stocks/pdf
+
 const rapportStocksPDF = async (req, res) => {
   try {
     const { magasin, categorie } = req.query;
@@ -345,7 +344,7 @@ const rapportStocksPDF = async (req, res) => {
   }
 };
 
-// @route GET /api/rapports/stocks/excel
+
 const rapportStocksExcel = async (req, res) => {
   try {
     const { magasin, categorie } = req.query;
@@ -452,9 +451,9 @@ const rapportStocksExcel = async (req, res) => {
   }
 };
 
-// ── CLIENTS ────────────────────────────────────────────────────────────────
+//CLIENTS pory
 
-// @route GET /api/rapports/clients/excel
+
 const rapportClientsExcel = async (req, res) => {
   try {
     const clients = await Client.find({ isActive: true })
@@ -516,9 +515,9 @@ const rapportClientsExcel = async (req, res) => {
   }
 };
 
-// ── FACTURE INDIVIDUELLE ───────────────────────────────────────────────────
+// FACTURE INDIVIDUELLE 
 
-// @route GET /api/rapports/facture/:id/pdf
+
 const factureIndividuellePDF = async (req, res) => {
   try {
     const facture = await Facture.findById(req.params.id)

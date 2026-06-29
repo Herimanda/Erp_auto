@@ -1,7 +1,6 @@
 const AuditLog = require('../models/AuditLog');
 const { success, error } = require('../utils/apiResponse');
 
-// @route GET /api/audit
 const getAuditLogs = async (req, res) => {
   try {
     const {
@@ -45,7 +44,7 @@ const getAuditLogs = async (req, res) => {
   }
 };
 
-// @route GET /api/audit/stats
+// statistique 
 const getAuditStats = async (req, res) => {
   try {
     const debut = new Date();

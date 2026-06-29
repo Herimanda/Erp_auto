@@ -18,8 +18,6 @@ const genererNumeroClient = async () => {
   return `CLT-${String(numero).padStart(5, '0')}`;
 };
 
-// @desc    Créer un client
-// @route   POST /api/clients
 const creerClient = async (req, res) => {
   try {
     const {
@@ -46,8 +44,7 @@ const creerClient = async (req, res) => {
   }
 };
 
-// @desc    Liste des clients
-// @route   GET /api/clients
+
 const getClients = async (req, res) => {
   try {
     const {
@@ -89,8 +86,7 @@ const getClients = async (req, res) => {
   }
 };
 
-// @desc    Détail d'un client
-// @route   GET /api/clients/:id
+
 const getClient = async (req, res) => {
   try {
     const client = await Client.findById(req.params.id);
@@ -103,8 +99,7 @@ const getClient = async (req, res) => {
   }
 };
 
-// @desc    Modifier un client
-// @route   PUT /api/clients/:id
+
 const modifierClient = async (req, res) => {
   try {
     const {
@@ -135,8 +130,7 @@ const modifierClient = async (req, res) => {
   }
 };
 
-// @desc    Supprimer un client (logique)
-// @route   DELETE /api/clients/:id
+
 const supprimerClient = async (req, res) => {
   try {
     // Vérifier s'il a des factures impayées
@@ -160,8 +154,7 @@ const supprimerClient = async (req, res) => {
   }
 };
 
-// @desc    Historique complet d'un client
-// @route   GET /api/clients/:id/historique
+
 const getHistoriqueClient = async (req, res) => {
   try {
     const { page = 1, limit = 20 } = req.query;
@@ -213,8 +206,7 @@ const getHistoriqueClient = async (req, res) => {
   }
 };
 
-// @desc    Meilleurs clients
-// @route   GET /api/clients/stats/top
+
 const getTopClients = async (req, res) => {
   try {
     const { limit = 10, periode } = req.query;

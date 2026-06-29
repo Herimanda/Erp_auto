@@ -7,8 +7,7 @@ const generateNumero = require('../utils/generateNumero');
 const { calculerTotaux } = require('../utils/calculLignes');
 const { success, error } = require('../utils/apiResponse');
 
-// @desc    Créer une facture
-// @route   POST /api/factures
+
 const creerFacture = async (req, res) => {
   try {
     const {
@@ -127,8 +126,7 @@ const creerFacture = async (req, res) => {
   }
 };
 
-// @desc    Liste des factures
-// @route   GET /api/factures
+
 const getFactures = async (req, res) => {
   try {
     const {
@@ -188,8 +186,7 @@ const getFactures = async (req, res) => {
   }
 };
 
-// @desc    Détail d'une facture
-// @route   GET /api/factures/:id
+
 const getFacture = async (req, res) => {
   try {
     const facture = await Facture.findById(req.params.id)
@@ -206,8 +203,7 @@ const getFacture = async (req, res) => {
   }
 };
 
-// @desc    Enregistrer un paiement
-// @route   POST /api/factures/:id/paiement
+
 const enregistrerPaiement = async (req, res) => {
   try {
     const { montant, mode, reference } = req.body;
@@ -254,8 +250,7 @@ const enregistrerPaiement = async (req, res) => {
   }
 };
 
-// @desc    Annuler une facture
-// @route   PUT /api/factures/:id/annuler
+
 const annulerFacture = async (req, res) => {
   try {
     const facture = await Facture.findById(req.params.id);
@@ -306,8 +301,7 @@ const annulerFacture = async (req, res) => {
   }
 };
 
-// @desc    Factures impayées
-// @route   GET /api/factures/alertes/impayes
+
 const getFacturesImpayees = async (req, res) => {
   try {
     const { magasin } = req.query;

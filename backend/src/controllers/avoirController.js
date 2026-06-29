@@ -7,8 +7,7 @@ const generateNumero = require('../utils/generateNumero');
 const { calculerTotaux } = require('../utils/calculLignes');
 const { success, error } = require('../utils/apiResponse');
 
-// @desc    Créer un avoir
-// @route   POST /api/avoirs
+
 const creerAvoir = async (req, res) => {
   try {
     const { factureId, lignes, type } = req.body;
@@ -115,8 +114,7 @@ const creerAvoir = async (req, res) => {
   }
 };
 
-// @desc    Liste des avoirs
-// @route   GET /api/avoirs
+
 const getAvoirs = async (req, res) => {
   try {
     const { client, magasin, page = 1, limit = 20 } = req.query;
@@ -147,8 +145,7 @@ const getAvoirs = async (req, res) => {
   }
 };
 
-// @desc    Détail avoir
-// @route   GET /api/avoirs/:id
+
 const getAvoir = async (req, res) => {
   try {
     const avoir = await Avoir.findById(req.params.id)
@@ -165,8 +162,6 @@ const getAvoir = async (req, res) => {
   }
 };
 
-// @desc    Valider un avoir
-// @route   PUT /api/avoirs/:id/valider
 const validerAvoir = async (req, res) => {
   try {
     const avoir = await Avoir.findByIdAndUpdate(

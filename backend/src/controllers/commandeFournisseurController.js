@@ -14,8 +14,7 @@ const calculerTotaux = (lignes) => {
   }, 0);
 };
 
-// @desc    Créer une commande fournisseur
-// @route   POST /api/commandes-fournisseur
+
 const creerCommande = async (req, res) => {
   try {
     const {
@@ -60,8 +59,7 @@ const creerCommande = async (req, res) => {
   }
 };
 
-// @desc    Valider une commande
-// @route   PUT /api/commandes-fournisseur/:id/valider
+
 const validerCommande = async (req, res) => {
   try {
     const commande = await CommandeFournisseur.findById(req.params.id);
@@ -80,8 +78,7 @@ const validerCommande = async (req, res) => {
   }
 };
 
-// @desc    Réceptionner une commande (entrée stock)
-// @route   PUT /api/commandes-fournisseur/:id/receptionner
+
 const receptionnerCommande = async (req, res) => {
   try {
     const { lignesRecues } = req.body;
@@ -168,8 +165,7 @@ const receptionnerCommande = async (req, res) => {
   }
 };
 
-// @desc    Annuler une commande
-// @route   PUT /api/commandes-fournisseur/:id/annuler
+
 const annulerCommande = async (req, res) => {
   try {
     const commande = await CommandeFournisseur.findById(req.params.id);
@@ -188,8 +184,7 @@ const annulerCommande = async (req, res) => {
   }
 };
 
-// @desc    Modifier une commande brouillon
-// @route   PUT /api/commandes-fournisseur/:id
+
 const modifierCommande = async (req, res) => {
   try {
     const commande = await CommandeFournisseur.findById(req.params.id);
@@ -227,8 +222,7 @@ const modifierCommande = async (req, res) => {
   }
 };
 
-// @desc    Liste des commandes fournisseur
-// @route   GET /api/commandes-fournisseur
+
 const getCommandes = async (req, res) => {
   try {
     const {
@@ -273,8 +267,7 @@ const getCommandes = async (req, res) => {
   }
 };
 
-// @desc    Détail commande
-// @route   GET /api/commandes-fournisseur/:id
+
 const getCommande = async (req, res) => {
   try {
     const commande = await CommandeFournisseur.findById(req.params.id)
