@@ -418,7 +418,7 @@ export default function UtilisateursPage() {
                         <div className="w-9 h-9 rounded-full bg-primary-600
                                         flex items-center justify-center
                                         text-white text-xs font-bold
-                                        flex-shrink-0">
+                                        shrink-0">
                           {u.prenom?.[0]}{u.nom?.[0]}
                         </div>
                         <div>
