@@ -140,3 +140,31 @@ export const useCreateAvoir = () => {
     onError: (err) => toast.error(err.message)
   });
 };
+
+// Ajouter ces deux hooks
+
+export const useValiderAvoir = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id) => api.patch(`/avoirs/${id}/valider`),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['avoirs'] })
+  });
+};
+
+export const useAnnulerAvoir = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id) => api.patch(`/avoirs/${id}/annuler`),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['avoirs'] })
+  });
+};
+
+// Pour récupérer les avoirs valides d'un client (pour PaiementForm)
+export const useAvoirsClient = (clientId) =>
+  useQuery({
+    queryKey: ['avoirs', 'client', clientId],
+    queryFn: () => api.get('/avoirs', {
+      params: { client: clientId, statut: 'valide', limit: 50 }
+    }),
+    enabled: !!clientId
+  });

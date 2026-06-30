@@ -23,11 +23,12 @@ const avoirSchema = new mongoose.Schema({
   },
   totalHT: { type: Number, default: 0 },
   totalTTC: { type: Number, default: 0 },
-  statut: {
-    type: String,
-    enum: ['en_attente', 'valide', 'utilise'],
-    default: 'en_attente'
-  },
+soldeRestant: { type: Number, default: 0 },
+statut: {
+  type: String,
+  enum: ['en_attente', 'valide', 'consomme', 'annule'],
+  default: 'en_attente'
+},
   creePar: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
 }, { timestamps: true });
 

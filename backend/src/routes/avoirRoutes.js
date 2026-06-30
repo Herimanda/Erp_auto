@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const {
   creerAvoir, getAvoirs,
-  getAvoir, validerAvoir
+  getAvoir, validerAvoir, annulerAvoir
 } = require('../controllers/avoirController');
 const { protect, authorize } = require('../middlewares/auth');
 
@@ -22,5 +22,8 @@ router.put(
   authorize('administrateur', 'gestionnaire'),
   validerAvoir
 );
+
+router.patch('/:id/valider',   validerAvoir);  // ← nouveau
+router.patch('/:id/annuler',   annulerAvoir);
 
 module.exports = router;

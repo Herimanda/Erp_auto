@@ -2,6 +2,7 @@ const Stock = require('../models/Stock');
 const Article = require('../models/Article');
 const MouvementStock = require('../models/MouvementStock');
 const { success, error } = require('../utils/apiResponse');
+const { notifierParRole } = require('../utils/NotificationHelper');
 
 // Fonction utilitaire : mettre à jour le stock
 const updateStock = async (articleId, magasinId, quantite, type) => {
@@ -36,6 +37,23 @@ const updateStock = async (articleId, magasinId, quantite, type) => {
   }
 
   await stock.save();
+
+  // Vérification du seuil de stock minimum et notification
+  const article = await Article.findById(articleId);
+  if (article && stock.quantite <= article.stockMinimum) {
+    await notifierParRole(
+      ['administrateur', 'gestionnaire'],
+      {
+        type: 'stock_minimum',
+        titre: stock.quantite === 0 ? 'Rupture de stock' : 'Stock faible',
+        message: `${article.designation} : ${stock.quantite} unité(s) restante(s) (seuil: ${article.stockMinimum})`,
+        lien: '/stocks',
+        entiteId: article._id
+      },
+      magasinId
+    );
+  }
+
   return { quantiteAvant, quantiteApres: stock.quantite };
 };
 
@@ -178,6 +196,22 @@ const ajustementStock = async (req, res) => {
     stock.quantite = nouvelleQuantite;
     await stock.save();
 
+    // Vérification du seuil de stock minimum et notification
+    const article = await Article.findById(articleId);
+    if (article && stock.quantite <= article.stockMinimum) {
+      await notifierParRole(
+        ['administrateur', 'gestionnaire'],
+        {
+          type: 'stock_minimum',
+          titre: stock.quantite === 0 ? 'Rupture de stock' : 'Stock faible',
+          message: `${article.designation} : ${stock.quantite} unité(s) restante(s) (seuil: ${article.stockMinimum})`,
+          lien: '/stocks',
+          entiteId: article._id
+        },
+        magasinId
+      );
+    }
+
     const mouvement = await MouvementStock.create({
       type,
       article: articleId,
@@ -250,6 +284,8 @@ const getHistorique = async (req, res) => {
     return error(res, err.message);
   }
 };
+
+
 
 module.exports = {
   entreeStock, sortieStock,

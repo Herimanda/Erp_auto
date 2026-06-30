@@ -3,6 +3,7 @@ const Stock = require('../models/Stock');
 const MouvementStock = require('../models/MouvementStock');
 const generateNumero = require('../utils/generateNumero');
 const { success, error } = require('../utils/apiResponse');
+const { notifierParRole } = require('../utils/NotificationHelper');
 
 
 const creerTransfert = async (req, res) => {
@@ -58,6 +59,17 @@ const creerTransfert = async (req, res) => {
   } catch (err) {
     return error(res, err.message);
   }
+  await notifierParRole(
+  ['administrateur', 'gestionnaire', 'magasinier'],
+  {
+    type: 'transfert_attente',
+    titre: 'Nouveau transfert à valider',
+    message: `Transfert ${numero} en attente de validation`,
+    lien: '/transferts',
+    entiteId: transfert._id
+  },
+  magasinDestination
+);
 };
 
 
@@ -196,7 +208,19 @@ const receptionnerTransfert = async (req, res) => {
   } catch (err) {
     return error(res, err.message);
   }
+  await notifierParRole(
+  ['administrateur', 'gestionnaire'],
+  {
+    type: 'transfert_recu',
+    titre: 'Transfert réceptionné',
+    message: `Transfert ${transfert.numero} reçu avec succès`,
+    lien: '/transferts',
+    entiteId: transfert._id
+  },
+  transfert.magasinSource
+);
 };
+
 
 
 const annulerTransfert = async (req, res) => {

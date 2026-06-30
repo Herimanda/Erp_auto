@@ -19,9 +19,9 @@ const paiementSchema = new mongoose.Schema({
     enum: ['especes', 'cheque', 'virement', 'carte', 'avoir'],
     required: true
   },
-  reference: { type: String }
+  reference: { type: String },
+  avoir: { type: mongoose.Schema.Types.ObjectId, ref: 'Avoir' }
 }, { _id: false });
-
 const factureSchema = new mongoose.Schema({
   numero: { type: String, required: true, unique: true },
   type: {
@@ -56,5 +56,14 @@ const factureSchema = new mongoose.Schema({
   notes: { type: String },
   creePar: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
 }, { timestamps: true });
+
+factureSchema.virtual('avoirs', {
+  ref: 'Avoir',
+  localField: '_id',
+  foreignField: 'factureOrigine'
+});
+
+factureSchema.set('toJSON', { virtuals: true });
+factureSchema.set('toObject', { virtuals: true });
 
 module.exports = mongoose.model('Facture', factureSchema);

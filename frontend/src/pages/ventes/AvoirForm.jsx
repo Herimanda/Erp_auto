@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useCreateAvoir } from '../../hooks/useVentes';
 import { formatMontant } from '../../utils/format';
@@ -54,6 +54,19 @@ export default function AvoirForm({ onSuccess }) {
       l.article === articleId ? { ...l, quantite: Number(qte) } : l
     ));
   };
+
+  // Total dynamique de l'avoir, recalculé au prorata des quantités
+  // sélectionnées par rapport aux quantités facturées.
+  const totalAvoir = useMemo(() => {
+    if (!facture) return 0;
+    return lignes.reduce((sum, l) => {
+      const ligneFacture = facture.lignes.find(
+        (lf) => (lf.article?._id || lf.article) === l.article
+      );
+      if (!ligneFacture || !ligneFacture.quantite) return sum;
+      return sum + ligneFacture.montantTTC * (l.quantite / ligneFacture.quantite);
+    }, 0);
+  }, [lignes, facture]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -147,6 +160,15 @@ export default function AvoirForm({ onSuccess }) {
               );
             })}
           </div>
+        </div>
+      )}
+
+      {/* Récapitulatif du total avoir */}
+      {lignes.length > 0 && (
+        <div className="flex justify-between items-center font-bold
+                        text-orange-700 bg-orange-50 rounded-xl p-3">
+          <span>Total avoir</span>
+          <span className="text-lg">— {formatMontant(totalAvoir)}</span>
         </div>
       )}
 

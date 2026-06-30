@@ -3,9 +3,16 @@ const Stock = require('../models/Stock');
 const MouvementStock = require('../models/MouvementStock');
 const Client = require('../models/Client');
 const Article = require('../models/Article');
+const Avoir = require('../models/Avoir');
 const generateNumero = require('../utils/generateNumero');
 const { calculerTotaux } = require('../utils/calculLignes');
 const { success, error } = require('../utils/apiResponse');
+const { notifierParRole } = require('../utils/NotificationHelper');
+
+// Petit utilitaire de formatage monétaire (Ariary, sans décimales)
+const formatMontant = (montant) => {
+  return new Intl.NumberFormat('fr-FR').format(montant) + ' Ar';
+};
 
 
 const creerFacture = async (req, res) => {
@@ -54,11 +61,32 @@ const creerFacture = async (req, res) => {
     let montantPaye = 0;
 
     if (paiementInitial && paiementInitial.montant > 0) {
+      // Si le paiement initial se fait par avoir, on valide le crédit ici aussi
+      if (paiementInitial.mode === 'avoir') {
+        if (!paiementInitial.avoirId) {
+          throw new Error("avoirId requis pour un paiement initial par avoir.");
+        }
+        const avoir = await Avoir.findById(paiementInitial.avoirId);
+        if (!avoir) throw new Error('Avoir introuvable.');
+        if (avoir.statut !== 'valide') throw new Error('Avoir non validé.');
+        if (avoir.client.toString() !== client.toString()) {
+          throw new Error("Cet avoir n'appartient pas à ce client.");
+        }
+        if (avoir.soldeRestant < paiementInitial.montant) {
+          throw new Error(`Crédit avoir insuffisant (${avoir.soldeRestant}).`);
+        }
+
+        avoir.soldeRestant -= paiementInitial.montant;
+        avoir.statut = avoir.soldeRestant === 0 ? 'consomme' : 'valide';
+        await avoir.save();
+      }
+
       paiements.push({
         date: new Date(),
         montant: paiementInitial.montant,
         mode: paiementInitial.mode || 'especes',
-        reference: paiementInitial.reference
+        reference: paiementInitial.reference,
+        avoir: paiementInitial.mode === 'avoir' ? paiementInitial.avoirId : undefined
       });
       montantPaye = paiementInitial.montant;
     }
@@ -105,11 +133,19 @@ const creerFacture = async (req, res) => {
       });
     }
 
-    // Mettre à jour solde client si crédit
+    // Mettre à jour solde client si crédit restant
     if (montantRestant > 0) {
-      await Client.findByIdAndUpdate(client, {
-        $inc: { solde: montantRestant }
-      });
+      await notifierParRole(
+        ['administrateur', 'gestionnaire'],
+        {
+          type: 'facture_impayee',
+          titre: 'Nouvelle facture à crédit',
+          message: `Facture ${facture.numero} — ${formatMontant(montantRestant)} restant`,
+          lien: '/factures',
+          entiteId: facture._id
+        },
+        magasin
+      );
     }
 
     return success(
@@ -194,7 +230,8 @@ const getFacture = async (req, res) => {
       .populate('magasin')
       .populate('lignes.article', 'designation reference')
       .populate('creePar', 'nom prenom')
-      .populate('devisOrigine', 'numero');
+      .populate('devisOrigine', 'numero')
+      .populate('avoirs', 'numero statut totalTTC soldeRestant');
 
     if (!facture) return error(res, 'Facture introuvable.', 404);
     return success(res, facture);
@@ -206,7 +243,7 @@ const getFacture = async (req, res) => {
 
 const enregistrerPaiement = async (req, res) => {
   try {
-    const { montant, mode, reference } = req.body;
+    const { montant, mode, reference, avoirId } = req.body;
 
     const facture = await Facture.findById(req.params.id);
     if (!facture) return error(res, 'Facture introuvable.', 404);
@@ -225,9 +262,41 @@ const enregistrerPaiement = async (req, res) => {
       );
     }
 
+    let avoir = null;
+
+    // ── Paiement par avoir ────────────────────────────────────────────
+    if (mode === 'avoir') {
+      if (!avoirId) {
+        return error(res, 'avoirId requis pour un paiement par avoir.', 400);
+      }
+
+      avoir = await Avoir.findById(avoirId);
+      if (!avoir) return error(res, 'Avoir introuvable.', 404);
+      if (avoir.statut !== 'valide') {
+        return error(res, 'Avoir non validé ou déjà consommé/annulé.', 400);
+      }
+      if (avoir.client.toString() !== facture.client.toString()) {
+        return error(res, "Cet avoir n'appartient pas au client de cette facture.", 400);
+      }
+      if (avoir.soldeRestant < montant) {
+        return error(
+          res,
+          `Crédit avoir insuffisant. Disponible: ${avoir.soldeRestant}.`,
+          400
+        );
+      }
+
+      // Consommer le crédit de l'avoir
+      avoir.soldeRestant -= montant;
+      avoir.statut = avoir.soldeRestant === 0 ? 'consomme' : 'valide';
+      await avoir.save();
+    }
+    // ─────────────────────────────────────────────────────────────────
+
     facture.paiements.push({
       date: new Date(),
-      montant, mode, reference
+      montant, mode, reference,
+      avoir: mode === 'avoir' ? avoirId : undefined
     });
 
     facture.montantPaye += montant;
@@ -239,12 +308,25 @@ const enregistrerPaiement = async (req, res) => {
 
     await facture.save();
 
-    // Mettre à jour solde client
-    await Client.findByIdAndUpdate(facture.client, {
-      $inc: { solde: -montant }
-    });
+    // Mettre à jour le solde client.
+    // Pour un paiement classique, le client doit moins (solde -= montant).
+    // Pour un paiement par avoir, le solde a déjà été ajusté lors de la
+    // validation de l'avoir (crédit accordé) — on ne le touche donc pas
+    // une seconde fois ici pour éviter de compter le crédit deux fois.
+    if (mode !== 'avoir') {
+      await Client.findByIdAndUpdate(facture.client, {
+        $inc: { solde: -montant }
+      });
+    }
 
-    return success(res, facture, 'Paiement enregistré.');
+    return success(
+      res,
+      await facture.populate([
+        { path: 'client', select: 'nom prenom societe numeroClient' },
+        { path: 'magasin', select: 'nom code' }
+      ]),
+      'Paiement enregistré.'
+    );
   } catch (err) {
     return error(res, err.message);
   }
@@ -258,6 +340,19 @@ const annulerFacture = async (req, res) => {
 
     if (facture.statut === 'annulee') {
       return error(res, 'Facture déjà annulée.', 400);
+    }
+
+    // Empêcher l'annulation si des avoirs actifs existent sur cette facture
+    const avoirsActifs = await Avoir.countDocuments({
+      factureOrigine: facture._id,
+      statut: { $in: ['en_attente', 'valide', 'consomme'] }
+    });
+    if (avoirsActifs > 0) {
+      return error(
+        res,
+        'Impossible d\'annuler : des avoirs existent sur cette facture. Annulez-les d\'abord.',
+        400
+      );
     }
 
     // Remettre les stocks
@@ -285,7 +380,7 @@ const annulerFacture = async (req, res) => {
       }
     }
 
-    // Remettre solde client
+    // Remettre solde client (seulement la part due, pas déjà payée)
     if (facture.montantRestant > 0) {
       await Client.findByIdAndUpdate(facture.client, {
         $inc: { solde: -facture.montantRestant }

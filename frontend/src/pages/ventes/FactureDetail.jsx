@@ -4,7 +4,7 @@ import {
   formatMontant, formatDate, formatDateTime,
   getStatutBadge, getStatutLabel
 } from '../../utils/format';
-import { CreditCard, CheckCircle } from 'lucide-react';
+import { CreditCard, CheckCircle, Printer } from 'lucide-react';
 
 const MODES_LABEL = {
   especes:  'Espèces',
@@ -17,7 +17,14 @@ const MODES_LABEL = {
 // Ajouter en haut du composant
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
-const handlePrint = async () => {
+
+
+
+export default function FactureDetail({ factureId }) {
+  const { data, isLoading } = useFacture(factureId);
+  const facture = data?.data;
+
+  const handlePrint = async () => {
   const token = localStorage.getItem('token');
   const res   = await fetch(
     `${API_BASE}/rapports/facture/${factureId}/pdf`,
@@ -27,11 +34,6 @@ const handlePrint = async () => {
   const url   = URL.createObjectURL(blob);
   window.open(url, '_blank');
 };
-
-
-export default function FactureDetail({ factureId }) {
-  const { data, isLoading } = useFacture(factureId);
-  const facture = data?.data;
 
   if (isLoading) return (
     <div className="flex justify-center py-8">

@@ -1,10 +1,14 @@
 import { useState } from 'react';
-import { Plus, Eye, FileMinus } from 'lucide-react';
-import { useAvoirs, useCreateAvoir, useAvoir } from '../../hooks/useVentes';
+import { Plus, Eye, FileMinus, CheckCircle, XCircle } from 'lucide-react';
+import {
+  useAvoirs, useCreateAvoir, useAvoir,
+  useValiderAvoir, useAnnulerAvoir
+} from '../../hooks/useVentes';
 import PageHeader from '../../components/ui/PageHeader';
 import Modal from '../../components/ui/Modal';
 import Pagination from '../../components/ui/Pagination';
 import AvoirForm from './AvoirForm';
+import AvoirDetail from './AvoirDetail';
 import { Table, Thead, Th, Tbody, Tr, Td }
   from '../../components/ui/Table';
 import {
@@ -17,15 +21,47 @@ export default function AvoirsPage() {
   const { user } = useAuthStore();
   const canEdit = ['administrateur', 'gestionnaire', 'caissier']
     .includes(user?.role);
+  const canValidate = ['administrateur', 'gestionnaire']
+    .includes(user?.role);
 
-  const [page, setPage]           = useState(1);
-  const [showForm, setShowForm]   = useState(false);
+  const [page, setPage]             = useState(1);
+  const [showForm, setShowForm]     = useState(false);
   const [showDetail, setShowDetail] = useState(false);
-  const [selected, setSelected]   = useState(null);
+  const [selected, setSelected]     = useState(null);
 
   const { data, isLoading } = useAvoirs({ page, limit: 15 });
   const avoirs     = data?.data?.avoirs || [];
   const pagination = data?.data?.pagination;
+
+  const validerMutation = useValiderAvoir();
+  const annulerMutation = useAnnulerAvoir();
+
+  const openDetail = (avoir) => {
+    setSelected(avoir);
+    setShowDetail(true);
+  };
+
+  const closeDetail = () => {
+    setShowDetail(false);
+    setSelected(null);
+  };
+
+  const handleValider = (avoir) => {
+    if (confirm(
+      `Valider l'avoir ${avoir.numero} ?\nLe stock sera remis et un crédit de ${formatMontant(avoir.totalTTC)} sera accordé au client.`
+    )) {
+      validerMutation.mutate(avoir._id);
+    }
+  };
+
+  const handleAnnuler = (avoir) => {
+    const message = avoir.statut === 'valide'
+      ? `Annuler l'avoir ${avoir.numero} ?\nLe stock sera retiré et le crédit client repris.`
+      : `Annuler l'avoir ${avoir.numero} ?`;
+    if (confirm(message)) {
+      annulerMutation.mutate(avoir._id);
+    }
+  };
 
   return (
     <div>
@@ -104,15 +140,43 @@ export default function AvoirsPage() {
                     </span>
                   </Td>
                   <Td>
-                    <button
-                      onClick={() => {
-                        setSelected(a); setShowDetail(true);
-                      }}
-                      className="p-1.5 rounded-lg hover:bg-gray-100
-                                 text-gray-400 hover:text-primary-600"
-                    >
-                      <Eye className="w-4 h-4" />
-                    </button>
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={() => openDetail(a)}
+                        className="p-1.5 rounded-lg hover:bg-gray-100
+                                   text-gray-400 hover:text-primary-600"
+                        title="Voir"
+                      >
+                        <Eye className="w-4 h-4" />
+                      </button>
+
+                      {a.statut === 'en_attente' && canValidate && (
+                        <button
+                          onClick={() => handleValider(a)}
+                          disabled={validerMutation.isPending}
+                          className="p-1.5 rounded-lg hover:bg-green-50
+                                     text-gray-400 hover:text-green-600
+                                     disabled:opacity-50"
+                          title="Valider l'avoir"
+                        >
+                          <CheckCircle className="w-4 h-4" />
+                        </button>
+                      )}
+
+                      {['en_attente', 'valide'].includes(a.statut) &&
+                        canValidate && (
+                        <button
+                          onClick={() => handleAnnuler(a)}
+                          disabled={annulerMutation.isPending}
+                          className="p-1.5 rounded-lg hover:bg-red-50
+                                     text-gray-400 hover:text-red-600
+                                     disabled:opacity-50"
+                          title="Annuler l'avoir"
+                        >
+                          <XCircle className="w-4 h-4" />
+                        </button>
+                      )}
+                    </div>
                   </Td>
                 </Tr>
               ))}
@@ -130,10 +194,19 @@ export default function AvoirsPage() {
         )}
       </div>
 
+      {/* Création */}
       <Modal isOpen={showForm}
         onClose={() => setShowForm(false)}
         title="Nouvel avoir" size="lg">
         <AvoirForm onSuccess={() => setShowForm(false)} />
+      </Modal>
+
+      {/* Détail */}
+      <Modal isOpen={showDetail}
+        onClose={closeDetail}
+        title={selected ? `Avoir ${selected.numero}` : 'Détail avoir'}
+        size="xl">
+        {selected && <AvoirDetail avoirId={selected._id} />}
       </Modal>
     </div>
   );

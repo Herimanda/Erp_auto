@@ -3,11 +3,17 @@ import { useState } from 'react';
 import useAuthStore from '../store/authStore';
 import useUiStore from '../store/uiStore';
 import { clsx } from 'clsx';
+import NotificationPanel from '../components/notifications/NotificationPanel';
+import { useCompteurNotifications } from '../hooks/useNotification';
 
 export default function Topbar({ title }) {
   const { user, magasinActif, setMagasinActif } = useAuthStore();
   const { toggleSidebar } = useUiStore();
   const [showMagasins, setShowMagasins] = useState(false);
+
+  const [showNotifs, setShowNotifs] = useState(false);
+const { data: compteurData } = useCompteurNotifications();
+const nbNonLues = compteurData?.data?.count || 0;
 
   return (
     <header className="h-16 bg-white border-b border-gray-200
@@ -68,12 +74,25 @@ export default function Topbar({ title }) {
         )}
 
         {/* Notifications */}
-        <button className="relative p-2 rounded-lg hover:bg-gray-100
-                           text-gray-500 hover:text-gray-700">
-          <Bell className="w-5 h-5" />
-          <span className="absolute top-1.5 right-1.5 w-2 h-2
-                           bg-red-500 rounded-full"></span>
-        </button>
+<div className="relative">
+  <button
+    onClick={() => setShowNotifs(!showNotifs)}
+    className="relative p-2 rounded-lg hover:bg-gray-100
+               text-gray-500 hover:text-gray-700"
+  >
+    <Bell className="w-5 h-5" />
+    {nbNonLues > 0 && (
+      <span className="absolute top-1 right-1 min-w-4 h-4 px-1
+                       bg-red-500 rounded-full text-[10px] text-white
+                       font-bold flex items-center justify-center">
+        {nbNonLues > 9 ? '9+' : nbNonLues}
+      </span>
+    )}
+  </button>
+  {showNotifs && (
+    <NotificationPanel onClose={() => setShowNotifs(false)} />
+  )}
+</div>
 
         {/* Avatar */}
         <div className="flex items-center gap-2 pl-3

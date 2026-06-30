@@ -50,6 +50,7 @@ app.use('/api/avoirs', avoirRoutes);
 app.use('/api/dashboard', require('./routes/dashboardRoutes'));
 app.use('/api/rapports', require('./routes/rapportRoutes'));
 app.use('/api/audit', require('./routes/auditRoutes'));
+app.use('/api/notifications', require('./routes/notificationRoutes'));
 
 
 //uploads
