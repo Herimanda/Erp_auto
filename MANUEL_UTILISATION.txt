@@ -1,0 +1,1018 @@
+================================================================================
+                    MANUEL D'UTILISATION - ERP AUTO
+        Application de Gestion Commerciale et de Stock Multi-Magasins
+================================================================================
+
+Version du document : 1.0
+Application          : ERP Auto v1.0
+Public visé          : Administrateurs, Gestionnaires, Caissiers, Magasiniers
+
+NB: Ity ny manuel hoan'izay sodenda tsy mahazo an'ilay appli, raha mila fanazavana fanampiny dia mandafasa MP aty amiko fa tsy za no nanao ny redaction an'ity fa chatgpt satria za kamo ka mety misy latsaka amin'ity manuel ity moa koa za kamo hamaky azy hatram farany
+
+
+
+
+
+================================================================================
+1. INTRODUCTION
+================================================================================
+
+ERP Auto est une application web de gestion commerciale concue pour les
+entreprises possedant un ou plusieurs magasins de vente de pieces
+automobiles et accessoires.
+
+Elle permet de centraliser depuis un seul outil :
+  - le catalogue d'articles et leurs prix
+  - le suivi des stocks en temps reel, magasin par magasin
+  - les ventes (devis, factures, avoirs)
+  - les achats aupres des fournisseurs
+  - la gestion des clients et de leur historique
+  - le suivi des performances grace a un tableau de bord et des rapports
+
+NB : Application natao hoan'i Foza mba hanamoràna ny gestion anah stock sy commercial , maka inspiraka @appli saga100
+Mbola misy fonctionnalité tsy vita hatram'farany ary mety misy bug satria zah ts nanao test hatram farany ,fa raha mahatsikaritra dia handefaso MP ny tenako hamahana ny olana
+d mba verifieo kou sao dia mbola taraiky any ny log feno teny ratsy
+
+
+================================================================================
+2. CONNEXION A L'APPLICATION
+================================================================================
+
+Pour se connecter :
+
+  1. Ouvrir un navigateur web et se rendre sur l'adresse de l'application
+     fournie par votre administrateur (exemple : http://localhost:5173
+     ou l'adresse de votre serveur).
+
+  2. Saisir votre adresse email professionnelle.
+
+  3. Saisir votre mot de passe.
+     (Cliquer sur l'icone "oeil" pour afficher/masquer le mot de passe.)
+
+  4. Cliquer sur "Se connecter".
+
+Si vos identifiants sont corrects, vous etes redirige vers le Tableau de
+bord. En cas d'erreur, un message "Identifiants incorrects" s'affiche :
+verifiez votre email et votre mot de passe, ou contactez votre
+administrateur pour une reinitialisation.
+
+
+
+
+================================================================================
+ PRESENTATION GENERALE DE L'INTERFACE
+================================================================================
+
+L'interface est composee de 3 zones principales :
+
+A) LE MENU LATERAL (SIDEBAR) - a gauche
+   Affiche les differentes sections de l'application, regroupees par
+   categorie : Principal, Catalogue, Stocks, Ventes, Achats, Tiers,
+   Rapports, Administration.
+   Seules les sections autorisees selon votre role s'affichent.
+   Un clic sur la fleche en haut permet de reduire/agrandir le menu.
+
+B) LA BARRE SUPERIEURE (TOPBAR) - en haut
+   Affiche le titre de la page en cours, le selecteur de magasin (si vous
+   avez acces a plusieurs magasins), la cloche de notifications et votre
+   profil avec votre nom et votre role.
+
+C) LA ZONE DE CONTENU - au centre
+   Affiche le contenu de la page selectionnee : tableaux, formulaires,
+   graphiques, etc.
+
+ELEMENTS RECURRENTS DANS L'APPLICATION :
+
+  - Barre de recherche : permet de filtrer les listes (articles, clients,
+    factures, etc.) par mot-cle.
+  - Boutons de filtre : permettent d'affiner l'affichage par statut,
+    categorie, periode, etc.
+  - Pagination : en bas des tableaux, permet de naviguer entre les pages
+    de resultats.
+  - Fenetres modales (pop-up) : s'ouvrent pour la creation ou la
+    modification d'un element, sans quitter la page en cours.
+  - Notifications "toast" : messages temporaires en haut a droite de
+    l'ecran confirmant une action (succes en vert, erreur en rouge).
+
+
+================================================================================
+ LES ROLES UTILISATEURS
+================================================================================
+
+L'application distingue 4 roles, chacun avec des droits d'acces differents :
+
+  - ADMINISTRATEUR
+    Acces total a toutes les fonctionnalites, y compris la gestion des
+    utilisateurs, des magasins, le journal d'audit et les parametres
+    systeme.
+
+  - GESTIONNAIRE
+    Acces a la gestion commerciale complete : articles, stocks, ventes,
+    achats, clients, fournisseurs, rapports. Pas d'acces a la gestion
+    des utilisateurs ni des magasins.
+
+  - CAISSIER
+    Acces axe sur la vente : consultation des articles, gestion des
+    clients, creation de devis/factures/avoirs et encaissement des
+    paiements. Pas d'acces aux stocks ni aux achats.
+
+  - MAGASINIER
+    Acces axe sur la logistique : consultation des articles, gestion
+    des stocks, mouvements, transferts et inventaires. Pas d'acces a la
+    facturation ni aux donnees financieres.
+
+Le tableau ci-dessous resume les acces par module :
+
+  Module                      | Admin | Gestionnaire | Caissier | Magasinier
+  -----------------------------|-------|--------------|----------|------------
+  Tableau de bord              |  Oui  |     Oui      |   Oui    |    Oui
+  Articles (consultation)      |  Oui  |     Oui      |   Oui    |    Oui
+  Articles (creation/edition)  |  Oui  |     Oui      |   Non    |    Non
+  Categories                   |  Oui  |     Oui      |   Non    |    Non
+  Etat des stocks               |  Oui  |     Oui      |   Non    |    Oui
+  Mouvements de stock           |  Oui  |     Oui      |   Non    |    Oui
+  Transferts                    |  Oui  |     Oui      |   Non    |    Oui
+  Inventaire                    |  Oui  |     Oui      |   Non    |    Oui
+  Clients                       |  Oui  |     Oui      |   Oui    |    Non
+  Fournisseurs                  |  Oui  |     Oui      |   Non    |    Non
+  Commandes fournisseurs        |  Oui  |     Oui      |   Non    |    Non
+  Devis                         |  Oui  |     Oui      |   Oui    |    Non
+  Factures                      |  Oui  |     Oui      |   Oui    |    Non
+  Avoirs                        |  Oui  |     Oui      |   Oui    |    Non
+  Rapports                      |  Oui  |     Oui      |   Non    |    Non
+  Magasins                      |  Oui  |     Non      |   Non    |    Non
+  Utilisateurs                  |  Oui  |     Non      |   Non    |    Non
+  Journal d'audit               |  Oui  |     Non      |   Non    |    Non
+  Parametres (profil personnel) |  Oui  |     Oui      |   Oui    |    Oui
+
+
+================================================================================
+ TABLEAU DE BORD
+================================================================================
+
+Le tableau de bord est la page d'accueil de l'application. Il offre une
+vue d'ensemble de l'activite, mise a jour automatiquement.
+
+CONTENU DE LA PAGE :
+
+  - Message de bienvenue personnalise avec la date et l'heure du jour.
+
+  - Indicateurs cles (KPI) - premiere rangee :
+      * CA aujourd'hui      : chiffre d'affaires du jour et nombre de
+                               factures emises
+      * CA ce mois          : chiffre d'affaires du mois en cours, avec
+                               comparaison (en %) par rapport au mois
+                               precedent
+      * CA cette annee      : chiffre d'affaires cumule depuis le 1er
+                               janvier
+      * Impayes             : montant total et nombre de factures non
+                               soldees
+
+  - Indicateurs operationnels - deuxieme rangee :
+      * Stocks en alerte    : nombre d'articles sous le seuil minimum,
+                               avec detail des ruptures
+      * Nouveaux clients    : clients crees ce mois-ci
+      * Commandes en cours  : commandes fournisseurs en attente de
+                               reception
+      * Transferts en attente : transferts inter-magasins non finalises
+
+  - Graphique du chiffre d'affaires :
+      Bascule entre vue "30 derniers jours" et "12 derniers mois".
+      Affiche le montant facture et le montant encaisse.
+
+  - Repartition du CA par categorie d'articles (graphique camembert) :
+      Montre quelles familles de produits generent le plus de ventes ce
+      mois-ci.
+
+  - Top produits :
+      Classement des articles les plus vendus en quantite, filtrable par
+      periode (jour, semaine, mois, annee).
+
+  - Dernieres ventes :
+      Liste des factures les plus recentes, mise a jour automatiquement
+      toutes les 30 secondes.
+
+  - Panneau d'alertes (visible uniquement par Administrateur et
+    Gestionnaire) :
+      Regroupe en un seul endroit : les articles en stock faible, les
+      factures impayees, les commandes fournisseurs a receptionner et
+      les transferts en attente.
+
+ASTUCE : Si vous gerez plusieurs magasins, utilisez le selecteur de
+magasin dans la barre superieure pour filtrer toutes ces informations sur
+un seul point de vente.
+
+
+================================================================================
+ GESTION DES ARTICLES
+================================================================================
+
+Cette page regroupe l'ensemble du catalogue de produits (pieces
+automobiles, accessoires, etc.).
+
+ACCEDER A LA PAGE : Menu lateral > Catalogue > Articles
+
+CONSULTER LES ARTICLES :
+  - La liste affiche : reference, designation, marque, categorie, prix
+    de vente, stock minimum et statut (actif/inactif).
+  - Utilisez la barre de recherche pour chercher par reference,
+    designation, marque ou code-barres.
+  - Utilisez le filtre "categorie" pour n'afficher qu'une famille de
+    produits.
+  - Cliquez sur l'icone "oeil" pour voir le detail d'un article : prix
+    d'achat, prix de vente, marge calculee automatiquement, et le detail
+    du stock disponible dans CHAQUE magasin.
+
+CREER UN NOUVEL ARTICLE (Administrateur, Gestionnaire) :
+  1. Cliquer sur "Nouvel article" en haut a droite.
+  2. Remplir les champs obligatoires (marques d'un asterisque *) :
+       - Reference (code unique de l'article, ex: FIL-001)
+       - Designation (nom de l'article)
+       - Categorie
+       - Prix d'achat et prix de vente
+  3. Renseigner les champs optionnels : code-barres, marque, TVA, stock
+     minimum, description, photo du produit (formats JPG/PNG/WEBP, 2 Mo
+     maximum).
+  4. Cliquer sur "Creer".
+
+A la creation, un stock a 0 unite est automatiquement initialise pour
+CHAQUE magasin existant. Il faudra ensuite faire une entree de stock
+(voir section 8.2) ou une reception de commande fournisseur pour
+approvisionner l'article.
+
+MODIFIER UN ARTICLE :
+  Cliquer sur l'icone "crayon" sur la ligne de l'article, modifier les
+  champs souhaites, puis "Modifier".
+
+SUPPRIMER UN ARTICLE :
+  Cliquer sur l'icone "corbeille". La suppression est dite "logique" :
+  l'article n'est pas definitivement efface de la base de donnees, il
+  est simplement marque comme inactif et n'apparait plus dans les listes
+  actives, ceci afin de conserver l'historique des ventes passees.
+
+LE STOCK MINIMUM : ce seuil determine a partir de quelle quantite un
+article est considere "en alerte" sur le tableau de bord et dans le
+module Stocks. Il est calcule sur le STOCK TOTAL (somme de tous les
+magasins), sauf si vous filtrez par magasin specifique.
+
+
+================================================================================
+ GESTION DES CATEGORIES
+================================================================================
+
+Les categories permettent d'organiser le catalogue d'articles par famille
+de produits (exemple : Filtres, Freins, Pneumatiques, Electricite...).
+
+ACCEDER A LA PAGE : Menu lateral > Catalogue > Categories
+
+CREER UNE CATEGORIE (Administrateur, Gestionnaire) :
+  1. Cliquer sur "Nouvelle categorie".
+  2. Saisir un code (court, en majuscules, ex: FILTRE) et un nom complet
+     (ex: Filtres moteur et habitacle).
+  3. Ajouter une description optionnelle.
+  4. Cliquer sur "Creer".
+
+Chaque categorie affiche le nombre d'articles qui lui sont rattaches.
+
+MODIFIER / SUPPRIMER :
+  Utilisez les icones "crayon" et "corbeille" sur chaque carte de
+  categorie.
+
+  ATTENTION : une categorie ne peut pas etre supprimee si des articles
+  actifs lui sont encore rattaches. Vous devez d'abord reaffecter ou
+  desactiver ces articles.
+
+
+================================================================================
+ GESTION DES STOCKS
+================================================================================
+
+Le module Stocks regroupe 4 sous-pages : Etat des stocks, Mouvements,
+Transferts et Inventaire.
+
+
+--------------------------------------------------------------------------------
+ ETAT DES STOCKS
+--------------------------------------------------------------------------------
+
+ACCEDER A LA PAGE : Menu lateral > Stocks > Etat des stocks
+
+Cette page donne une VUE GLOBALE de tous les articles, avec le detail de
+la quantite disponible DANS CHAQUE MAGASIN, cote a cote dans un tableau.
+
+INDICATEURS EN HAUT DE PAGE :
+  - Total articles geres
+  - Valeur totale du stock (quantite x prix d'achat, tous articles
+    confondus)
+  - Nombre d'articles en alerte (sous le seuil minimum)
+  - Nombre d'articles en rupture totale (0 unite)
+
+FILTRES DISPONIBLES :
+  - Recherche par reference ou designation
+  - Bouton "Tous" / "Alerte" / "Rupture" pour filtrer rapidement
+
+LECTURE DU TABLEAU :
+  Chaque ligne represente un article. Une colonne est affichee par
+  magasin, avec un badge colore :
+    - Vert  : stock suffisant
+    - Jaune : stock sous le seuil minimum (alerte)
+    - Rouge : rupture totale (0 unite)
+  La colonne "Total" additionne les quantites de tous les magasins.
+
+
+--------------------------------------------------------------------------------
+ MOUVEMENTS DE STOCK
+--------------------------------------------------------------------------------
+
+ACCEDER A LA PAGE : Menu lateral > Stocks > Mouvements
+
+Cette page affiche l'HISTORIQUE COMPLET de toutes les entrees et sorties
+de stock, avec la date, le type de mouvement, l'article concerne, le
+magasin, la quantite, le stock avant/apres et l'utilisateur responsable.
+
+TYPES DE MOUVEMENTS :
+
+  ENTREES (le stock augmente) :
+    - Achat fournisseur    : reception d'une commande
+    - Retour client        : un client rapporte un article (via un avoir)
+    - Ajustement positif   : correction manuelle a la hausse
+    - Transfert entrant    : reception d'un transfert depuis un autre
+                              magasin
+
+  SORTIES (le stock diminue) :
+    - Vente                : creation d'une facture
+    - Retour fournisseur   : article renvoye a un fournisseur
+    - Ajustement negatif   : correction manuelle a la baisse (casse,
+                              perte, vol, erreur)
+    - Transfert sortant    : expedition d'un transfert vers un autre
+                              magasin
+
+CREER UN MOUVEMENT MANUEL (Administrateur, Gestionnaire, Magasinier) :
+
+  Pour une ENTREE :
+    1. Cliquer sur le bouton "Entree".
+    2. Selectionner l'article et le magasin concerne.
+    3. Choisir le type d'entree (achat fournisseur, retour client ou
+       ajustement positif).
+    4. Saisir la quantite a ajouter.
+    5. Optionnel : indiquer un prix unitaire si different du prix
+       d'achat habituel.
+    6. Valider.
+
+  Pour une SORTIE :
+    1. Cliquer sur le bouton "Sortie".
+    2. Selectionner l'article, le magasin, le type de sortie (retour
+       fournisseur ou ajustement negatif) et la quantite.
+    3. Valider.
+
+  Pour un AJUSTEMENT (correction de stock suite a une erreur) :
+    1. Cliquer sur le bouton "Ajuster".
+    2. Selectionner l'article et le magasin.
+    3. Saisir la NOUVELLE QUANTITE REELLE (et non la difference).
+    4. Choisir un motif obligatoire : Casse, Perte, Vol ou Correction
+       d'erreur.
+    5. Valider. L'application calcule automatiquement l'ecart et cree le
+       mouvement correspondant (positif ou negatif).
+
+NOTE IMPORTANTE : les ventes et les receptions de commandes fournisseurs
+generent AUTOMATIQUEMENT leurs mouvements de stock. Il n'est pas
+necessaire de les saisir manuellement ici.
+
+
+--------------------------------------------------------------------------------
+TRANSFERTS INTER-MAGASINS
+--------------------------------------------------------------------------------
+
+ACCEDER A LA PAGE : Menu lateral > Stocks > Transferts
+
+Permet de deplacer des articles d'un magasin vers un autre, par exemple
+pour reequilibrer les stocks entre points de vente.
+
+LE TRANSFERT SUIT UN WORKFLOW EN 4 ETAPES :
+
+  1. EN ATTENTE   : la demande de transfert vient d'etre creee.
+  2. VALIDE       : la demande a ete approuvee par un responsable.
+  3. EXPEDIE      : les articles ont quitte le magasin source (le stock
+                     source est deduit a ce moment).
+  4. RECU         : les articles sont arrives au magasin destination (le
+                     stock destination est credite a ce moment).
+
+A tout moment avant la reception, un transfert peut etre ANNULE. Si le
+transfert avait deja ete expedie, le stock source est automatiquement
+recredite lors de l'annulation.
+
+CREER UN TRANSFERT :
+  1. Cliquer sur "Nouveau transfert".
+  2. Selectionner le magasin source et le magasin destination (ils
+     doivent etre differents).
+  3. Ajouter une ou plusieurs lignes d'articles avec les quantites
+     souhaitees (bouton "Ajouter" pour une ligne supplementaire).
+  4. Valider la creation.
+
+FAIRE AVANCER LE TRANSFERT :
+  Sur chaque ligne de transfert, des icones d'action apparaissent selon
+  le statut actuel :
+    - Icone "coche verte"  : valider le transfert
+    - Icone "camion"       : expedier (deduit le stock source)
+    - Icone "colis"        : receptionner (credite le stock destination)
+
+  Lors de la reception, vous pouvez ajuster les quantites reellement
+  recues si elles different de la demande initiale (cas de casse pendant
+  le transport, par exemple).
+
+
+--------------------------------------------------------------------------------
+ INVENTAIRE
+--------------------------------------------------------------------------------
+
+ACCEDER A LA PAGE : Menu lateral > Stocks > Inventaire
+
+Ce module permet de realiser un COMPTAGE PHYSIQUE des stocks et de
+corriger automatiquement les ecarts par rapport au stock theorique
+enregistre dans le systeme.
+
+L'INVENTAIRE SE DEROULE EN 3 ETAPES :
+
+  ETAPE 1 - SELECTION :
+    Choisir le magasin a inventorier.
+    Optionnellement, choisir une categorie precise pour faire un
+    "inventaire tournant" (partiel) plutot qu'un inventaire complet.
+    Cliquer sur "Demarrer l'inventaire".
+
+  ETAPE 2 - SAISIE :
+    Une feuille de comptage s'affiche avec, pour chaque article, le
+    STOCK THEORIQUE (celui enregistre dans le systeme).
+    Pour chaque article compte physiquement en magasin, saisir la
+    quantite reelle trouvee dans la colonne "Stock physique".
+    L'ecart se calcule et s'affiche automatiquement en temps reel :
+      - Vert/Bleu : excedent (plus de stock que prevu)
+      - Rouge     : manquant (moins de stock que prevu)
+    Une barre de progression indique le pourcentage d'articles deja
+    saisis.
+    Possibilite d'exporter une feuille vierge au format CSV pour
+    realiser le comptage sur papier ou tablette hors ligne, puis ressaisir
+    les valeurs ensuite.
+
+  ETAPE 3 - VALIDATION ET RESULTAT :
+    Une fois la saisie terminee (meme partiellement), cliquer sur
+    "Valider l'inventaire".
+    Une fenetre de confirmation recapitule le nombre de lignes sans
+    ecart et avec ecart.
+    APRES CONFIRMATION, CETTE ACTION EST IRREVERSIBLE : les stocks sont
+    mis a jour definitivement selon les quantites physiques saisies, et
+    un mouvement d'ajustement est cree automatiquement pour chaque
+    article en ecart (motif "Correction d'erreur").
+    Un ecran de resultat affiche le detail de toutes les corrections
+    effectuees.
+
+CONSEIL : effectuez les inventaires de preference en dehors des heures
+de vente actives, pour eviter que des ventes ne modifient le stock
+pendant votre comptage.
+
+
+================================================================================
+GESTION DES CLIENTS
+================================================================================
+
+ACCEDER A LA PAGE : Menu lateral > Tiers > Clients
+
+Cette page centralise toute la base clients de l'entreprise.
+
+CATEGORIES DE CLIENTS :
+  - Particulier
+  - Garage
+  - Revendeur
+
+CREER UN CLIENT (Administrateur, Gestionnaire, Caissier) :
+  1. Cliquer sur "Nouveau client".
+  2. Renseigner le nom (obligatoire), le prenom, la societe, la
+     categorie, le telephone, l'email, l'adresse et le NIF.
+  3. Valider. Un numero client unique est genere automatiquement
+     (format CLT-00001).
+
+CONSULTER L'HISTORIQUE D'UN CLIENT :
+  Cliquer sur l'icone "oeil" sur la ligne du client pour ouvrir sa fiche
+  complete :
+    - Coordonnees et solde du (montant restant a payer, le cas echeant)
+    - Indicateurs : total des achats, total paye, restant du, nombre de
+      factures
+    - Liste de toutes ses factures avec leur statut
+    - Liste de ses avoirs
+
+LE SOLDE CLIENT : si un client beneficie d'une facture a credit non
+entierement payee, le montant restant s'ajoute a son "solde". Ce solde
+diminue automatiquement a chaque paiement enregistre ou avoir cree.
+
+TOP CLIENTS : la liste des meilleurs clients (par montant d'achats) est
+visible depuis l'API et peut etre integree aux rapports.
+
+MODIFIER / SUPPRIMER UN CLIENT :
+  Utilisez les icones "crayon" et "corbeille".
+  ATTENTION : un client ayant des factures impayees ne peut pas etre
+  supprime.
+
+
+================================================================================
+GESTION DES FOURNISSEURS
+================================================================================
+
+ACCEDER A LA PAGE : Menu lateral > Achats > Fournisseurs
+
+CREER UN FOURNISSEUR (Administrateur, Gestionnaire) :
+  1. Cliquer sur "Nouveau fournisseur".
+  2. Renseigner la reference (code unique), la raison sociale
+     (obligatoires), le contact, le telephone, l'email, l'adresse et le
+     NIF.
+  3. Valider.
+
+CONSULTER L'HISTORIQUE :
+  Cliquer sur l'icone "oeil" pour voir toutes les commandes passees
+  aupres de ce fournisseur, avec les indicateurs : nombre total de
+  commandes, montant total achete, commandes en cours.
+
+MODIFIER / SUPPRIMER :
+  Un fournisseur ayant des commandes actives (brouillon, validee ou en
+  cours) ne peut pas etre supprime.
+
+
+================================================================================
+ COMMANDES FOURNISSEURS
+================================================================================
+
+ACCEDER A LA PAGE : Menu lateral > Achats > Commandes
+
+Ce module gere le cycle d'achat aupres des fournisseurs, depuis la
+commande jusqu'a la reception en stock.
+
+WORKFLOW DE LA COMMANDE :
+
+  1. BROUILLON  : commande en cours de redaction, modifiable librement.
+  2. VALIDEE    : commande confirmee, envoyee au fournisseur (n'est plus
+                  modifiable dans son contenu).
+  3. EN COURS   : une reception partielle a deja eu lieu.
+  4. RECUE      : toutes les quantites commandees ont ete receptionnees.
+  5. ANNULEE    : commande abandonnee (possible a tout moment sauf si
+                  deja recue).
+
+CREER UNE COMMANDE :
+  1. Cliquer sur "Nouvelle commande".
+  2. Selectionner le fournisseur et le magasin de destination.
+  3. Ajouter les lignes d'articles avec les quantites souhaitees (le
+     prix d'achat habituel de l'article est propose automatiquement,
+     modifiable si besoin).
+  4. Indiquer une date de livraison prevue (optionnel) et des notes.
+  5. Valider la creation (la commande reste en statut "Brouillon").
+
+VALIDER UNE COMMANDE :
+  Cliquer sur l'icone "coche verte" pour faire passer la commande de
+  "Brouillon" a "Validee".
+
+RECEPTIONNER UNE COMMANDE (Administrateur, Gestionnaire, Magasinier) :
+  1. Cliquer sur l'icone "colis" (disponible des que la commande est
+     validee).
+  2. Pour chaque article, saisir la quantite REELLEMENT recue (qui peut
+     etre inferieure a la quantite commandee en cas de livraison
+     partielle) et ajuster le prix d'achat si necessaire.
+  3. Valider la reception.
+
+A LA RECEPTION :
+  - Le stock du magasin concerne est automatiquement augmente.
+  - Le prix d'achat de l'article est mis a jour si un nouveau prix a ete
+    saisi.
+  - Si toutes les quantites commandees sont recues, le statut passe a
+    "Recue". Sinon, il reste "En cours" et une nouvelle reception pourra
+    etre effectuee plus tard pour le solde restant.
+
+ANNULER UNE COMMANDE :
+  Cliquer sur l'icone "croix rouge". Impossible si la commande est deja
+  entierement recue.
+
+
+================================================================================
+ DEVIS
+================================================================================
+
+ACCEDER A LA PAGE : Menu lateral > Ventes > Devis
+
+Le devis est un document commercial non engageant, transmis a un client
+avant facturation.
+
+STATUTS D'UN DEVIS :
+  - BROUILLON : en cours de redaction, modifiable.
+  - ENVOYE    : transmis au client.
+  - ACCEPTE   : le client a donne son accord.
+  - REFUSE    : le client a decline l'offre.
+
+CREER UN DEVIS :
+  1. Cliquer sur "Nouveau devis".
+  2. Rechercher et selectionner le client (champ de recherche
+     instantanee).
+  3. Choisir le magasin.
+  4. Ajouter les lignes d'articles : selectionner l'article (le prix de
+     vente et la TVA se remplissent automatiquement), ajuster la
+     quantite, le prix unitaire si besoin, et une remise ligne par ligne
+     si necessaire.
+  5. Appliquer une remise globale en pourcentage si besoin.
+  6. Indiquer une date de validite et des notes optionnelles.
+  7. Valider la creation.
+
+Les totaux HT, TVA et TTC se calculent automatiquement au fur et a
+mesure de la saisie.
+
+FAIRE EVOLUER LE STATUT :
+  - Bouton "enveloppe" : marquer comme Envoye
+  - Bouton "coche"     : marquer comme Accepte
+  - Bouton "croix"     : marquer comme Refuse
+
+CONVERTIR UN DEVIS EN FACTURE :
+  Une fois le devis envoye ou accepte, cliquer sur l'icone de
+  "conversion" (fleches circulaires). Une facture comptoir est creee
+  automatiquement avec les memes lignes, le stock est verifie et deduit,
+  et le devis passe au statut "Accepte".
+
+  ATTENTION : la conversion verifie la disponibilite du stock avant de
+  creer la facture. Si le stock est insuffisant pour un article, la
+  conversion est bloquee avec un message d'erreur.
+
+
+================================================================================
+ FACTURES ET PAIEMENTS
+================================================================================
+
+ACCEDER A LA PAGE : Menu lateral > Ventes > Factures
+
+C'est le coeur du module de vente : chaque facture deduit
+automatiquement le stock et genere les ecritures necessaires.
+
+TYPES DE FACTURES :
+  - COMPTOIR  : vente classique au comptant.
+  - CREDIT    : vente a credit, paiement differe ou en plusieurs fois.
+  - PROFORMA  : facture pro forma, document non definitif (devis
+                formalise envoye avant accord final, n'impacte pas
+                le stock de la meme maniere qu'une facture classique).
+
+STATUTS DE PAIEMENT :
+  - EN ATTENTE             : aucun paiement recu.
+  - PARTIELLEMENT PAYEE    : un ou plusieurs paiements recus, solde
+                              restant a payer.
+  - PAYEE                  : facture entierement reglee.
+  - ANNULEE                : facture annulee (stock remis automatiquement).
+
+CREER UNE FACTURE :
+  1. Cliquer sur "Nouvelle facture".
+  2. Selectionner le client et le magasin.
+  3. Choisir le type de facture.
+  4. Ajouter les lignes d'articles (le stock disponible est verifie a la
+     validation : impossible de facturer plus que le stock disponible).
+  5. Appliquer une remise globale si besoin.
+  6. SECTION PAIEMENT IMMEDIAT : si le client paie au moment de la
+     vente, saisir le montant encaisse et le mode de paiement (especes,
+     cheque, virement, carte). Le systeme calcule automatiquement la
+     monnaie a rendre si le montant saisi depasse le total, ou le reste
+     a payer si le montant est inferieur.
+  7. Valider la creation.
+
+A LA CREATION D'UNE FACTURE :
+  - Le stock de chaque article vendu est automatiquement deduit dans le
+    magasin selectionne.
+  - Si la facture n'est pas entierement payee, le solde du client
+    augmente du montant restant.
+
+ENREGISTRER UN PAIEMENT SUPPLEMENTAIRE :
+  Pour les factures partiellement payees ou en attente, cliquer sur
+  l'icone "carte bancaire" :
+    1. Le montant restant du s'affiche par defaut, modifiable.
+    2. Choisir le mode de paiement (Especes, Cheque, Virement, Carte,
+       Avoir).
+    3. Pour cheque/virement, indiquer une reference.
+    4. Valider. L'historique des paiements de la facture se met a jour
+       et le solde client diminue d'autant.
+
+CONSULTER LE DETAIL D'UNE FACTURE :
+  Cliquer sur l'icone "oeil" : affiche les lignes, le recapitulatif des
+  montants et l'historique complet des paiements recus.
+
+IMPRIMER UNE FACTURE :
+  Depuis le detail de la facture, le bouton "Imprimer" genere un PDF
+  professionnel de la facture, pret a etre remis au client.
+
+ANNULER UNE FACTURE (Administrateur, Gestionnaire uniquement) :
+  Cliquer sur l'icone "croix rouge". Cette action :
+    - Remet en stock tous les articles de la facture.
+    - Annule le solde restant eventuellement du par le client.
+    - Passe le statut de la facture a "Annulee" (elle reste visible dans
+      l'historique mais n'est plus comptabilisee dans le chiffre
+      d'affaires).
+
+ALERTE FACTURES IMPAYEES : un bandeau rouge en haut de la page Factures
+signale le nombre et le montant total des factures non soldees.
+
+
+================================================================================
+ AVOIRS
+================================================================================
+
+ACCEDER A LA PAGE : Menu lateral > Ventes > Avoirs
+
+L'avoir permet de gerer les retours de marchandise ou les annulations
+(partielles ou totales) sur une facture deja emise.
+
+TYPES D'AVOIRS :
+  - RETOUR PRODUIT         : le client rapporte un ou plusieurs articles.
+  - ANNULATION PARTIELLE   : annulation d'une partie de la facture.
+  - ANNULATION TOTALE      : annulation complete de la facture via avoir.
+
+CREER UN AVOIR :
+  1. Cliquer sur "Nouvel avoir".
+  2. Selectionner la facture d'origine (uniquement parmi les factures
+     payees).
+  3. Choisir le type d'avoir.
+  4. Cocher les articles concernes par le retour et ajuster la quantite
+     retournee (elle ne peut pas depasser la quantite initialement
+     facturee).
+  5. Valider la creation.
+
+EFFETS DE LA CREATION D'UN AVOIR :
+  - Les articles retournes sont automatiquement remis en stock dans le
+    magasin de la facture d'origine.
+  - Le solde du client diminue du montant de l'avoir.
+  - Un numero d'avoir unique est genere (format AVO-2024-0001).
+
+Un avoir une fois cree peut etre valide par un administrateur ou
+gestionnaire pour confirmer son traitement definitif.
+
+
+================================================================================
+ RAPPORTS (PDF / EXCEL)
+================================================================================
+
+ACCEDER A LA PAGE : Menu lateral > Rapports
+
+Ce module (reserve aux Administrateurs et Gestionnaires) permet
+d'exporter les donnees de l'application pour analyse externe ou
+archivage.
+
+FILTRES GLOBAUX DISPONIBLES :
+  - Date de debut et date de fin
+  - Magasin (ou "Tous les magasins")
+
+RAPPORTS DISPONIBLES :
+
+  1. RAPPORT DES VENTES (PDF et Excel)
+     Liste detaillee de toutes les factures sur la periode choisie, avec
+     pour chacune : numero, date, client, magasin, type, montants
+     HT/TVA/TTC, montant paye et reste a payer. Le PDF inclut un resume
+     en en-tete et le total general. Le fichier Excel comporte une
+     feuille "Ventes" detaillee et une feuille "Resume".
+
+  2. RAPPORT DES STOCKS (PDF et Excel)
+     Etat detaille du stock de chaque article, avec son statut (OK,
+     Alerte, Rupture) et sa valeur (quantite x prix d'achat). Le PDF est
+     au format paysage pour plus de lisibilite. Le fichier Excel detaille
+     le stock COLONNE PAR COLONNE pour chaque magasin si aucun magasin
+     specifique n'est filtre.
+
+  3. RAPPORT CLIENTS (Excel uniquement)
+     Liste complete de tous les clients actifs avec leurs coordonnees et
+     leur solde du.
+
+TELECHARGER UN RAPPORT :
+  Cliquer sur le bouton "PDF" ou "Excel" de la carte du rapport
+  souhaite. Le fichier se telecharge automatiquement dans le dossier de
+  telechargement de votre navigateur.
+
+
+================================================================================
+ NOTIFICATIONS
+================================================================================
+
+L'icone "cloche" presente dans la barre superieure, sur chaque page de
+l'application, donne acces au centre de notifications.
+
+UN PASTILLE ROUGE affiche le nombre de notifications NON LUES. Ce
+compteur se met a jour automatiquement toutes les 30 secondes.
+
+TYPES DE NOTIFICATIONS GENEREES AUTOMATIQUEMENT :
+
+  - STOCK MINIMUM ATTEINT
+    Envoyee aux administrateurs et gestionnaires du magasin concerne
+    des qu'un article passe sous son seuil minimum (ou tombe en rupture
+    totale), suite a une vente ou une sortie de stock.
+
+  - FACTURE IMPAYEE
+    Envoyee a la creation d'une facture a credit non entierement payee.
+
+  - TRANSFERT EN ATTENTE
+    Envoyee aux responsables du magasin destinataire des qu'un nouveau
+    transfert inter-magasins est cree et necessite une validation.
+
+  - TRANSFERT RECU
+    Envoyee aux responsables du magasin source lorsqu'un transfert
+    expedie a bien ete receptionne par le magasin destinataire.
+
+  - COMMANDE RECUE / NOUVELLE COMMANDE
+    Notifications liees au cycle d'achat fournisseur.
+
+UTILISER LE PANNEAU DE NOTIFICATIONS :
+  1. Cliquer sur l'icone "cloche" pour ouvrir le panneau deroulant.
+  2. Deux onglets permettent de filtrer : "Toutes" ou "Non lues".
+  3. Cliquer sur une notification :
+       - La marque automatiquement comme lue.
+       - Vous redirige vers la page concernee (ex: la page Stocks pour
+         une alerte de stock minimum).
+  4. Le bouton "Tout lire" en haut du panneau marque toutes les
+     notifications comme lues en une seule action.
+  5. Passer la souris sur une notification fait apparaitre une icone
+     "corbeille" permettant de la supprimer individuellement.
+  6. Le bouton en bas du panneau "Effacer les notifications lues"
+     permet de nettoyer l'historique des notifications deja consultees.
+
+Les notifications sont personnelles a chaque utilisateur et dependent de
+son role et des magasins auxquels il a acces.
+
+
+================================================================================
+ ADMINISTRATION
+================================================================================
+
+Cette section n'est accessible qu'aux utilisateurs ayant le role
+ADMINISTRATEUR (sauf la page Parametres, accessible a tous).
+
+
+--------------------------------------------------------------------------------
+ GESTION DES MAGASINS
+--------------------------------------------------------------------------------
+
+ACCEDER A LA PAGE : Menu lateral > Administration > Magasins
+
+Chaque magasin represente un point de vente physique distinct, avec son
+propre stock independant.
+
+CREER UN MAGASIN :
+  1. Cliquer sur "Nouveau magasin".
+  2. Saisir un code unique (ex: MAG-A), un nom, et optionnellement le
+     telephone, l'email et l'adresse.
+  3. Valider.
+
+A la creation d'un nouvel article, un stock a 0 est automatiquement
+cree pour TOUS les magasins existants, y compris ceux crees
+ulterieurement (le stock est cree au moment de la creation de
+l'article, donc il faut creer les magasins avant les articles pour une
+couverture complete, ou utiliser une entree de stock manuelle pour les
+articles existants).
+
+DESACTIVER UN MAGASIN :
+  Le bouton "Desactiver" permet de retirer un magasin de la liste des
+  points de vente actifs sans supprimer son historique. Un magasin
+  desactive n'apparait plus dans les selecteurs de magasin lors de la
+  creation de documents (factures, commandes...).
+
+
+--------------------------------------------------------------------------------
+ GESTION DES UTILISATEURS
+--------------------------------------------------------------------------------
+
+ACCEDER A LA PAGE : Menu lateral > Administration > Utilisateurs
+
+CREER UN UTILISATEUR :
+  1. Cliquer sur "Nouvel utilisateur".
+  2. Renseigner le nom, le prenom, l'email (doit etre unique) et un mot
+     de passe initial (minimum 6 caracteres).
+  3. Choisir le role : Administrateur, Gestionnaire, Caissier ou
+     Magasinier.
+  4. Cocher le ou les magasins auxquels cet utilisateur aura acces.
+  5. Valider.
+
+MODIFIER UN UTILISATEUR :
+  Cliquer sur l'icone "crayon" pour modifier ses informations, son role
+  ou ses magasins d'acces.
+
+REINITIALISER UN MOT DE PASSE :
+  Si un utilisateur a oublie son mot de passe, cliquer sur l'icone "cle"
+  sur sa ligne, saisir et confirmer un nouveau mot de passe, puis
+  valider. Communiquer ensuite ce nouveau mot de passe a l'utilisateur
+  par un canal securise.
+
+ACTIVER / DESACTIVER UN COMPTE :
+  Le bouton avec l'icone "utilisateur barre" / "utilisateur coche"
+  permet de bloquer temporairement l'acces d'un utilisateur sans
+  supprimer son compte (utile en cas de depart temporaire, conges
+  prolonges, etc.). Un compte desactive ne peut plus se connecter.
+
+FILTRER LA LISTE :
+  Utilisez la barre de recherche (nom, prenom, email) et les boutons de
+  filtre par role.
+
+
+--------------------------------------------------------------------------------
+JOURNAL D'AUDIT
+--------------------------------------------------------------------------------
+
+ACCEDER A LA PAGE : Menu lateral > Administration > Journal d'audit
+
+Ce module enregistre AUTOMATIQUEMENT et de maniere PERMANENTE toutes les
+actions importantes effectuees dans l'application :
+  - Connexions et deconnexions
+  - Creations, modifications et suppressions de donnees
+  - Ventes
+  - Ajustements de stock
+  - Transferts
+
+CHAQUE ENTREE DU JOURNAL AFFICHE :
+  - La date et l'heure precises
+  - L'utilisateur ayant realise l'action et son role
+  - Le type d'action effectuee
+  - L'entite concernee (Article, Facture, Stock...)
+  - Le magasin concerne
+  - L'adresse IP d'origine
+
+FILTRER LE JOURNAL :
+  - Par type d'action (menu deroulant)
+  - Par plage de dates (du / au)
+
+Ce journal est un outil essentiel de tracabilite et de securite : il
+permet de retracer qui a fait quoi et quand dans l'application, en cas
+de litige ou d'anomalie constatee.
+
+L'historique du journal d'audit est conserve SANS LIMITE DE TEMPS.
+
+
+--------------------------------------------------------------------------------
+ PARAMETRES
+--------------------------------------------------------------------------------
+
+ACCEDER A LA PAGE : Menu lateral > Administration > Parametres
+(Accessible a TOUS les utilisateurs, pour la gestion de leur propre
+compte)
+
+La page Parametres est organisee en 4 onglets :
+
+  1. MON PROFIL
+     Permet de modifier son nom, prenom et email personnels.
+
+  2. SECURITE
+     Permet de changer son propre mot de passe. Il faut connaitre
+     l'ancien mot de passe pour pouvoir le modifier. Un indicateur visuel
+     affiche la force du nouveau mot de passe saisi.
+
+  3. NOTIFICATIONS
+     Permet de personnaliser quelles alertes vous souhaitez recevoir :
+     stock minimum, factures impayees, nouvelles commandes, transferts
+     en attente.
+
+  4. APPARENCE
+     Permet de choisir un theme visuel (clair/sombre - le mode sombre
+     sera disponible dans une prochaine version) et affiche les
+     informations techniques du systeme (version de l'application,
+     technologies utilisees).
+
+
+
+
+
+================================================================================
+ Glossaire (mots tsy dia azo)
+================================================================================
+
+CA (Chiffre d'Affaires)  : Montant total des ventes realisees sur une
+                            periode donnee, exprime en TTC.
+
+HT / TTC                 : Hors Taxes / Toutes Taxes Comprises.
+
+TVA                      : Taxe sur la Valeur Ajoutee, appliquee en
+                            pourcentage sur chaque ligne d'article.
+
+Stock theorique           : Quantite enregistree dans le systeme
+                            informatique, avant verification physique.
+
+Stock physique             : Quantite reellement comptee en magasin lors
+                            d'un inventaire.
+
+Ecart d'inventaire        : Difference entre le stock theorique et le
+                            stock physique constate.
+
+Solde client              : Montant restant du par un client sur
+                            l'ensemble de ses factures a credit non
+                            soldees.
+
+Avoir                     : Document comptable annulant tout ou partie
+                            d'une facture deja emise, generalement suite
+                            a un retour de marchandise.
+
+KPI (Key Performance Indicator) : Indicateur cle de performance, affiche
+                            sous forme de chiffre synthetique sur le
+                            tableau de bord.
+
+Suppression logique       : Methode de suppression qui ne supprime pas
+                            reellement la donnee de la base, mais la
+                            marque comme "inactive", afin de conserver
+                            l'historique pour les besoins comptables et
+                            de tracabilite.
+
+Inventaire tournant        : Inventaire partiel, portant uniquement sur
+                            une categorie ou une selection d'articles,
+                            par opposition a l'inventaire complet qui
+                            porte sur l'intégralite du catalogue.
+
+
+
