@@ -5,6 +5,9 @@ const helmet = require('helmet');
 const morgan = require('morgan');
 require('dotenv').config();
 
+const { startMongoMemoryServer } = require('./config/mongoMemoryServer');
+const seed = require('./config/seed');
+
 
 const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
@@ -61,9 +64,33 @@ app.use('/uploads', (req, res, next) => {
 
 
 // Connexion MongoDB
-mongoose.connect(process.env.MONGODB_URI)
-  .then(() => console.log('✅ MongoDB connecté'))
-  .catch(err => console.error('❌ Erreur MongoDB :', err));
+async function connectDB() {
+  let uri = process.env.MONGODB_URI;
+
+  if (process.env.USE_MEMORY_DB === 'true') {
+    console.log('Using in-memory MongoDB...');
+    uri = await startMongoMemoryServer();
+  }
+
+  try {
+    await mongoose.connect(uri);
+    console.log('✅ MongoDB connecté');
+    await seed();
+  } catch (err) {
+    if (!process.env.USE_MEMORY_DB && uri.includes('localhost')) {
+      console.log('⚠️  MongoDB local indisponible, bascule vers mémoire...');
+      uri = await startMongoMemoryServer();
+      await mongoose.connect(uri);
+      console.log('✅ MongoDB mémoire connecté');
+      await seed();
+    } else {
+      console.error('❌ Erreur MongoDB :', err);
+      process.exit(1);
+    }
+  }
+}
+
+connectDB();
 
 // Route de test
 app.get('/', (req, res) => {
