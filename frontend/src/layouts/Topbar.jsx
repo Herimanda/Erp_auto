@@ -16,18 +16,19 @@ const { data: compteurData } = useCompteurNotifications();
 const nbNonLues = compteurData?.data?.count || 0;
 
   return (
-    <header className="h-16 bg-white border-b border-gray-200
-                       flex items-center justify-between px-6
-                       shrink-0 z-10">
+<header className="h-16 bg-white dark:bg-gray-900 border-b
+                   border-gray-200 dark:border-gray-800
+                   flex items-center justify-between px-6
+                   shrink-0 z-10">
       {/* Gauche */}
       <div className="flex items-center gap-4">
         <button
           onClick={toggleSidebar}
-          className="lg:hidden p-2 rounded-lg hover:bg-gray-100"
+          className="lg:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600"
         >
           <Menu className="w-5 h-5 text-gray-500" />
         </button>
-        <h1 className="text-lg font-semibold text-gray-800">{title}</h1>
+        <h1 className="text-lg font-semibold text-gray-800 dark:text-gray-100">{title}</h1>
       </div>
 
       {/* Droite */}
@@ -38,8 +39,8 @@ const nbNonLues = compteurData?.data?.count || 0;
             <button
               onClick={() => setShowMagasins(!showMagasins)}
               className="flex items-center gap-2 px-3 py-1.5 rounded-lg
-                         border border-gray-200 hover:bg-gray-50
-                         text-sm font-medium text-gray-700"
+                         border border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600
+                         text-sm font-medium text-gray-700 dark:text-gray-50"
             >
               <Store className="w-4 h-4 text-primary-600" />
               <span>{magasinActif?.nom || 'Tous les magasins'}</span>
@@ -77,8 +78,8 @@ const nbNonLues = compteurData?.data?.count || 0;
 <div className="relative">
   <button
     onClick={() => setShowNotifs(!showNotifs)}
-    className="relative p-2 rounded-lg hover:bg-gray-100
-               text-gray-500 hover:text-gray-700"
+    className="relative p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600
+               text-gray-500 dark:text-gray-50 hover:text-gray-700"
   >
     <Bell className="w-5 h-5" />
     {nbNonLues > 0 && (
@@ -103,7 +104,7 @@ const nbNonLues = compteurData?.data?.count || 0;
             {user?.prenom?.[0]}{user?.nom?.[0]}
           </div>
           <div className="hidden md:block">
-            <p className="text-sm font-medium text-gray-700">
+            <p className="text-sm font-medium text-gray-700 dark:text-gray-50">
               {user?.prenom} {user?.nom}
             </p>
             <p className="text-xs text-gray-500 capitalize">

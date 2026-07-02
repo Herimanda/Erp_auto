@@ -32,15 +32,18 @@ export default function FacturesPage() {
   const [page, setPage]             = useState(1);
   const [typeFiltre, setType]       = useState('');
   const [statutFiltre, setStatut]   = useState('');
-  const [onglet, setOnglet]         = useState('liste');
   const [showForm, setShowForm]     = useState(false);
   const [showDetail, setShowDetail] = useState(false);
   const [showPay, setShowPay]       = useState(false);
   const [selected, setSelected]     = useState(null);
 
   const { data, isLoading } = useFactures({
-    type: typeFiltre, statut: statutFiltre, page, limit: 15
+    type: typeFiltre,
+    statut: statutFiltre,
+    page,
+    limit: 15
   });
+
   const { data: impayesData } = useFacturesImpayees();
   const annulerMutation = useAnnulerFacture();
 
@@ -86,7 +89,7 @@ export default function FacturesPage() {
           {
             label: 'Total facturé',
             value: formatMontant(totaux.totalTTC),
-            color: 'text-gray-900'
+            color: 'text-blue-600'
           },
           {
             label: 'Total encaissé',
@@ -108,45 +111,78 @@ export default function FacturesPage() {
         ))}
       </div>
 
-      {/* Filtres */}
+      {/* 🔥 FILTRES MODIFIÉS */}
       <div className="card mb-6">
-        <div className="flex flex-col sm:flex-row gap-3">
-          <div className="flex gap-2 flex-wrap">
-            <span className="text-sm text-gray-500 self-center">Type :</span>
-            {['', ...TYPES].map((t) => (
-              <button key={t}
+        <div className="flex flex-col sm:flex-row gap-4">
+
+          {/* TYPE */}
+          <div className="flex flex-wrap gap-2 items-center">
+            <span className="text-sm text-gray-500">Type :</span>
+
+            <button
+              onClick={() => setType('')}
+              className={clsx(
+                'px-3 py-1.5 rounded-lg text-sm font-medium',
+                typeFiltre === ''
+                  ? 'bg-primary-600 text-white'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              )}
+            >
+              Tous
+            </button>
+
+            {TYPES.map((t) => (
+              <button
+                key={t}
                 onClick={() => setType(t)}
                 className={clsx(
                   'px-3 py-1.5 rounded-lg text-sm font-medium capitalize',
                   typeFiltre === t
                     ? 'bg-primary-600 text-white'
-                    : 'bg-gray-100 text-gray-600'
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                 )}
               >
-                {t || 'Tous'}
+                {t}
               </button>
             ))}
           </div>
-          <div className="flex gap-2 flex-wrap">
-            <span className="text-sm text-gray-500 self-center">Statut :</span>
-            {['', ...STATUTS].map((s) => (
-              <button key={s}
+
+          {/* STATUT */}
+          <div className="flex flex-wrap gap-2 items-center">
+            <span className="text-sm text-gray-500">Statut :</span>
+
+            <button
+              onClick={() => setStatut('')}
+              className={clsx(
+                'px-3 py-1.5 rounded-lg text-sm font-medium',
+                statutFiltre === ''
+                  ? 'bg-primary-600 text-white'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              )}
+            >
+              Tous
+            </button>
+
+            {STATUTS.map((s) => (
+              <button
+                key={s}
                 onClick={() => setStatut(s)}
                 className={clsx(
                   'px-3 py-1.5 rounded-lg text-sm font-medium',
                   statutFiltre === s
                     ? 'bg-primary-600 text-white'
-                    : 'bg-gray-100 text-gray-600'
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                 )}
               >
-                {s ? getStatutLabel(s) : 'Tous'}
+                {getStatutLabel(s)}
               </button>
             ))}
           </div>
+
         </div>
       </div>
 
-      {/* Table */}
+      {/* TABLE */}
       <div className="card p-0">
         {isLoading ? (
           <div className="flex justify-center py-12">
@@ -174,15 +210,16 @@ export default function FacturesPage() {
                 <Th>Actions</Th>
               </tr>
             </Thead>
+
             <Tbody>
               {factures.map((f) => (
                 <Tr key={f._id}>
                   <Td>
-                    <span className="font-mono text-sm font-medium
-                                     text-primary-600">
+                    <span className="font-mono text-sm font-medium text-primary-600">
                       {f.numero}
                     </span>
                   </Td>
+
                   <Td>
                     <span className={clsx(
                       'text-xs font-medium px-2 py-0.5 rounded-full',
@@ -195,6 +232,7 @@ export default function FacturesPage() {
                       {getStatutLabel(f.type)}
                     </span>
                   </Td>
+
                   <Td>
                     <p className="font-medium text-sm text-gray-900">
                       {f.client?.nom} {f.client?.prenom}
@@ -203,68 +241,65 @@ export default function FacturesPage() {
                       {f.client?.numeroClient}
                     </p>
                   </Td>
+
                   <Td className="text-sm">{f.magasin?.nom}</Td>
+
                   <Td className="text-right font-semibold text-sm">
                     {formatMontant(f.totalTTC)}
                   </Td>
-                  <Td className="text-right text-sm text-green-600
-                                 font-medium">
-                    {f.montantPaye > 0
-                      ? formatMontant(f.montantPaye) : '—'}
+
+                  <Td className="text-right text-sm text-green-600 font-medium">
+                    {f.montantPaye > 0 ? formatMontant(f.montantPaye) : '—'}
                   </Td>
+
                   <Td className="text-right text-sm font-medium">
-                    <span className={f.montantRestant > 0
-                      ? 'text-red-600' : 'text-gray-400'}>
-                      {f.montantRestant > 0
-                        ? formatMontant(f.montantRestant) : '—'}
+                    <span className={f.montantRestant > 0 ? 'text-red-600' : 'text-gray-400'}>
+                      {f.montantRestant > 0 ? formatMontant(f.montantRestant) : '—'}
                     </span>
                   </Td>
+
                   <Td className="text-sm text-gray-500">
                     {formatDate(f.createdAt)}
                   </Td>
+
                   <Td>
                     <span className={getStatutBadge(f.statut)}>
                       {getStatutLabel(f.statut)}
                     </span>
                   </Td>
+
                   <Td>
                     <div className="flex items-center gap-1">
                       <button
                         onClick={() => {
-                          setSelected(f); setShowDetail(true);
+                          setSelected(f);
+                          setShowDetail(true);
                         }}
-                        className="p-1.5 rounded-lg hover:bg-gray-100
-                                   text-gray-400 hover:text-primary-600"
-                        title="Voir"
+                        className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-primary-600"
                       >
                         <Eye className="w-4 h-4" />
                       </button>
-                      {canEdit &&
-                        f.statut !== 'payee' &&
-                        f.statut !== 'annulee' && (
+
+                      {canEdit && f.statut !== 'payee' && f.statut !== 'annulee' && (
                         <button
                           onClick={() => {
-                            setSelected(f); setShowPay(true);
+                            setSelected(f);
+                            setShowPay(true);
                           }}
-                          className="p-1.5 rounded-lg hover:bg-green-50
-                                     text-gray-400 hover:text-green-600"
-                          title="Enregistrer paiement"
+                          className="p-1.5 rounded-lg hover:bg-green-50 text-gray-400 hover:text-green-600"
                         >
                           <CreditCard className="w-4 h-4" />
                         </button>
                       )}
-                      {canEdit &&
-                        ['administrateur', 'gestionnaire']
-                          .includes(user?.role) &&
-                        f.statut !== 'annulee' && (
+
+                      {canEdit && ['administrateur', 'gestionnaire'].includes(user?.role) && f.statut !== 'annulee' && (
                         <button
                           onClick={() => {
-                            if (confirm('Annuler cette facture ?'))
+                            if (confirm('Annuler cette facture ?')) {
                               annulerMutation.mutate(f._id);
+                            }
                           }}
-                          className="p-1.5 rounded-lg hover:bg-red-50
-                                     text-gray-400 hover:text-red-600"
-                          title="Annuler"
+                          className="p-1.5 rounded-lg hover:bg-red-50 text-gray-400 hover:text-red-600"
                         >
                           <XCircle className="w-4 h-4" />
                         </button>
@@ -276,37 +311,19 @@ export default function FacturesPage() {
             </Tbody>
           </Table>
         )}
-        {pagination && (
-          <div className="p-4 border-t border-gray-100">
-            <Pagination
-              page={pagination.page}
-              totalPages={pagination.totalPages}
-              onPageChange={setPage}
-            />
-          </div>
-        )}
       </div>
 
-      {/* Modals */}
-      <Modal isOpen={showForm}
-        onClose={() => setShowForm(false)}
-        title="Nouvelle facture" size="xl">
+      {/* MODALS inchangés */}
+      <Modal isOpen={showForm} onClose={() => setShowForm(false)} title="Nouvelle facture" size="xl">
         <FactureForm onSuccess={() => setShowForm(false)} />
       </Modal>
 
-      <Modal isOpen={showDetail}
-        onClose={() => setShowDetail(false)}
-        title="Détail facture" size="xl">
+      <Modal isOpen={showDetail} onClose={() => setShowDetail(false)} title="Détail facture" size="xl">
         <FactureDetail factureId={selected?._id} />
       </Modal>
 
-      <Modal isOpen={showPay}
-        onClose={() => setShowPay(false)}
-        title="Enregistrer un paiement">
-        <PaiementForm
-          facture={selected}
-          onSuccess={() => setShowPay(false)}
-        />
+      <Modal isOpen={showPay} onClose={() => setShowPay(false)} title="Enregistrer un paiement">
+        <PaiementForm facture={selected} onSuccess={() => setShowPay(false)} />
       </Modal>
     </div>
   );

@@ -18,9 +18,10 @@ const formatAr = (v) =>
 const CustomTooltip = ({ active, payload, label }) => {
   if (!active || !payload?.length) return null;
   return (
-    <div className="bg-white border border-gray-200 rounded-xl
+    <div className="bg-white dark:bg-gray-800 border border-gray-200
+                    dark:border-gray-700 rounded-xl
                     shadow-lg p-3 text-sm">
-      <p className="font-semibold text-gray-700 mb-2">{label}</p>
+      <p className="font-semibold text-gray-700 dark:text-gray-200 mb-2">{label}</p>
       {payload.map((p) => (
         <p key={p.name} style={{ color: p.color }}
           className="font-medium">
@@ -51,14 +52,14 @@ export default function ChartCA() {
     <div className="card">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h3 className="text-base font-semibold text-gray-900">
+          <h3 className="text-base font-semibold text-gray-900 dark:text-white">
             Chiffre d'affaires
           </h3>
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-gray-500 dark:text-gray-400">
             {vue === 'journalier' ? '30 derniers jours' : '12 derniers mois'}
           </p>
         </div>
-        <div className="flex gap-1 bg-gray-100 rounded-lg p-1">
+        <div className="flex gap-1 bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
           {['journalier', 'mensuel'].map((v) => (
             <button key={v}
               onClick={() => setVue(v)}
@@ -66,8 +67,8 @@ export default function ChartCA() {
                 'px-3 py-1.5 rounded-md text-xs font-medium capitalize',
                 'transition-colors',
                 vue === v
-                  ? 'bg-white text-gray-900 shadow-sm'
-                  : 'text-gray-500 hover:text-gray-700'
+                  ? 'bg-white text-gray-900 shadow-sm dark:bg-gray-700 dark:text-white'
+                  : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
               )}
             >
               {v === 'journalier' ? '30 jours' : '12 mois'}
@@ -82,45 +83,50 @@ export default function ChartCA() {
                           border-t-transparent rounded-full animate-spin"/>
         </div>
       ) : (
-        <ResponsiveContainer width="100%" height={260}>
-          {vue === 'mensuel' ? (
-            <BarChart data={donnees} barSize={28}
-              margin={{ top: 5, right: 10, left: 10, bottom: 5 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-              <XAxis dataKey={xKey} tick={{ fontSize: 11 }}
-                axisLine={false} tickLine={false} />
-              <YAxis tickFormatter={formatAr} tick={{ fontSize: 11 }}
-                axisLine={false} tickLine={false} width={45} />
-              <Tooltip content={<CustomTooltip />} />
-              <Legend wrapperStyle={{ fontSize: 12 }} />
-              <Bar dataKey="totalTTC" name="Facturé"
-                fill="#3b82f6" radius={[4,4,0,0]} />
-              <Bar dataKey="totalPaye" name="Encaissé"
-                fill="#22c55e" radius={[4,4,0,0]} />
-            </BarChart>
-          ) : (
-            <AreaChart data={donnees}
-              margin={{ top: 5, right: 10, left: 10, bottom: 5 }}>
-              <defs>
-                <linearGradient id="colorCA" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.15}/>
-                  <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-              <XAxis dataKey={xKey} tick={{ fontSize: 11 }}
-                axisLine={false} tickLine={false} />
-              <YAxis tickFormatter={formatAr} tick={{ fontSize: 11 }}
-                axisLine={false} tickLine={false} width={45} />
-              <Tooltip content={<CustomTooltip />} />
-              <Area type="monotone" dataKey="totalTTC" name="Facturé"
-                stroke="#3b82f6" strokeWidth={2}
-                fill="url(#colorCA)" />
-              <Area type="monotone" dataKey="totalPaye" name="Encaissé"
-                stroke="#22c55e" strokeWidth={2} fill="transparent" />
-            </AreaChart>
-          )}
-        </ResponsiveContainer>
+        // Le wrapper porte la couleur `currentColor` utilisée par la grille
+        // et les axes du graphique (stroke/fill SVG ne suivent pas les
+        // classes Tailwind dark: directement, d'où ce détour).
+        <div className="text-gray-300 dark:text-gray-700">
+          <ResponsiveContainer width="100%" height={260}>
+            {vue === 'mensuel' ? (
+              <BarChart data={donnees} barSize={28}
+                margin={{ top: 5, right: 10, left: 10, bottom: 5 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="currentColor" />
+                <XAxis dataKey={xKey} tick={{ fontSize: 11, fill: 'currentColor' }}
+                  axisLine={false} tickLine={false} />
+                <YAxis tickFormatter={formatAr} tick={{ fontSize: 11, fill: 'currentColor' }}
+                  axisLine={false} tickLine={false} width={45} />
+                <Tooltip content={<CustomTooltip />} />
+                <Legend wrapperStyle={{ fontSize: 12, color: 'currentColor' }} />
+                <Bar dataKey="totalTTC" name="Facturé"
+                  fill="#3b82f6" radius={[4,4,0,0]} />
+                <Bar dataKey="totalPaye" name="Encaissé"
+                  fill="#22c55e" radius={[4,4,0,0]} />
+              </BarChart>
+            ) : (
+              <AreaChart data={donnees}
+                margin={{ top: 5, right: 10, left: 10, bottom: 5 }}>
+                <defs>
+                  <linearGradient id="colorCA" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.15}/>
+                    <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="currentColor" />
+                <XAxis dataKey={xKey} tick={{ fontSize: 11, fill: 'currentColor' }}
+                  axisLine={false} tickLine={false} />
+                <YAxis tickFormatter={formatAr} tick={{ fontSize: 11, fill: 'currentColor' }}
+                  axisLine={false} tickLine={false} width={45} />
+                <Tooltip content={<CustomTooltip />} />
+                <Area type="monotone" dataKey="totalTTC" name="Facturé"
+                  stroke="#3b82f6" strokeWidth={2}
+                  fill="url(#colorCA)" />
+                <Area type="monotone" dataKey="totalPaye" name="Encaissé"
+                  stroke="#22c55e" strokeWidth={2} fill="transparent" />
+              </AreaChart>
+            )}
+          </ResponsiveContainer>
+        </div>
       )}
     </div>
   );

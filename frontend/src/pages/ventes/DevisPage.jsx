@@ -33,9 +33,14 @@ export default function DevisPage() {
   const [showDetail, setShowDetail] = useState(false);
   const [selected, setSelected]     = useState(null);
 
-  const { data, isLoading } = useDevis({ statut: statutFiltre, page, limit: 15 });
-  const statutMutation   = useUpdateDevisStatut();
-  const convertMutation  = useConvertirDevis();
+  const { data, isLoading } = useDevis({
+    statut: statutFiltre,
+    page,
+    limit: 15
+  });
+
+  const statutMutation  = useUpdateDevisStatut();
+  const convertMutation = useConvertirDevis();
 
   const devisList  = data?.data?.devis || [];
   const pagination = data?.data?.pagination;
@@ -57,7 +62,10 @@ export default function DevisPage() {
         subtitle={`${pagination?.total || 0} devis`}
         actions={canEdit && (
           <button
-            onClick={() => { setSelected(null); setShowForm(true); }}
+            onClick={() => {
+              setSelected(null);
+              setShowForm(true);
+            }}
             className="btn-primary flex items-center gap-2"
           >
             <Plus className="w-4 h-4" /> Nouveau devis
@@ -65,28 +73,33 @@ export default function DevisPage() {
         )}
       />
 
-      {/* Filtres */}
+      {/* 🔥 FILTRES MODIFIÉS */}
       <div className="card mb-6">
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-2 items-center">
+
+          {/* Tous */}
           <button
             onClick={() => setStatut('')}
             className={clsx(
               'px-3 py-1.5 rounded-lg text-sm font-medium',
-              !statutFiltre
+              statutFiltre === ''
                 ? 'bg-primary-600 text-white'
-                : 'bg-gray-100 text-gray-600'
+                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
             )}
           >
             Tous
           </button>
+
+          {/* Statuts */}
           {STATUTS.map((s) => (
-            <button key={s}
+            <button
+              key={s}
               onClick={() => setStatut(s)}
               className={clsx(
-                'px-3 py-1.5 rounded-lg text-sm font-medium',
+                'px-3 py-1.5 rounded-lg text-sm font-medium capitalize',
                 statutFiltre === s
                   ? 'bg-primary-600 text-white'
-                  : 'bg-gray-100 text-gray-600'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
               )}
             >
               {getStatutLabel(s)}
@@ -95,7 +108,7 @@ export default function DevisPage() {
         </div>
       </div>
 
-      {/* Table */}
+      {/* TABLE */}
       <div className="card p-0">
         {isLoading ? (
           <div className="flex justify-center py-12">
@@ -122,15 +135,16 @@ export default function DevisPage() {
                 <Th>Actions</Th>
               </tr>
             </Thead>
+
             <Tbody>
               {devisList.map((d) => (
                 <Tr key={d._id}>
                   <Td>
-                    <span className="font-mono text-sm font-medium
-                                     text-primary-600">
+                    <span className="font-mono text-sm font-medium text-primary-600">
                       {d.numero}
                     </span>
                   </Td>
+
                   <Td>
                     <p className="font-medium text-sm text-gray-900">
                       {d.client?.nom} {d.client?.prenom}
@@ -139,29 +153,37 @@ export default function DevisPage() {
                       {d.client?.numeroClient}
                     </p>
                   </Td>
+
                   <Td className="text-sm">{d.magasin?.nom}</Td>
+
                   <Td className="text-sm text-gray-500">
                     {d.lignes?.length} article(s)
                   </Td>
+
                   <Td className="text-right font-semibold text-sm">
                     {formatMontant(d.totalTTC)}
                   </Td>
+
                   <Td className="text-sm text-gray-500">
                     {formatDate(d.createdAt)}
                   </Td>
+
                   <Td className="text-sm text-gray-500">
                     {d.dateValidite ? formatDate(d.dateValidite) : '—'}
                   </Td>
+
                   <Td>
                     <span className={getStatutBadge(d.statut)}>
                       {getStatutLabel(d.statut)}
                     </span>
                   </Td>
+
                   <Td>
                     <div className="flex items-center gap-1">
                       <button
                         onClick={() => {
-                          setSelected(d); setShowDetail(true);
+                          setSelected(d);
+                          setShowDetail(true);
                         }}
                         className="p-1.5 rounded-lg hover:bg-gray-100
                                    text-gray-400 hover:text-primary-600"
@@ -169,10 +191,10 @@ export default function DevisPage() {
                       >
                         <Eye className="w-4 h-4" />
                       </button>
+
                       {canEdit && d.statut === 'brouillon' && (
                         <button
-                          onClick={() =>
-                            handleStatut(d._id, 'envoye')}
+                          onClick={() => handleStatut(d._id, 'envoye')}
                           className="p-1.5 rounded-lg hover:bg-blue-50
                                      text-gray-400 hover:text-blue-600"
                           title="Marquer envoyé"
@@ -180,20 +202,20 @@ export default function DevisPage() {
                           <Send className="w-4 h-4" />
                         </button>
                       )}
+
                       {canEdit && d.statut === 'envoye' && (
                         <>
                           <button
-                            onClick={() =>
-                              handleStatut(d._id, 'accepte')}
+                            onClick={() => handleStatut(d._id, 'accepte')}
                             className="p-1.5 rounded-lg hover:bg-green-50
                                        text-gray-400 hover:text-green-600"
                             title="Accepter"
                           >
                             <CheckCircle className="w-4 h-4" />
                           </button>
+
                           <button
-                            onClick={() =>
-                              handleStatut(d._id, 'refuse')}
+                            onClick={() => handleStatut(d._id, 'refuse')}
                             className="p-1.5 rounded-lg hover:bg-red-50
                                        text-gray-400 hover:text-red-600"
                             title="Refuser"
@@ -202,6 +224,7 @@ export default function DevisPage() {
                           </button>
                         </>
                       )}
+
                       {canEdit &&
                         ['envoye', 'accepte'].includes(d.statut) && (
                         <button
@@ -220,6 +243,7 @@ export default function DevisPage() {
             </Tbody>
           </Table>
         )}
+
         {pagination && (
           <div className="p-4 border-t border-gray-100">
             <Pagination
@@ -231,6 +255,7 @@ export default function DevisPage() {
         )}
       </div>
 
+      {/* MODALS inchangés */}
       <Modal
         isOpen={showForm}
         onClose={() => setShowForm(false)}

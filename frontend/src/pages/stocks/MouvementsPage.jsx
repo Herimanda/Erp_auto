@@ -75,35 +75,38 @@ export default function MouvementsPage() {
       />
 
       {/* Filtre type */}
-      <div className="card mb-6">
-        <div className="flex flex-wrap gap-2">
-          <button
-            onClick={() => setTypeFiltre('')}
-            className={clsx(
-              'px-3 py-1.5 rounded-lg text-sm font-medium',
-              !typeFiltre
-                ? 'bg-primary-600 text-white'
-                : 'bg-gray-100 text-gray-600'
-            )}
-          >
-            Tous
-          </button>
-          {Object.entries(TYPE_CONFIG).map(([key, cfg]) => (
-            <button
-              key={key}
-              onClick={() => setTypeFiltre(key)}
-              className={clsx(
-                'px-3 py-1.5 rounded-lg text-sm font-medium',
-                typeFiltre === key
-                  ? 'bg-primary-600 text-white'
-                  : 'bg-gray-100 text-gray-600'
-              )}
-            >
-              {cfg.label}
-            </button>
-          ))}
-        </div>
-      </div>
+<div className="card mb-6">
+  <div className="flex flex-wrap gap-2">
+    <button
+      onClick={() => setTypeFiltre('')}
+      className={clsx(
+        'px-3 py-1.5 rounded-lg text-sm font-medium transition-colors',
+        !typeFiltre
+          ? 'bg-primary-600 text-white'
+          : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+            + ' dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
+      )}
+    >
+      Tous
+    </button>
+
+    {Object.entries(TYPE_CONFIG).map(([key, cfg]) => (
+      <button
+        key={key}
+        onClick={() => setTypeFiltre(key)}
+        className={clsx(
+          'px-3 py-1.5 rounded-lg text-sm font-medium transition-colors',
+          typeFiltre === key
+            ? 'bg-primary-600 text-white'
+            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              + ' dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
+        )}
+      >
+        {cfg.label}
+      </button>
+    ))}
+  </div>
+</div>
 
       {/* Table */}
       <div className="card p-0">

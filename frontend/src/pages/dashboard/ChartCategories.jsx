@@ -6,8 +6,8 @@ import { useCaCategories } from '../../hooks/useDashboard';
 import useAuthStore from '../../store/authStore';
 
 const COLORS = [
-  '#3b82f6','#22c55e','#f59e0b','#ef4444',
-  '#8b5cf6','#06b6d4','#f97316','#84cc16'
+  '#3b82f6', '#22c55e', '#f59e0b', '#ef4444',
+  '#8b5cf6', '#06b6d4', '#f97316', '#84cc16'
 ];
 
 const formatAr = (v) =>
@@ -16,12 +16,13 @@ const formatAr = (v) =>
 const CustomTooltip = ({ active, payload }) => {
   if (!active || !payload?.length) return null;
   return (
-    <div className="bg-white border border-gray-200 rounded-xl
+    <div className="bg-white dark:bg-gray-800 border border-gray-200
+                    dark:border-gray-700 rounded-xl
                     shadow-lg p-3 text-sm">
       <p className="font-semibold" style={{ color: payload[0].payload.fill }}>
         {payload[0].name}
       </p>
-      <p className="text-gray-700">{formatAr(payload[0].value)}</p>
+      <p className="text-gray-700 dark:text-gray-300">{formatAr(payload[0].value)}</p>
     </div>
   );
 };
@@ -34,10 +35,10 @@ export default function ChartCategories() {
   return (
     <div className="card">
       <div className="mb-4">
-        <h3 className="text-base font-semibold text-gray-900">
+        <h3 className="text-base font-semibold text-gray-900 dark:text-white">
           CA par catégorie
         </h3>
-        <p className="text-sm text-gray-500">Ce mois</p>
+        <p className="text-sm text-gray-500 dark:text-gray-400">Ce mois</p>
       </div>
 
       {isLoading ? (
@@ -47,7 +48,7 @@ export default function ChartCategories() {
         </div>
       ) : donnees.length === 0 ? (
         <div className="h-52 flex items-center justify-center
-                        text-gray-400 text-sm">
+                        text-gray-400 dark:text-gray-500 text-sm">
           Aucune donnée ce mois
         </div>
       ) : (

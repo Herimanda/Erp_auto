@@ -62,7 +62,7 @@ function MagasinForm({ magasin, onSuccess }) {
             placeholder="MAG-A"
           />
           {errors.code && (
-            <p className="text-red-500 text-xs mt-1">
+            <p className="text-red-500 dark:text-red-400 text-xs mt-1">
               {errors.code.message}
             </p>
           )}
@@ -75,7 +75,7 @@ function MagasinForm({ magasin, onSuccess }) {
             placeholder="Magasin Principal"
           />
           {errors.nom && (
-            <p className="text-red-500 text-xs mt-1">
+            <p className="text-red-500 dark:text-red-400 text-xs mt-1">
               {errors.nom.message}
             </p>
           )}
@@ -96,7 +96,7 @@ function MagasinForm({ magasin, onSuccess }) {
             className="input-field"
           />
           {errors.email && (
-            <p className="text-red-500 text-xs mt-1">
+            <p className="text-red-500 dark:text-red-400 text-xs mt-1">
               {errors.email.message}
             </p>
           )}
@@ -150,7 +150,7 @@ export default function MagasinsPage() {
       <div>
         <PageHeader title="Magasins" />
         <div className="card text-center py-12">
-          <p className="text-red-500 font-medium">
+          <p className="text-red-500 dark:text-red-400 font-medium">
             Erreur : {queryError.message}
           </p>
         </div>
@@ -177,12 +177,12 @@ export default function MagasinsPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {[...Array(3)].map((_, i) => (
             <div key={i}
-              className="h-48 bg-gray-100 rounded-2xl animate-pulse" />
+              className="h-48 bg-gray-100 dark:bg-gray-800 rounded-2xl animate-pulse" />
           ))}
         </div>
       ) : magasins.length === 0 ? (
-        <div className="text-center py-16 text-gray-400">
-          <Building2 className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+        <div className="text-center py-16 text-gray-400 dark:text-gray-500">
+          <Building2 className="w-12 h-12 mx-auto mb-3 text-gray-300 dark:text-gray-600" />
           <p className="font-medium">Aucun magasin</p>
           <button
             onClick={() => setShowForm(true)}
@@ -197,23 +197,25 @@ export default function MagasinsPage() {
             <div
               key={m._id}
               className={clsx(
-                'bg-white rounded-2xl border p-5 shadow-sm',
+                'bg-white dark:bg-gray-900 rounded-2xl border p-5 shadow-sm',
                 'hover:shadow-md transition-shadow',
                 m.isActive
-                  ? 'border-gray-200'
-                  : 'border-red-200 opacity-70'
+                  ? 'border-gray-200 dark:border-gray-800'
+                  : 'border-red-200 dark:border-red-900/50 opacity-70'
               )}
             >
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-xl bg-primary-100
-                                  flex items-center justify-center">
-                    <Building2 className="w-5 h-5 text-primary-600" />
+                                  flex items-center justify-center
+                                  dark:bg-primary-900/40">
+                    <Building2 className="w-5 h-5 text-primary-600 dark:text-primary-400" />
                   </div>
                   <div>
-                    <p className="font-bold text-gray-900">{m.nom}</p>
+                    <p className="font-bold text-gray-900 dark:text-white">{m.nom}</p>
                     <span className="font-mono text-xs bg-gray-100
-                                     px-1.5 py-0.5 rounded text-gray-600">
+                                     px-1.5 py-0.5 rounded text-gray-600
+                                     dark:bg-gray-800 dark:text-gray-300">
                       {m.code}
                     </span>
                   </div>
@@ -225,7 +227,7 @@ export default function MagasinsPage() {
                 </span>
               </div>
 
-              <div className="space-y-1.5 text-sm text-gray-500 mb-4">
+              <div className="space-y-1.5 text-sm text-gray-500 dark:text-gray-400 mb-4">
                 {m.telephone && (
                   <p className="flex items-center gap-2">
                     <span>📞</span> {m.telephone}
@@ -242,13 +244,13 @@ export default function MagasinsPage() {
                   </p>
                 )}
                 {!m.telephone && !m.email && !m.adresse && (
-                  <p className="text-gray-300 italic text-xs">
+                  <p className="text-gray-300 dark:text-gray-600 italic text-xs">
                     Aucune information de contact
                   </p>
                 )}
               </div>
 
-              <div className="flex gap-2 pt-3 border-t border-gray-100">
+              <div className="flex gap-2 pt-3 border-t border-gray-100 dark:border-gray-800">
                 <button
                   onClick={() => {
                     setSelected(m);
@@ -268,8 +270,8 @@ export default function MagasinsPage() {
                     'flex-1 text-sm rounded-lg px-3 py-2',
                     'font-medium transition-colors',
                     m.isActive
-                      ? 'bg-red-50 text-red-600 hover:bg-red-100'
-                      : 'bg-green-50 text-green-600 hover:bg-green-100'
+                      ? 'bg-red-50 text-red-600 hover:bg-red-100 dark:bg-red-900/30 dark:text-red-300 dark:hover:bg-red-900/50'
+                      : 'bg-green-50 text-green-600 hover:bg-green-100 dark:bg-green-900/30 dark:text-green-300 dark:hover:bg-green-900/50'
                   )}
                 >
                   {m.isActive ? 'Désactiver' : 'Activer'}

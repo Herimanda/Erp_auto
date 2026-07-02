@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, Edit2, Trash2, Eye, Truck } from 'lucide-react';
+import { Plus, Edit2, Trash2, Eye, Truck, XCircle } from 'lucide-react';
 import {
   useFournisseurs, useDeleteFournisseur
 } from '../../hooks/useFournisseurs';
@@ -29,6 +29,11 @@ export default function FournisseursPage() {
   const fournisseurs = data?.data?.fournisseurs || [];
   const pagination   = data?.data?.pagination;
 
+  const clearSearch = () => {
+    setSearch('');
+    setPage(1);
+  };
+
   return (
     <div>
       <PageHeader
@@ -44,14 +49,36 @@ export default function FournisseursPage() {
         )}
       />
 
+      {/* FILTRE */}
       <div className="card mb-6">
-        <SearchInput
-          value={search}
-          onChange={(v) => { setSearch(v); setPage(1); }}
-          placeholder="Raison sociale, référence, contact..."
-        />
+        <div className="flex items-center gap-2">
+          <div className="flex-1">
+            <SearchInput
+              value={search}
+              onChange={(v) => {
+                setSearch(v);
+                setPage(1);
+              }}
+              placeholder="Raison sociale, référence, contact..."
+            />
+          </div>
+
+          {search && (
+            <button
+              onClick={clearSearch}
+              className="p-2 rounded-lg bg-gray-100 hover:bg-gray-200
+                         text-gray-500 hover:text-gray-700 transition
+                         dark:bg-gray-800 dark:hover:bg-gray-700
+                         dark:text-gray-400 dark:hover:text-gray-200"
+              title="Effacer"
+            >
+              <XCircle className="w-5 h-5" />
+            </button>
+          )}
+        </div>
       </div>
 
+      {/* TABLE */}
       <div className="card p-0">
         {isLoading ? (
           <div className="flex justify-center py-16">
@@ -59,8 +86,8 @@ export default function FournisseursPage() {
                             border-t-transparent rounded-full animate-spin" />
           </div>
         ) : fournisseurs.length === 0 ? (
-          <div className="text-center py-16 text-gray-400">
-            <Truck className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+          <div className="text-center py-16 text-gray-400 dark:text-gray-500">
+            <Truck className="w-12 h-12 mx-auto mb-3 text-gray-300 dark:text-gray-600" />
             <p className="font-medium">Aucun fournisseur trouvé</p>
           </div>
         ) : (
@@ -81,63 +108,73 @@ export default function FournisseursPage() {
                 <Tr key={f._id}>
                   <Td>
                     <span className="font-mono text-xs bg-gray-100
-                                     px-2 py-0.5 rounded font-medium">
+                                     px-2 py-0.5 rounded font-medium
+                                     dark:bg-gray-800 dark:text-gray-300">
                       {f.reference}
                     </span>
                   </Td>
+
                   <Td>
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 rounded-lg bg-blue-100
-                                      flex items-center justify-center">
-                        <Truck className="w-4 h-4 text-blue-600" />
+                                      flex items-center justify-center
+                                      dark:bg-blue-900/40">
+                        <Truck className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                       </div>
-                      <p className="font-medium text-gray-900">
+                      <p className="font-medium text-gray-900 dark:text-white">
                         {f.raisonSociale}
                       </p>
                     </div>
                   </Td>
-                  <Td className="text-sm text-gray-600">
-                    {f.contact || '—'}
-                  </Td>
-                  <Td className="text-sm text-gray-600">
-                    {f.telephone || '—'}
-                  </Td>
-                  <Td className="text-sm text-gray-500">
-                    {f.email || '—'}
-                  </Td>
-                  <Td className="text-sm text-gray-500">
-                    {f.nif || '—'}
-                  </Td>
+
+                  <Td className="text-sm text-gray-600 dark:text-gray-300">{f.contact || '—'}</Td>
+                  <Td className="text-sm text-gray-600 dark:text-gray-300">{f.telephone || '—'}</Td>
+                  <Td className="text-sm text-gray-500 dark:text-gray-400">{f.email || '—'}</Td>
+                  <Td className="text-sm text-gray-500 dark:text-gray-400">{f.nif || '—'}</Td>
+
                   <Td>
                     <div className="flex items-center justify-end gap-1">
                       <button
                         onClick={() => {
-                          setSelected(f); setShowHisto(true);
+                          setSelected(f);
+                          setShowHisto(true);
                         }}
                         className="p-1.5 rounded-lg hover:bg-gray-100
-                                   text-gray-400 hover:text-primary-600"
+                                   text-gray-400 hover:text-primary-600
+                                   dark:hover:bg-gray-800 dark:text-gray-500
+                                   dark:hover:text-primary-400"
                         title="Historique"
                       >
                         <Eye className="w-4 h-4" />
                       </button>
+
                       {canEdit && (
                         <>
                           <button
                             onClick={() => {
-                              setSelected(f); setShowForm(true);
+                              setSelected(f);
+                              setShowForm(true);
                             }}
                             className="p-1.5 rounded-lg hover:bg-gray-100
-                                       text-gray-400 hover:text-blue-600"
+                                       text-gray-400 hover:text-blue-600
+                                       dark:hover:bg-gray-800 dark:text-gray-500
+                                       dark:hover:text-blue-400"
+                            title="Modifier"
                           >
                             <Edit2 className="w-4 h-4" />
                           </button>
+
                           <button
                             onClick={() => {
-                              if (confirm('Supprimer ce fournisseur ?'))
+                              if (confirm('Supprimer ce fournisseur ?')) {
                                 deleteMutation.mutate(f._id);
+                              }
                             }}
                             className="p-1.5 rounded-lg hover:bg-gray-100
-                                       text-gray-400 hover:text-red-600"
+                                       text-gray-400 hover:text-red-600
+                                       dark:hover:bg-gray-800 dark:text-gray-500
+                                       dark:hover:text-red-400"
+                            title="Supprimer"
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>
@@ -150,8 +187,9 @@ export default function FournisseursPage() {
             </Tbody>
           </Table>
         )}
+
         {pagination && (
-          <div className="p-4 border-t border-gray-100">
+          <div className="p-4 border-t border-gray-100 dark:border-gray-800">
             <Pagination
               page={pagination.page}
               totalPages={pagination.totalPages}
@@ -161,6 +199,7 @@ export default function FournisseursPage() {
         )}
       </div>
 
+      {/* MODALS */}
       <Modal
         isOpen={showForm}
         onClose={() => setShowForm(false)}

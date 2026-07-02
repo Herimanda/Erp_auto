@@ -61,10 +61,13 @@ export default function StocksPage() {
           }
         ].map((kpi) => (
           <div key={kpi.label} className="card">
-            <p className="text-sm text-gray-500">{kpi.label}</p>
-            <p className="text-2xl font-bold text-gray-900 mt-1">
-              {kpi.value}
-            </p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            {kpi.label}
+          </p>
+
+          <p className="text-2xl font-bold text-gray-900 dark:text-gray-100 mt-1">
+            {kpi.value}
+          </p>
           </div>
         ))}
       </div>
@@ -88,7 +91,11 @@ export default function StocksPage() {
                   'px-4 py-2 rounded-lg text-sm font-medium capitalize',
                   filtre === f
                     ? 'bg-primary-600 text-white'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    : `
+                      bg-gray-100 dark:bg-gray-800
+                      text-gray-600 dark:text-gray-300
+                      hover:bg-gray-200 dark:hover:bg-gray-700
+                    `
                 )}
               >
                 {f === 'tous' ? 'Tous' :
@@ -103,12 +110,21 @@ export default function StocksPage() {
       <div className="card p-0 overflow-x-auto">
         {isLoading ? (
           <div className="flex justify-center py-16">
-            <div className="w-8 h-8 border-4 border-primary-600
-                            border-t-transparent rounded-full animate-spin" />
+          <div
+            className="
+              w-8 h-8
+              border-4
+              border-primary-600
+              dark:border-primary-400
+              border-t-transparent
+              rounded-full
+              animate-spin
+            "
+          />
           </div>
         ) : (
           <table className="w-full text-sm">
-            <thead className="bg-gray-50 border-b border-gray-200">
+            <thead className="bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
               <tr>
                 <th className="table-header">Article</th>
                 <th className="table-header">Catégorie</th>
@@ -130,10 +146,10 @@ export default function StocksPage() {
                   className="table-row">
                   <td className="table-cell">
                     <div>
-                      <p className="font-medium text-gray-900">
+                      <p className="font-medium text-gray-900 dark:text-gray-100">
                         {s.article.designation}
                       </p>
-                      <p className="text-xs text-gray-400 font-mono">
+                      <p className="text-xs text-gray-400 dark:text-gray-500 font-mono">
                         {s.article.reference}
                       </p>
                     </div>
@@ -149,23 +165,22 @@ export default function StocksPage() {
                       <span className={clsx(
                         'w-10 h-10 inline-flex items-center justify-center',
                         'rounded-lg text-sm font-bold',
-                        s.parMagasin[mag.code] === 0
-                          ? 'bg-red-100 text-red-700'
-                          : s.parMagasin[mag.code]
-                            <= s.article.stockMinimum
-                            ? 'bg-yellow-100 text-yellow-700'
-                            : 'bg-green-100 text-green-700'
+                    s.parMagasin[mag.code] === 0
+                      ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300'
+                      : s.parMagasin[mag.code] <= s.article.stockMinimum
+                      ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300'
+                      : 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300'
                       )}>
                         {s.parMagasin[mag.code] ?? 0}
                       </span>
                     </td>
                   ))}
                   <td className="table-cell text-center">
-                    <span className="text-lg font-bold text-gray-900">
+                    <span className="text-lg font-bold text-gray-900 dark:text-gray-100">
                       {s.stockTotal}
                     </span>
                   </td>
-                  <td className="table-cell font-medium text-gray-600">
+                  <td className="table-cell font-medium text-gray-600 dark:text-gray-300">
                     {formatMontant(s.valeurTotale)}
                   </td>
                   <td className="table-cell">

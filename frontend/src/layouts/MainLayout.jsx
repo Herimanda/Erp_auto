@@ -22,7 +22,7 @@ export default function MainLayout() {
   const title = getPageTitle(location.pathname);
 
   return (
-    <div className="flex h-screen overflow-hidden bg-gray-50">
+    <div className="flex h-screen overflow-hidden bg-gray-50 dark:bg-gray-950">
       {/* Overlay mobile */}
       {sidebarOpen && (
         <div

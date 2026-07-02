@@ -3,9 +3,10 @@ import { Download, FileText, Table, Filter } from 'lucide-react';
 import PageHeader from '../../components/ui/PageHeader';
 import { useQuery } from '@tanstack/react-query';
 import api from '../../services/api';
+import clsx from 'clsx';
 import toast from 'react-hot-toast';
 
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const API_BASE = import.meta.env.VITE_API_URL;
 
 const downloadRapport = async (url, filename) => {
   const token = localStorage.getItem('token');
@@ -30,55 +31,54 @@ const RapportCard = ({
   title, description, icon: Icon,
   color, onPDF, onExcel, filters
 }) => {
-  const colors = {
-    blue:   'bg-blue-50 text-blue-600 border-blue-100',
-    green:  'bg-green-50 text-green-600 border-green-100',
-    purple: 'bg-purple-50 text-purple-600 border-purple-100',
-    orange: 'bg-orange-50 text-orange-600 border-orange-100',
+
+  const iconColors = {
+    blue: "bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-300",
+    green: "bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-300",
+    purple: "bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-300",
+    orange: "bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-300",
   };
 
   return (
-    <div className={`bg-white rounded-2xl border p-5 shadow-sm
-                     hover:shadow-md transition-shadow ${colors[color]}`}>
+    <div className="report-card">
+
       <div className="flex items-start gap-4 mb-4">
-        <div className={`w-11 h-11 rounded-xl flex items-center
-                         justify-center shrink-0 ${
-          color === 'blue'   ? 'bg-blue-100'   :
-          color === 'green'  ? 'bg-green-100'  :
-          color === 'purple' ? 'bg-purple-100' : 'bg-orange-100'
-        }`}>
+
+        <div className={clsx("report-icon", iconColors[color])}>
           <Icon className="w-5 h-5" />
         </div>
+
         <div>
-          <h3 className="font-semibold text-gray-900">{title}</h3>
-          <p className="text-sm text-gray-500 mt-0.5">{description}</p>
+          <h3 className="report-title">{title}</h3>
+          <p className="report-desc">{description}</p>
         </div>
+
       </div>
 
       {filters && (
-        <div className="mb-4">{filters}</div>
+        <div className="mb-4">
+          {filters}
+        </div>
       )}
 
       <div className="flex gap-2">
+
         {onPDF && (
           <button onClick={onPDF}
-            className="flex-1 flex items-center justify-center gap-2
-                       py-2 px-3 bg-red-50 hover:bg-red-100 text-red-700
-                       rounded-lg text-sm font-medium transition-colors">
+            className="report-btn report-btn-red">
             <FileText className="w-4 h-4" />
             PDF
           </button>
         )}
+
         {onExcel && (
           <button onClick={onExcel}
-            className="flex-1 flex items-center justify-center gap-2
-                       py-2 px-3 bg-green-50 hover:bg-green-100
-                       text-green-700 rounded-lg text-sm font-medium
-                       transition-colors">
+            className="report-btn report-btn-green">
             <Table className="w-4 h-4" />
             Excel
           </button>
         )}
+
       </div>
     </div>
   );

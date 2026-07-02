@@ -4,10 +4,13 @@ import useAuthStore from '../../store/authStore';
 import api from '../../services/api';
 import toast from 'react-hot-toast';
 import { clsx } from 'clsx';
+import { Sun, Moon, Monitor, Check } from 'lucide-react';
+import useThemeStore from '../../store/themeStore';
 
 export default function ParametresPage() {
   const { user, setAuth } = useAuthStore();
   const [onglet, setOnglet] = useState('profil');
+  const { theme, setTheme } = useThemeStore();
 
   // ── Profil ──────────────────────────────────────────
   const [profil, setProfil] = useState({
@@ -85,20 +88,17 @@ export default function ParametresPage() {
         </p>
       </div>
 
-      <div className="flex flex-col lg:flex-row gap-6">
+      <div className="settings-layout">
         {/* Navigation latérale */}
-        <div className="lg:w-56 shrink-0">
-          <div className="card p-2 space-y-1">
+      <div className="settings-sidebar">
+        <div className="settings-tabs">
             {ONGLETS.map((o) => (
               <button
                 key={o.id}
                 onClick={() => setOnglet(o.id)}
                 className={clsx(
-                  'w-full flex items-center gap-3 px-3 py-2.5',
-                  'rounded-lg text-sm font-medium transition-colors',
-                  onglet === o.id
-                    ? 'bg-primary-600 text-white'
-                    : 'text-gray-600 hover:bg-gray-100'
+                  'settings-tab',
+                  onglet === o.id && 'settings-tab-active'
                 )}
               >
                 <o.icon className="w-4 h-4" />
@@ -114,7 +114,7 @@ export default function ParametresPage() {
           {/* Profil */}
           {onglet === 'profil' && (
             <div className="card">
-              <h3 className="text-lg font-semibold text-gray-900 mb-5">
+              <h3 className="settings-card-title">
                 Informations personnelles
               </h3>
 
@@ -280,33 +280,35 @@ export default function ParametresPage() {
                   },
                 ].map((n) => (
                   <div key={n.key}
-                    className="flex items-center justify-between
-                               p-4 bg-gray-50 rounded-xl">
+                    className="settings-block">
                     <div>
-                      <p className="font-medium text-gray-900 text-sm">
+                      <p className="label-notif">
                         {n.label}
                       </p>
                       <p className="text-xs text-gray-500 mt-0.5">
                         {n.desc}
                       </p>
                     </div>
-                    <button
-                      onClick={() =>
-                        setNotifs({ ...notifs, [n.key]: !notifs[n.key] })}
+                  <button
+                    onClick={() =>
+                      setNotifs({ ...notifs, [n.key]: !notifs[n.key] })
+                    }
+                    className={clsx(
+                      'relative w-12 h-6 rounded-full shrink-0 transition-colors duration-200',
+                      notifs[n.key]
+                        ? 'bg-primary-600'
+                        : 'bg-gray-300 dark:bg-gray-600'
+                    )}
+                  >
+                    <span
                       className={clsx(
-                        'w-11 h-6 rounded-full transition-colors',
-                        'relative shrink-0',
+                        'absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow-md transition-transform duration-200',
                         notifs[n.key]
-                          ? 'bg-primary-600' : 'bg-gray-300'
+                          ? 'translate-x-6'
+                          : 'translate-x-0'
                       )}
-                    >
-                      <span className={clsx(
-                        'absolute top-0.5 w-5 h-5 bg-white rounded-full',
-                        'shadow transition-transform',
-                        notifs[n.key]
-                          ? 'translate-x-5' : 'translate-x-0.5'
-                      )} />
-                    </button>
+                    />
+                  </button>
                   </div>
                 ))}
               </div>
@@ -322,61 +324,111 @@ export default function ParametresPage() {
 
           {/* Apparence */}
           {onglet === 'apparence' && (
-            <div className="card">
-              <h3 className="text-lg font-semibold text-gray-900 mb-5">
-                Apparence
-              </h3>
+  <div className="card">
+    <h3 className="text-lg font-semibold text-gray-900
+                   dark:text-gray-100 mb-5">
+      Apparence
+    </h3>
 
-              {/* Thème */}
-              <div className="mb-6">
-                <label className="label">Thème</label>
-                <div className="grid grid-cols-3 gap-3 mt-2">
-                  {[
-                    { id: 'light', label: 'Clair',   bg: 'bg-white'    },
-                    { id: 'dark',  label: 'Sombre',  bg: 'bg-gray-900' },
-                    { id: 'auto',  label: 'Auto',    bg: 'bg-gradient-to-r from-white to-gray-900' },
-                  ].map((t) => (
-                    <div key={t.id}
-                      className="border-2 border-primary-600 rounded-xl
-                                 p-3 text-center cursor-pointer
-                                 hover:shadow-md transition-shadow">
-                      <div className={`h-12 rounded-lg mb-2 ${t.bg} border border-gray-200`}/>
-                      <p className="text-sm font-medium text-gray-700">
-                        {t.label}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-                <p className="text-xs text-gray-400 mt-2">
-                  Le mode sombre sera disponible dans une prochaine version.
-                </p>
-              </div>
+    {/* Thème */}
+    <div className="mb-6">
+      <label className="label">Thème</label>
+      <p className="text-xs text-gray-400 dark:text-gray-500 mb-3">
+        Choisissez l'apparence de l'application. Le mode "Auto" suit
+        les préférences de votre systeme d'exploitation.
+      </p>
 
-              {/* Infos système */}
-              <div className="border-t border-gray-200 pt-5">
-                <h4 className="text-sm font-semibold text-gray-700 mb-3">
-                  Informations système
-                </h4>
-                <div className="space-y-2 text-sm">
-                  {[
-                    { label: 'Version',   value: 'ERP Auto v1.0.0'     },
-                    { label: 'Backend',   value: 'Node.js + Express'   },
-                    { label: 'Base de données', value: 'MongoDB'       },
-                    { label: 'Frontend',  value: 'React + Tailwind CSS' },
-                  ].map((info) => (
-                    <div key={info.label}
-                      className="flex justify-between items-center
-                                 p-2.5 bg-gray-50 rounded-lg">
-                      <span className="text-gray-500">{info.label}</span>
-                      <span className="font-medium text-gray-700">
-                        {info.value}
-                      </span>
-                    </div>
-                  ))}
+      <div className="grid grid-cols-3 gap-3">
+        {[
+          {
+            id: 'light',
+            label: 'Clair',
+            icon: Sun,
+            preview: 'bg-white border-gray-200'
+          },
+          {
+            id: 'dark',
+            label: 'Sombre',
+            icon: Moon,
+            preview: 'bg-gray-900 border-gray-700'
+          },
+          {
+            id: 'auto',
+            label: 'Auto',
+            icon: Monitor,
+            preview: 'bg-gradient-to-br from-white via-white to-gray-900 border-gray-300'
+          },
+        ].map((t) => {
+          const isActive = theme === t.id;
+          const Icon = t.icon;
+          return (
+            <button
+              key={t.id}
+              type="button"
+              onClick={() => setTheme(t.id)}
+              className={clsx(
+                'relative border-2 rounded-xl p-3 text-center',
+                'transition-all duration-150 hover:shadow-md',
+                isActive
+                  ? 'border-primary-600 ring-2 ring-primary-100 dark:ring-primary-900/40'
+                  : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'
+              )}
+            >
+              {isActive && (
+                <div className="absolute top-1.5 right-1.5 w-4 h-4
+                                bg-primary-600 rounded-full flex
+                                items-center justify-center">
+                  <Check className="w-2.5 h-2.5 text-white" />
                 </div>
+              )}
+              <div className={clsx(
+                'h-14 rounded-lg mb-2 border flex items-center justify-center',
+                t.preview
+              )}>
+                <Icon className={clsx(
+                  'w-5 h-5',
+                  t.id === 'dark' ? 'text-gray-300' : 'text-gray-500'
+                )} />
               </div>
-            </div>
-          )}
+              <p className="text-sm font-medium text-gray-700
+                            dark:text-gray-200">
+                {t.label}
+              </p>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+
+    {/* Infos système */}
+    <div className="border-t border-gray-200 dark:border-gray-800 pt-5">
+      <h4 className="text-sm font-semibold text-gray-700
+                     dark:text-gray-300 mb-3">
+        Informations système
+      </h4>
+      <div className="space-y-2 text-sm">
+        {[
+          { label: 'Version',        value: 'ERP Auto v1.0.0' },
+          { label: 'Backend',        value: 'Node.js + Express' },
+          { label: 'Base de données',value: 'MongoDB' },
+          { label: 'Frontend',       value: 'React + Tailwind CSS' },
+        ].map((info) => (
+          <div
+            key={info.label}
+            className="settings-info-row"
+          >
+            <span className="text-gray-500 dark:text-gray-400">
+              {info.label}
+            </span>
+            <span className="font-medium text-gray-700 dark:text-gray-200">
+              {info.value}
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+)}
 
         </div>
       </div>

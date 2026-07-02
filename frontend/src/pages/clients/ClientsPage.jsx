@@ -95,7 +95,7 @@ export default function ClientsPage() {
                   'px-3 py-2 rounded-lg text-sm font-medium capitalize',
                   categorie === cat
                     ? 'bg-primary-600 text-white'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
                 )}
               >
                 {cat || 'Tous'}
@@ -113,8 +113,8 @@ export default function ClientsPage() {
                             border-t-transparent rounded-full animate-spin" />
           </div>
         ) : clients.length === 0 ? (
-          <div className="text-center py-16 text-gray-400">
-            <User className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+          <div className="text-center py-16 text-gray-400 dark:text-gray-500">
+            <User className="w-12 h-12 mx-auto mb-3 text-gray-300 dark:text-gray-600" />
             <p className="font-medium">Aucun client trouvé</p>
           </div>
         ) : (
@@ -138,7 +138,8 @@ export default function ClientsPage() {
                   <Tr key={c._id}>
                     <Td>
                       <span className="font-mono text-xs bg-gray-100
-                                       px-2 py-0.5 rounded font-medium">
+                                       px-2 py-0.5 rounded font-medium
+                                       dark:bg-gray-800 dark:text-gray-300">
                         {c.numeroClient}
                       </span>
                     </Td>
@@ -146,15 +147,16 @@ export default function ClientsPage() {
                       <div className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded-full
                                         bg-primary-100 flex items-center
-                                        justify-center shrink-0">
-                          <Icon className="w-4 h-4 text-primary-600" />
+                                        justify-center shrink-0
+                                        dark:bg-primary-900/40">
+                          <Icon className="w-4 h-4 text-primary-600 dark:text-primary-400" />
                         </div>
                         <div>
-                          <p className="font-medium text-gray-900">
+                          <p className="font-medium text-gray-900 dark:text-white">
                             {c.nom} {c.prenom}
                           </p>
                           {c.societe && (
-                            <p className="text-xs text-gray-400">
+                            <p className="text-xs text-gray-400 dark:text-gray-500">
                               {c.societe}
                             </p>
                           )}
@@ -166,18 +168,18 @@ export default function ClientsPage() {
                         {cfg?.label}
                       </span>
                     </Td>
-                    <Td className="text-sm text-gray-600">
+                    <Td className="text-sm text-gray-600 dark:text-gray-300">
                       {c.telephone || '—'}
                     </Td>
-                    <Td className="text-sm text-gray-500">
+                    <Td className="text-sm text-gray-500 dark:text-gray-400">
                       {c.email || '—'}
                     </Td>
                     <Td className="text-right">
                       <span className={clsx(
                         'font-semibold text-sm',
                         c.solde > 0
-                          ? 'text-red-600'
-                          : 'text-gray-900'
+                          ? 'text-red-600 dark:text-red-400'
+                          : 'text-gray-900 dark:text-white'
                       )}>
                         {c.solde > 0
                           ? formatMontant(c.solde)
@@ -189,7 +191,9 @@ export default function ClientsPage() {
                         <button
                           onClick={() => handleView(c)}
                           className="p-1.5 rounded-lg hover:bg-gray-100
-                                     text-gray-400 hover:text-primary-600"
+                                     text-gray-400 hover:text-primary-600
+                                     dark:hover:bg-gray-800 dark:text-gray-500
+                                     dark:hover:text-primary-400"
                           title="Historique"
                         >
                           <Eye className="w-4 h-4" />
@@ -199,7 +203,9 @@ export default function ClientsPage() {
                             <button
                               onClick={() => handleEdit(c)}
                               className="p-1.5 rounded-lg hover:bg-gray-100
-                                         text-gray-400 hover:text-blue-600"
+                                         text-gray-400 hover:text-blue-600
+                                         dark:hover:bg-gray-800 dark:text-gray-500
+                                         dark:hover:text-blue-400"
                               title="Modifier"
                             >
                               <Edit2 className="w-4 h-4" />
@@ -207,7 +213,9 @@ export default function ClientsPage() {
                             <button
                               onClick={() => handleDelete(c._id)}
                               className="p-1.5 rounded-lg hover:bg-gray-100
-                                         text-gray-400 hover:text-red-600"
+                                         text-gray-400 hover:text-red-600
+                                         dark:hover:bg-gray-800 dark:text-gray-500
+                                         dark:hover:text-red-400"
                               title="Supprimer"
                             >
                               <Trash2 className="w-4 h-4" />
@@ -223,7 +231,7 @@ export default function ClientsPage() {
           </Table>
         )}
         {pagination && (
-          <div className="p-4 border-t border-gray-100">
+          <div className="p-4 border-t border-gray-100 dark:border-gray-800">
             <Pagination
               page={pagination.page}
               totalPages={pagination.totalPages}

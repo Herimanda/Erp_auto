@@ -31,10 +31,10 @@ export default function DashboardPage() {
       {/* Greeting */}
       <div className="flex items-start justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-50">
             {salut}, {user?.prenom} 👋
           </h2>
-          <p className="text-gray-500 mt-1">
+          <p className="text-gray-500 dark:text-gray-50 mt-1">
             {magasinActif
               ? `Magasin : ${magasinActif.nom}`
               : 'Tous les magasins'}
@@ -46,7 +46,7 @@ export default function DashboardPage() {
           </p>
         </div>
         <div className="hidden sm:flex items-center gap-2 text-sm
-                        text-gray-400 bg-gray-50 px-3 py-2 rounded-lg">
+                        text-gray-400 dark:text-gray-50 bg-gray-50 dark:bg-gray-600 px-3 py-2 rounded-lg">
           <Clock className="w-4 h-4" />
           {now.toLocaleTimeString('fr-FR', {
             hour: '2-digit', minute: '2-digit'

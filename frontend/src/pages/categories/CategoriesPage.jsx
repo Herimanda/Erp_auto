@@ -112,16 +112,16 @@ export default function CategoriesPage() {
   const deleteMutation      = useDeleteCategorie();
   const categories          = data?.data || [];
 
-  const COULEURS = [
-    'bg-blue-100 text-blue-700',
-    'bg-green-100 text-green-700',
-    'bg-purple-100 text-purple-700',
-    'bg-orange-100 text-orange-700',
-    'bg-red-100 text-red-700',
-    'bg-teal-100 text-teal-700',
-    'bg-pink-100 text-pink-700',
-    'bg-indigo-100 text-indigo-700',
-  ];
+const COULEURS = [
+  'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300',
+  'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300',
+  'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300',
+  'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300',
+  'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300',
+  'bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-300',
+  'bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-300',
+  'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300',
+];
 
   return (
     <div>
@@ -142,12 +142,12 @@ export default function CategoriesPage() {
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
           {[...Array(6)].map((_, i) => (
             <div key={i}
-              className="h-28 bg-gray-100 rounded-2xl animate-pulse" />
+              className="h-28 bg-gray-100 dark:bg-gray-800 rounded-2xl animate-pulse" />
           ))}
         </div>
       ) : categories.length === 0 ? (
-        <div className="text-center py-16 text-gray-400">
-          <Tag className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+        <div className="text-center py-16 text-gray-400 dark:text-gray-500">
+          <Tag className="w-12 h-12 mx-auto mb-3 text-gray-300 dark:text-gray-600" />
           <p className="font-medium">Aucune catégorie</p>
           {canEdit && (
             <button
@@ -165,8 +165,15 @@ export default function CategoriesPage() {
             return (
               <div
                 key={cat._id}
-                className="bg-white rounded-2xl border border-gray-200
-                           p-4 shadow-sm hover:shadow-md transition-shadow"
+                className="
+                  bg-white dark:bg-gray-900
+                  border border-gray-200 dark:border-gray-700
+                  rounded-2xl
+                  p-4
+                  shadow-sm
+                  hover:shadow-md
+                  transition-all
+                  "
               >
                 <div className="flex items-start justify-between mb-3">
                   <div className={clsx(
@@ -182,8 +189,13 @@ export default function CategoriesPage() {
                           setSelected(cat);
                           setShowForm(true);
                         }}
-                        className="p-1 rounded text-gray-400
-                                   hover:text-blue-600 hover:bg-blue-50"
+                        className="
+                        p-1
+                        rounded
+                        text-gray-400 dark:text-gray-500
+                        hover:text-blue-600 dark:hover:text-blue-400
+                        hover:bg-blue-50 dark:hover:bg-blue-900/20
+                        "
                         title="Modifier"
                       >
                         <Edit2 className="w-3.5 h-3.5" />
@@ -194,8 +206,13 @@ export default function CategoriesPage() {
                             deleteMutation.mutate(cat._id);
                           }
                         }}
-                        className="p-1 rounded text-gray-400
-                                   hover:text-red-600 hover:bg-red-50"
+                        className="
+                        p-1
+                        rounded
+                        text-gray-400 dark:text-gray-500
+                        hover:text-red-600 dark:hover:text-red-400
+                        hover:bg-red-50 dark:hover:bg-red-900/20
+                        "
                         title="Supprimer"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
@@ -204,15 +221,15 @@ export default function CategoriesPage() {
                   )}
                 </div>
 
-                <p className="font-semibold text-gray-900 text-sm">
+                <p className="font-semibold text-gray-900 dark:text-gray-100 text-sm">
                   {cat.nom}
                 </p>
                 {cat.description && (
-                  <p className="text-xs text-gray-400 mt-1 line-clamp-2">
+                  <p className="text-xs text-gray-400 dark:text-gray-500 mt-1 line-clamp-2">
                     {cat.description}
                   </p>
                 )}
-                <p className="text-xs text-gray-400 mt-2 font-medium">
+                <p className="text-xs text-gray-400 dark:text-gray-500 mt-2 font-medium">
                   {cat.nombreArticles || 0} article(s)
                 </p>
               </div>
