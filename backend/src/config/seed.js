@@ -3,9 +3,11 @@ const User = require('../models/User');
 const Magasin = require('../models/Magasin');
 require('dotenv').config();
 
-const seed = async () => {
-  await mongoose.connect(process.env.MONGODB_URI);
-  console.log('✅ Connecté à MongoDB');
+const seed = async (exitOnComplete = false) => {
+  if (mongoose.connection.readyState !== 1) {
+    await mongoose.connect(process.env.MONGODB_URI);
+    console.log('✅ Connecté à MongoDB');
+  }
 
   // Créer magasin principal
   let magasin = await Magasin.findOne({ code: 'MAG-A' });
@@ -34,7 +36,12 @@ const seed = async () => {
   }
 
   console.log('🎉 Seed terminé !');
-  process.exit();
+  if (exitOnComplete) process.exit();
 };
 
-seed().catch(console.error);
+// Standalone mode
+if (require.main === module) {
+  seed(true).catch(console.error);
+}
+
+module.exports = seed;
