@@ -24,7 +24,8 @@ export default function DashboardPage() {
 
   const now  = new Date();
   const heure = now.getHours();
-  const salut = heure < 12 ? 'Bonjour' : heure < 18 ? 'Bon après-midi' : 'Bonsoir';
+  const salut = heure < 12 ? 'Akory Leka ah' : heure < 18 ? 'Atoandro oh' : 'Alina ny andro leka ah';
+  const note = 'Tongasoa eto aminy ity apply maimbo tay kely ity'
 
   return (
     <div className="space-y-6">
@@ -32,7 +33,7 @@ export default function DashboardPage() {
       <div className="flex items-start justify-between">
         <div>
           <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-50">
-            {salut}, {user?.prenom} 👋
+            {salut}, {note}  👋
           </h2>
           <p className="text-gray-500 dark:text-gray-50 mt-1">
             {magasinActif

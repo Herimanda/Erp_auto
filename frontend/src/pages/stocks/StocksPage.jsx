@@ -29,7 +29,7 @@ export default function StocksPage() {
     <div>
       <PageHeader
         title="État des stocks"
-        subtitle="Vue globale multi-magasins"
+        subtitle="Vue globale multi-magasins (Eto ny stock totale par Magasin no hita)"
       />
 
       {/* KPIs */}

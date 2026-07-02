@@ -86,6 +86,9 @@ export default function ParametresPage() {
         <p className="text-gray-500 mt-1">
           Gérez votre compte et vos préférences
         </p>
+                <p className="text-gray-500 mt-1">
+         NB : Atao hoan'role rehetra @manaraka fa tsy hoan'ny admin fotsiny ny paramètre no tokony asiana upload pdp fa kamo b za fa mikitika composant bdb
+        </p>
       </div>
 
       <div className="settings-layout">
@@ -404,7 +407,7 @@ export default function ParametresPage() {
     <div className="border-t border-gray-200 dark:border-gray-800 pt-5">
       <h4 className="text-sm font-semibold text-gray-700
                      dark:text-gray-300 mb-3">
-        Informations système
+        Informations système (Tsy dia ilay fa otrany maina be le page dia nataoko teo aloha)
       </h4>
       <div className="space-y-2 text-sm">
         {[
