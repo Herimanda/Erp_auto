@@ -145,7 +145,7 @@ export const navigation = [
         label: 'Paramètres',
         icon: Settings,
         path: '/parametres',
-        roles: ['administrateur']
+        roles: ['administrateur', 'gestionnaire', 'magasinier']
       }
     ]
   }

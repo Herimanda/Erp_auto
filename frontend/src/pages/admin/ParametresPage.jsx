@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Save, User, Lock, Bell, Palette } from 'lucide-react';
+import { useState, useRef } from 'react';
+import { Save, User, Lock, Bell, Palette, Camera } from 'lucide-react';
 import useAuthStore from '../../store/authStore';
 import api from '../../services/api';
 import toast from 'react-hot-toast';
@@ -7,10 +7,14 @@ import { clsx } from 'clsx';
 import { Sun, Moon, Monitor, Check } from 'lucide-react';
 import useThemeStore from '../../store/themeStore';
 
+const API_BASE = import.meta.env.VITE_API_URL.replace(/\/api\/?$/, '');
+
 export default function ParametresPage() {
   const { user, setAuth } = useAuthStore();
   const [onglet, setOnglet] = useState('profil');
   const { theme, setTheme } = useThemeStore();
+    const fileInputRef = useRef(null);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
 
   // ── Profil ──────────────────────────────────────────
   const [profil, setProfil] = useState({
@@ -20,11 +24,12 @@ export default function ParametresPage() {
   });
   const [loadingProfil, setLoadingProfil] = useState(false);
 
+
   const saveProfil = async (e) => {
     e.preventDefault();
     setLoadingProfil(true);
     try {
-      const res = await api.put(`/users/${user._id}`, profil);
+      const res = await api.put('/profile', profil);
       const token = localStorage.getItem('token');
       setAuth(res.data, token);
       toast.success('Profil mis à jour.');
@@ -35,6 +40,42 @@ export default function ParametresPage() {
     }
   };
 
+  // ── Photo de profil ─────────────────────────────────
+  const handlePhotoClick = () => fileInputRef.current?.click();
+
+  const handlePhotoChange = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validation côté client (taille + type) avant envoi
+    const typesAutorises = ['image/jpeg', 'image/png', 'image/webp'];
+    if (!typesAutorises.includes(file.type)) {
+      toast.error('Format non supporté (jpg, png, webp uniquement).');
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error('Image trop lourde (max 2 Mo).');
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('photo', file);
+
+    setUploadingPhoto(true);
+    try {
+      const res = await api.post('/profile/photo', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      const token = localStorage.getItem('token');
+      setAuth(res.data, token);
+      toast.success('Photo de profil mise à jour.');
+    } catch (err) {
+      toast.error(err.message);
+    } finally {
+      setUploadingPhoto(false);
+      e.target.value = ''; // permet de re-sélectionner le même fichier si besoin
+    }
+  };
   // ── Mot de passe ────────────────────────────────────
   const [mdp, setMdp] = useState({
     ancien: '', nouveau: '', confirmer: ''
@@ -86,9 +127,6 @@ export default function ParametresPage() {
         <p className="text-gray-500 mt-1">
           Gérez votre compte et vos préférences
         </p>
-                <p className="text-gray-500 mt-1">
-         NB : Atao hoan'role rehetra @manaraka fa tsy hoan'ny admin fotsiny ny paramètre no tokony asiana upload pdp fa kamo b za fa mikitika composant bdb
-        </p>
       </div>
 
       <div className="settings-layout">
@@ -124,11 +162,50 @@ export default function ParametresPage() {
               {/* Avatar */}
               <div className="flex items-center gap-4 mb-6 pb-6
                               border-b border-gray-200">
-                <div className="w-16 h-16 rounded-full bg-primary-600
-                                flex items-center justify-center
-                                text-white text-xl font-bold">
-                  {user?.prenom?.[0]}{user?.nom?.[0]}
+                <div className="relative group shrink-0">
+<div className="w-30 h-30 rounded-full bg-primary-600
+                flex items-center justify-center
+                text-white text-xl font-bold overflow-hidden
+                border-4 border-white shadow-lg">
+  {user?.photo ? (
+    <img
+      src={`${API_BASE}${user.photo}`}
+      alt="Photo de profil"
+      className="w-full h-full object-cover"
+    />
+  ) : (
+    <span>{user?.prenom?.[0]}{user?.nom?.[0]}</span>
+  )}
+</div>
+
+                  {/* Bouton overlay caméra */}
+                  <button
+                    type="button"
+                    onClick={handlePhotoClick}
+                    disabled={uploadingPhoto}
+                    className="absolute inset-0 rounded-full bg-black/50
+                              flex items-center justify-center
+                              opacity-0 group-hover:opacity-100
+                              transition-opacity"
+                    title="Changer la photo"
+                  >
+                    {uploadingPhoto ? (
+                      <div className="w-4 h-4 border-2 border-white
+                                      border-t-transparent rounded-full animate-spin" />
+                    ) : (
+                      <Camera className="w-5 h-5 text-white" />
+                    )}
+                  </button>
+
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    className="hidden"
+                    onChange={handlePhotoChange}
+                  />
                 </div>
+
                 <div>
                   <p className="font-semibold text-gray-900">
                     {user?.prenom} {user?.nom}
@@ -137,6 +214,14 @@ export default function ParametresPage() {
                     {user?.role}
                   </p>
                   <p className="text-xs text-gray-400">{user?.email}</p>
+                  <button
+                    type="button"
+                    onClick={handlePhotoClick}
+                    className="text-xs text-primary-600 hover:text-primary-700
+                              font-medium mt-1"
+                  >
+                    Changer la photo
+                  </button>
                 </div>
               </div>
 
@@ -407,7 +492,7 @@ export default function ParametresPage() {
     <div className="border-t border-gray-200 dark:border-gray-800 pt-5">
       <h4 className="text-sm font-semibold text-gray-700
                      dark:text-gray-300 mb-3">
-        Informations système (Tsy dia ilay fa otrany maina be le page dia nataoko teo aloha)
+        Informations système 
       </h4>
       <div className="space-y-2 text-sm">
         {[

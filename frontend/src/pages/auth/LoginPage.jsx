@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Eye, EyeOff, LogIn, Package } from 'lucide-react';
+import { Eye, EyeOff, LogIn, Package, AlertCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../../services/api';
 import useAuthStore from '../../store/authStore';
@@ -16,6 +16,7 @@ const schema = z.object({
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [loginError, setLoginError] = useState(null);
   const navigate = useNavigate();
   const setAuth = useAuthStore((s) => s.setAuth);
   const setMagasinActif = useAuthStore((s) => s.setMagasinActif);
@@ -28,6 +29,7 @@ export default function LoginPage() {
 
   const onSubmit = async (data) => {
     setLoading(true);
+    setLoginError(null);
     try {
       const res = await api.post('/auth/login', data);
       setAuth(res.data.user, res.data.token);
@@ -40,7 +42,12 @@ export default function LoginPage() {
       toast.success(`Bienvenue, ${res.data.user.prenom} !`);
       navigate('/dashboard');
     } catch (err) {
-      toast.error(err.message);
+      const message =
+        err?.response?.data?.message ||
+        err?.message ||
+        'Identifiant ou mot de passe incorrect';
+      setLoginError(message);
+      toast.error(message);
     } finally {
       setLoading(false);
     }
@@ -67,6 +74,16 @@ export default function LoginPage() {
             Connexion
           </h2>
 
+          {/* Alerte d'erreur */}
+          {loginError && (
+            <div className="mb-5 flex items-start gap-2 rounded-xl
+                            bg-red-50 border border-red-200
+                            px-4 py-3 text-sm text-red-700">
+              <AlertCircle className="w-4 h-4 mt-0.5 shrink-0 text-red-500" />
+              <p>{loginError}</p>
+            </div>
+          )}
+
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
             {/* Email */}
             <div>
@@ -74,9 +91,10 @@ export default function LoginPage() {
               <input
                 type="email"
                 {...register('email')}
-                className="input-field"
+                className={`input-field ${errors.email || loginError ? 'border-red-300 focus:border-red-400 focus:ring-red-100' : ''}`}
                 placeholder="admin@erp.com"
                 autoComplete="email"
+                onChange={() => loginError && setLoginError(null)}
               />
               {errors.email && (
                 <p className="text-red-500 text-xs mt-1">
@@ -92,9 +110,10 @@ export default function LoginPage() {
                 <input
                   type={showPassword ? 'text' : 'password'}
                   {...register('motDePasse')}
-                  className="input-field pr-10"
+                  className={`input-field pr-10 ${errors.motDePasse || loginError ? 'border-red-300 focus:border-red-400 focus:ring-red-100' : ''}`}
                   placeholder="••••••••"
                   autoComplete="current-password"
+                  onChange={() => loginError && setLoginError(null)}
                 />
                 <button
                   type="button"

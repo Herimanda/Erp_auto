@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
+const path = require('path');
 require('dotenv').config();
 
 
@@ -51,13 +52,22 @@ app.use('/api/dashboard', require('./routes/dashboardRoutes'));
 app.use('/api/rapports', require('./routes/rapportRoutes'));
 app.use('/api/audit', require('./routes/auditRoutes'));
 app.use('/api/notifications', require('./routes/notificationRoutes'));
+app.use('/api/profile', require('./routes/profileRoutes'));
 
 
 //uploads
 app.use('/uploads', (req, res, next) => {
   res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
   next();
-}, express.static('uploads'));
+}, express.static(path.join(__dirname, '..', 'uploads')));
+
+// Erreurs Multer (taille, format...)
+app.use((err, req, res, next) => {
+  if (err.name === 'MulterError' || err.message?.includes('Format non supporté')) {
+    return res.status(400).json({ message: err.message });
+  }
+  next(err);
+});
 
 
 // Connexion MongoDB
