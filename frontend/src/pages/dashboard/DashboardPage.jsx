@@ -24,8 +24,8 @@ export default function DashboardPage() {
 
   const now  = new Date();
   const heure = now.getHours();
-  const salut = heure < 12 ? 'Akory Leka ah' : heure < 18 ? 'Atoandro oh' : 'Alina ny andro leka ah';
-  const note = 'Tongasoa eto aminy ity apply maimbo tay kely ity'
+  const salut = heure < 12 ? 'Bonjour' : heure < 18 ? 'Bonne après-midi' : 'Bonsoir';
+  const note = 'ERP AUTO est une application de gestion et de suivie de stock multi-magasin'
 
   return (
     <div className="space-y-6">
@@ -37,13 +37,9 @@ export default function DashboardPage() {
           </h2>
           <p className="text-gray-500 dark:text-gray-50 mt-1">
             {magasinActif
-              ? `Magasin : ${magasinActif.nom}`
+              ? `Magasin prise en charge: ${magasinActif.nom}`
               : 'Tous les magasins'}
-            {' '}—{' '}
-            {now.toLocaleDateString('fr-FR', {
-              weekday: 'long', day: 'numeric',
-              month: 'long', year: 'numeric'
-            })}
+
           </p>
         </div>
         <div className="hidden sm:flex items-center gap-2 text-sm
@@ -58,7 +54,7 @@ export default function DashboardPage() {
       {/* KPIs Row 1 — CA */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <KpiCard
-          title="CA aujourd'hui"
+          title="Chiffre d'Affaires aujourd'hui"
           value={formatMontant(kpis?.caJour?.total)}
           subtitle={`${kpis?.caJour?.count || 0} facture(s)`}
           icon={TrendingUp}
@@ -66,7 +62,7 @@ export default function DashboardPage() {
           loading={kpisLoading}
         />
         <KpiCard
-          title="CA ce mois"
+          title="Chiffre d'Affaires ce mois"
           value={formatMontant(kpis?.caMois?.total)}
           subtitle={`${kpis?.caMois?.count || 0} facture(s)`}
           icon={ShoppingCart}
@@ -75,7 +71,7 @@ export default function DashboardPage() {
           loading={kpisLoading}
         />
         <KpiCard
-          title="CA cette année"
+          title="Chiffres d'Affaires cette année"
           value={formatMontant(kpis?.caAnnee?.total)}
           icon={CreditCard}
           color="purple"

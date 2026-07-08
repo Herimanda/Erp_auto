@@ -6,6 +6,8 @@ import useUiStore from '../store/uiStore';
 import { navigation } from '../config/navigation';
 import toast from 'react-hot-toast';
 
+const API_BASE = import.meta.env.VITE_API_URL.replace(/\/api\/?$/, '');
+
 export default function Sidebar() {
   const { user, logout } = useAuthStore();
   const { sidebarCollapsed, toggleCollapse } = useUiStore();
@@ -100,8 +102,16 @@ export default function Sidebar() {
           <div className="flex items-center gap-3 mb-2 px-2">
             <div className="w-8 h-8 rounded-full bg-primary-600
                             flex items-center justify-center text-xs
-                            font-bold shrink-0">
-              {user?.prenom?.[0]}{user?.nom?.[0]}
+                            font-bold shrink-0 overflow-hidden">
+              {user?.photo ? (
+                <img
+                  src={`${API_BASE}${user.photo}`}
+                  alt="Profil"
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <span>{user?.prenom?.[0]}{user?.nom?.[0]}</span>
+              )}
             </div>
             <div className="min-w-0">
               <p className="text-sm font-medium truncate">
@@ -115,8 +125,17 @@ export default function Sidebar() {
         ) : (
           <div className="flex justify-center mb-2">
             <div className="w-8 h-8 rounded-full bg-primary-600
-                            flex items-center justify-center text-xs font-bold">
-              {user?.prenom?.[0]}{user?.nom?.[0]}
+                            flex items-center justify-center text-xs font-bold
+                            overflow-hidden">
+              {user?.photo ? (
+                <img
+                  src={`${API_BASE}${user.photo}`}
+                  alt="Profil"
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <span>{user?.prenom?.[0]}{user?.nom?.[0]}</span>
+              )}
             </div>
           </div>
         )}

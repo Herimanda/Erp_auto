@@ -36,7 +36,7 @@ export default function ChartCategories() {
     <div className="card">
       <div className="mb-4">
         <h3 className="text-base font-semibold text-gray-900 dark:text-white">
-          CA par catégorie
+          Chiffre d'Affaires par catégorie
         </h3>
         <p className="text-sm text-gray-500 dark:text-gray-400">Ce mois</p>
       </div>

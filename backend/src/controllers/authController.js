@@ -37,19 +37,19 @@ const login = async (req, res) => {
       ip: req.ip
     });
 
-    const token = generateToken(user._id);
-
-    return success(res, {
-      token,
-      user: {
-        _id: user._id,
-        nom: user.nom,
-        prenom: user.prenom,
-        email: user.email,
-        role: user.role,
-        magasins: user.magasins
-      }
-    }, 'Connexion réussie');
+ const token = generateToken(user._id);
+return success(res, {
+  token,
+  user: {
+    _id: user._id,
+    nom: user.nom,
+    prenom: user.prenom,
+    email: user.email,
+    photo: user.photo,
+    role: user.role,
+    magasins: user.magasins
+  }
+}, 'Connexion réussie');
 
   } catch (err) {
     return error(res, err.message);

@@ -28,7 +28,6 @@ const modifierMonProfil = async (req, res) => {
 // Upload / remplacement de la photo de profil
 const uploadMaPhoto = async (req, res) => {
   try {
-    console.log('Fichier reçu :', req.file);
     if (!req.file) {
       return error(res, 'Aucun fichier reçu.', 400);
     }
@@ -36,14 +35,15 @@ const uploadMaPhoto = async (req, res) => {
     const user = await User.findById(req.user.id);
     if (!user) return error(res, 'Utilisateur introuvable.', 404);
 
-    // Supprimer l'ancienne photo si elle existe
     if (user.photo) {
       const ancienChemin = path.join(__dirname, '..', user.photo);
-      fs.unlink(ancienChemin, () => {}); // silencieux si le fichier n'existe déjà plus
+      fs.unlink(ancienChemin, () => {});
     }
 
     user.photo = `/uploads/avatars/${req.file.filename}`;
     await user.save();
+
+    await user.populate('magasins'); // ← ajouté
 
     return success(res, user, 'Photo de profil mise à jour.');
   } catch (err) {
