@@ -79,7 +79,7 @@ export default function CommandesFournisseurPage() {
               'px-3 py-1.5 rounded-lg text-sm font-medium',
               !statutFiltre
                 ? 'bg-primary-600 text-white'
-                : 'bg-gray-100 text-gray-600'
+                : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
             )}
           >
             Toutes
@@ -92,7 +92,7 @@ export default function CommandesFournisseurPage() {
                 'px-3 py-1.5 rounded-lg text-sm font-medium',
                 statutFiltre === s
                   ? 'bg-primary-600 text-white'
-                  : 'bg-gray-100 text-gray-600'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
               )}
             >
               {getStatutLabel(s)}
@@ -109,7 +109,7 @@ export default function CommandesFournisseurPage() {
                             border-t-transparent rounded-full animate-spin"/>
           </div>
         ) : commandes.length === 0 ? (
-          <div className="text-center py-12 text-gray-400">
+          <div className="text-center py-12 text-gray-400 dark:text-gray-500">
             <p className="font-medium">Aucune commande trouvée</p>
           </div>
         ) : (
@@ -132,29 +132,31 @@ export default function CommandesFournisseurPage() {
                 <Tr key={c._id}>
                   <Td>
                     <span className="font-mono text-sm font-medium
-                                     text-primary-600">
+                                     text-primary-600 dark:text-primary-400">
                       {c.numero}
                     </span>
                   </Td>
                   <Td>
-                    <p className="font-medium text-sm text-gray-900">
+                    <p className="font-medium text-sm text-gray-900 dark:text-white">
                       {c.fournisseur?.raisonSociale}
                     </p>
-                    <p className="text-xs text-gray-400">
+                    <p className="text-xs text-gray-400 dark:text-gray-500">
                       {c.fournisseur?.reference}
                     </p>
                   </Td>
-                  <Td className="text-sm">{c.magasin?.nom}</Td>
-                  <Td className="text-sm text-gray-500">
+                  <Td className="text-sm text-gray-700 dark:text-gray-300">
+                    {c.magasin?.nom}
+                  </Td>
+                  <Td className="text-sm text-gray-500 dark:text-gray-400">
                     {c.lignes?.length} article(s)
                   </Td>
-                  <Td className="font-medium text-sm">
+                  <Td className="font-medium text-sm text-gray-900 dark:text-white">
                     {formatMontant(c.totalHT)}
                   </Td>
-                  <Td className="text-sm text-gray-500">
+                  <Td className="text-sm text-gray-500 dark:text-gray-400">
                     {formatDate(c.createdAt)}
                   </Td>
-                  <Td className="text-sm text-gray-500">
+                  <Td className="text-sm text-gray-500 dark:text-gray-400">
                     {c.dateLivraisonPrevue
                       ? formatDate(c.dateLivraisonPrevue)
                       : '—'}
@@ -171,7 +173,9 @@ export default function CommandesFournisseurPage() {
                           setSelected(c); setShowDetail(true);
                         }}
                         className="p-1.5 rounded-lg hover:bg-gray-100
-                                   text-gray-400 hover:text-primary-600"
+                                   text-gray-400 hover:text-primary-600
+                                   dark:hover:bg-gray-800 dark:text-gray-500
+                                   dark:hover:text-primary-400"
                         title="Voir détail"
                       >
                         <Eye className="w-4 h-4" />
@@ -180,7 +184,9 @@ export default function CommandesFournisseurPage() {
                         <button
                           onClick={() => handleAction(c._id, 'valider')}
                           className="p-1.5 rounded-lg hover:bg-green-50
-                                     text-gray-400 hover:text-green-600"
+                                     text-gray-400 hover:text-green-600
+                                     dark:hover:bg-green-900/30 dark:text-gray-500
+                                     dark:hover:text-green-400"
                           title="Valider"
                         >
                           <CheckCircle className="w-4 h-4" />
@@ -193,7 +199,9 @@ export default function CommandesFournisseurPage() {
                             setSelected(c); setShowRecep(true);
                           }}
                           className="p-1.5 rounded-lg hover:bg-blue-50
-                                     text-gray-400 hover:text-blue-600"
+                                     text-gray-400 hover:text-blue-600
+                                     dark:hover:bg-blue-900/30 dark:text-gray-500
+                                     dark:hover:text-blue-400"
                           title="Réceptionner"
                         >
                           <PackageCheck className="w-4 h-4" />
@@ -204,7 +212,9 @@ export default function CommandesFournisseurPage() {
                         <button
                           onClick={() => handleAction(c._id, 'annuler')}
                           className="p-1.5 rounded-lg hover:bg-red-50
-                                     text-gray-400 hover:text-red-600"
+                                     text-gray-400 hover:text-red-600
+                                     dark:hover:bg-red-900/30 dark:text-gray-500
+                                     dark:hover:text-red-400"
                           title="Annuler"
                         >
                           <XCircle className="w-4 h-4" />
@@ -218,7 +228,7 @@ export default function CommandesFournisseurPage() {
           </Table>
         )}
         {pagination && (
-          <div className="p-4 border-t border-gray-100">
+          <div className="p-4 border-t border-gray-100 dark:border-gray-800">
             <Pagination
               page={pagination.page}
               totalPages={pagination.totalPages}

@@ -84,7 +84,7 @@ export default function DevisPage() {
               'px-3 py-1.5 rounded-lg text-sm font-medium',
               statutFiltre === ''
                 ? 'bg-primary-600 text-white'
-                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
             )}
           >
             Tous
@@ -99,7 +99,7 @@ export default function DevisPage() {
                 'px-3 py-1.5 rounded-lg text-sm font-medium capitalize',
                 statutFiltre === s
                   ? 'bg-primary-600 text-white'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
               )}
             >
               {getStatutLabel(s)}
@@ -116,8 +116,8 @@ export default function DevisPage() {
                             border-t-transparent rounded-full animate-spin" />
           </div>
         ) : devisList.length === 0 ? (
-          <div className="text-center py-16 text-gray-400">
-            <FileText className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+          <div className="text-center py-16 text-gray-400 dark:text-gray-500">
+            <FileText className="w-12 h-12 mx-auto mb-3 text-gray-300 dark:text-gray-600" />
             <p className="font-medium">Aucun devis trouvé</p>
           </div>
         ) : (
@@ -140,35 +140,37 @@ export default function DevisPage() {
               {devisList.map((d) => (
                 <Tr key={d._id}>
                   <Td>
-                    <span className="font-mono text-sm font-medium text-primary-600">
+                    <span className="font-mono text-sm font-medium text-primary-600 dark:text-primary-400">
                       {d.numero}
                     </span>
                   </Td>
 
                   <Td>
-                    <p className="font-medium text-sm text-gray-900">
+                    <p className="font-medium text-sm text-gray-900 dark:text-white">
                       {d.client?.nom} {d.client?.prenom}
                     </p>
-                    <p className="text-xs text-gray-400">
+                    <p className="text-xs text-gray-400 dark:text-gray-500">
                       {d.client?.numeroClient}
                     </p>
                   </Td>
 
-                  <Td className="text-sm">{d.magasin?.nom}</Td>
+                  <Td className="text-sm text-gray-700 dark:text-gray-300">
+                    {d.magasin?.nom}
+                  </Td>
 
-                  <Td className="text-sm text-gray-500">
+                  <Td className="text-sm text-gray-500 dark:text-gray-400">
                     {d.lignes?.length} article(s)
                   </Td>
 
-                  <Td className="text-right font-semibold text-sm">
+                  <Td className="text-right font-semibold text-sm text-gray-900 dark:text-white">
                     {formatMontant(d.totalTTC)}
                   </Td>
 
-                  <Td className="text-sm text-gray-500">
+                  <Td className="text-sm text-gray-500 dark:text-gray-400">
                     {formatDate(d.createdAt)}
                   </Td>
 
-                  <Td className="text-sm text-gray-500">
+                  <Td className="text-sm text-gray-500 dark:text-gray-400">
                     {d.dateValidite ? formatDate(d.dateValidite) : '—'}
                   </Td>
 
@@ -186,7 +188,9 @@ export default function DevisPage() {
                           setShowDetail(true);
                         }}
                         className="p-1.5 rounded-lg hover:bg-gray-100
-                                   text-gray-400 hover:text-primary-600"
+                                   text-gray-400 hover:text-primary-600
+                                   dark:hover:bg-gray-800 dark:text-gray-500
+                                   dark:hover:text-primary-400"
                         title="Voir"
                       >
                         <Eye className="w-4 h-4" />
@@ -196,7 +200,9 @@ export default function DevisPage() {
                         <button
                           onClick={() => handleStatut(d._id, 'envoye')}
                           className="p-1.5 rounded-lg hover:bg-blue-50
-                                     text-gray-400 hover:text-blue-600"
+                                     text-gray-400 hover:text-blue-600
+                                     dark:hover:bg-blue-900/30 dark:text-gray-500
+                                     dark:hover:text-blue-400"
                           title="Marquer envoyé"
                         >
                           <Send className="w-4 h-4" />
@@ -208,7 +214,9 @@ export default function DevisPage() {
                           <button
                             onClick={() => handleStatut(d._id, 'accepte')}
                             className="p-1.5 rounded-lg hover:bg-green-50
-                                       text-gray-400 hover:text-green-600"
+                                       text-gray-400 hover:text-green-600
+                                       dark:hover:bg-green-900/30 dark:text-gray-500
+                                       dark:hover:text-green-400"
                             title="Accepter"
                           >
                             <CheckCircle className="w-4 h-4" />
@@ -217,7 +225,9 @@ export default function DevisPage() {
                           <button
                             onClick={() => handleStatut(d._id, 'refuse')}
                             className="p-1.5 rounded-lg hover:bg-red-50
-                                       text-gray-400 hover:text-red-600"
+                                       text-gray-400 hover:text-red-600
+                                       dark:hover:bg-red-900/30 dark:text-gray-500
+                                       dark:hover:text-red-400"
                             title="Refuser"
                           >
                             <XCircle className="w-4 h-4" />
@@ -230,7 +240,9 @@ export default function DevisPage() {
                         <button
                           onClick={() => handleConvertir(d._id)}
                           className="p-1.5 rounded-lg hover:bg-purple-50
-                                     text-gray-400 hover:text-purple-600"
+                                     text-gray-400 hover:text-purple-600
+                                     dark:hover:bg-purple-900/30 dark:text-gray-500
+                                     dark:hover:text-purple-400"
                           title="Convertir en facture"
                         >
                           <RefreshCw className="w-4 h-4" />
@@ -245,7 +257,7 @@ export default function DevisPage() {
         )}
 
         {pagination && (
-          <div className="p-4 border-t border-gray-100">
+          <div className="p-4 border-t border-gray-100 dark:border-gray-800">
             <Pagination
               page={pagination.page}
               totalPages={pagination.totalPages}

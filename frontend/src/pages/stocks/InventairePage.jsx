@@ -24,28 +24,31 @@ function LigneInventaire({ ligne, index, onChange, readOnly }) {
 
   return (
     <tr className={clsx(
-      'border-b border-gray-100 last:border-0 transition-colors',
+      'border-b border-gray-100 last:border-0 transition-colors dark:border-gray-800',
       ecart !== null && ecart !== 0
-        ? ecart > 0 ? 'bg-green-50' : 'bg-red-50'
-        : 'hover:bg-gray-50'
+        ? ecart > 0
+          ? 'bg-green-50 dark:bg-green-900/20'
+          : 'bg-red-50 dark:bg-red-900/20'
+        : 'hover:bg-gray-50 dark:hover:bg-gray-800/60'
     )}>
       <td className="table-cell">
-        <span className="text-xs text-gray-400 font-mono">
+        <span className="text-xs text-gray-400 font-mono dark:text-gray-500">
           {index + 1}
         </span>
       </td>
       <td className="table-cell">
         <span className="font-mono text-xs bg-gray-100
-                         px-2 py-0.5 rounded">
+                         px-2 py-0.5 rounded
+                         dark:bg-gray-800 dark:text-gray-300">
           {ligne.article.reference}
         </span>
       </td>
       <td className="table-cell">
-        <p className="font-medium text-gray-900 text-sm">
+        <p className="font-medium text-gray-900 text-sm dark:text-white">
           {ligne.article.designation}
         </p>
         {ligne.article.marque && (
-          <p className="text-xs text-gray-400">{ligne.article.marque}</p>
+          <p className="text-xs text-gray-400 dark:text-gray-500">{ligne.article.marque}</p>
         )}
       </td>
       <td className="table-cell">
@@ -54,7 +57,7 @@ function LigneInventaire({ ligne, index, onChange, readOnly }) {
         </span>
       </td>
       <td className="table-cell text-center">
-        <span className="text-lg font-bold text-gray-700">
+        <span className="text-lg font-bold text-gray-700 dark:text-gray-300">
           {ligne.stockTheorique}
         </span>
       </td>
@@ -62,8 +65,9 @@ function LigneInventaire({ ligne, index, onChange, readOnly }) {
         {readOnly ? (
           <span className={clsx(
             'text-lg font-bold',
-            ligne.stockPhysique === null ? 'text-gray-300'
-              : 'text-gray-900'
+            ligne.stockPhysique === null
+              ? 'text-gray-300 dark:text-gray-600'
+              : 'text-gray-900 dark:text-white'
           )}>
             {ligne.stockPhysique ?? '—'}
           </span>
@@ -79,9 +83,9 @@ function LigneInventaire({ ligne, index, onChange, readOnly }) {
               'border-2 rounded-lg focus:outline-none transition-colors',
               ecart !== null && ecart !== 0
                 ? ecart > 0
-                  ? 'border-green-400 bg-green-50 text-green-700'
-                  : 'border-red-400 bg-red-50 text-red-700'
-                : 'border-gray-300 focus:border-primary-500'
+                  ? 'border-green-400 bg-green-50 text-green-700 dark:border-green-600 dark:bg-green-900/20 dark:text-green-400'
+                  : 'border-red-400 bg-red-50 text-red-700 dark:border-red-600 dark:bg-red-900/20 dark:text-red-400'
+                : 'border-gray-300 focus:border-primary-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:focus:border-primary-500'
             )}
           />
         )}
@@ -91,22 +95,24 @@ function LigneInventaire({ ligne, index, onChange, readOnly }) {
           <span className={clsx(
             'text-sm font-bold px-2 py-0.5 rounded-full',
             ecart === 0
-              ? 'bg-green-100 text-green-700'
+              ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
               : ecart > 0
-                ? 'bg-blue-100 text-blue-700'
-                : 'bg-red-100 text-red-700'
+                ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
+                : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
           )}>
             {ecart > 0 ? `+${ecart}` : ecart}
           </span>
         ) : (
-          <span className="text-gray-300 text-sm">—</span>
+          <span className="text-gray-300 text-sm dark:text-gray-600">—</span>
         )}
       </td>
       <td className="table-cell text-center">
         {ecart !== null && ecart !== 0 ? (
           <span className={clsx(
             'text-xs font-medium',
-            ecart > 0 ? 'text-blue-600' : 'text-red-600'
+            ecart > 0
+              ? 'text-blue-600 dark:text-blue-400'
+              : 'text-red-600 dark:text-red-400'
           )}>
             {ecart > 0 ? '↑ Excédent' : '↓ Manquant'}
           </span>
@@ -127,15 +133,16 @@ function ConfirmationModal({ isOpen, onClose, resume, onConfirm, loading }) {
       title="Confirmer la validation">
       <div className="space-y-4">
         <div className="bg-yellow-50 border border-yellow-200
-                        rounded-xl p-4">
+                        rounded-xl p-4
+                        dark:bg-yellow-900/20 dark:border-yellow-800">
           <div className="flex items-start gap-3">
             <AlertTriangle className="w-5 h-5 text-yellow-600
-                                       shrink-0 mt-0.5" />
+                                       shrink-0 mt-0.5 dark:text-yellow-400" />
             <div>
-              <p className="text-sm font-semibold text-yellow-800">
+              <p className="text-sm font-semibold text-yellow-800 dark:text-yellow-300">
                 Attention — Action irréversible
               </p>
-              <p className="text-xs text-yellow-700 mt-1">
+              <p className="text-xs text-yellow-700 mt-1 dark:text-yellow-400">
                 Cette action va mettre à jour définitivement les stocks
                 selon les quantités physiques saisies.
               </p>
@@ -149,19 +156,19 @@ function ConfirmationModal({ isOpen, onClose, resume, onConfirm, loading }) {
             {
               label: 'Total lignes',
               value: resume.total,
-              color: 'bg-gray-50 text-gray-700'
+              color: 'bg-gray-50 text-gray-700 dark:bg-gray-800 dark:text-gray-300'
             },
             {
               label: 'Sans écart',
               value: resume.sansEcart,
-              color: 'bg-green-50 text-green-700'
+              color: 'bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-400'
             },
             {
               label: 'Avec écart',
               value: resume.avecEcart,
               color: resume.avecEcart > 0
-                ? 'bg-red-50 text-red-700'
-                : 'bg-green-50 text-green-700'
+                ? 'bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-400'
+                : 'bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-400'
             },
           ].map((s) => (
             <div key={s.label}
@@ -358,13 +365,14 @@ export default function InventairePage() {
           <div className="card">
             <div className="text-center mb-6">
               <div className="w-14 h-14 bg-primary-100 rounded-2xl
-                              flex items-center justify-center mx-auto mb-3">
-                <ClipboardList className="w-7 h-7 text-primary-600" />
+                              flex items-center justify-center mx-auto mb-3
+                              dark:bg-primary-900/40">
+                <ClipboardList className="w-7 h-7 text-primary-600 dark:text-primary-400" />
               </div>
-              <h3 className="text-lg font-bold text-gray-900">
+              <h3 className="text-lg font-bold text-gray-900 dark:text-white">
                 Démarrer un inventaire
               </h3>
-              <p className="text-sm text-gray-500 mt-1">
+              <p className="text-sm text-gray-500 mt-1 dark:text-gray-400">
                 Sélectionnez le magasin et les articles à inventorier
               </p>
             </div>
@@ -389,7 +397,7 @@ export default function InventairePage() {
               <div>
                 <label className="label">
                   Catégorie{' '}
-                  <span className="text-gray-400 font-normal">
+                  <span className="text-gray-400 font-normal dark:text-gray-500">
                     (optionnel — inventaire tournant)
                   </span>
                 </label>
@@ -409,10 +417,11 @@ export default function InventairePage() {
               {magasinId && feuilleData && (
                 <div className="flex items-center gap-3 p-3
                                 bg-blue-50 border border-blue-200
-                                rounded-xl">
+                                rounded-xl
+                                dark:bg-blue-900/20 dark:border-blue-800">
                   <ClipboardList className="w-5 h-5 text-blue-600
-                                             shrink-0" />
-                  <p className="text-sm text-blue-700">
+                                             shrink-0 dark:text-blue-400" />
+                  <p className="text-sm text-blue-700 dark:text-blue-400">
                     <span className="font-bold">
                       {feuilleData.data?.nombreArticles || 0}
                     </span>
@@ -451,22 +460,22 @@ export default function InventairePage() {
           <div className="card mb-4">
             <div className="flex items-center justify-between mb-3">
               <div>
-                <p className="font-semibold text-gray-900">
+                <p className="font-semibold text-gray-900 dark:text-white">
                   Inventaire — {magasinNom}
                 </p>
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-gray-500 dark:text-gray-400">
                   {stats.saisies} / {stats.total} articles saisis
                 </p>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-2xl font-bold text-primary-600">
+                <span className="text-2xl font-bold text-primary-600 dark:text-primary-400">
                   {stats.progression}%
                 </span>
               </div>
             </div>
 
             {/* Barre de progression */}
-            <div className="w-full bg-gray-200 rounded-full h-2.5 mb-4">
+            <div className="w-full bg-gray-200 rounded-full h-2.5 mb-4 dark:bg-gray-700">
               <div
                 className="bg-primary-600 h-2.5 rounded-full transition-all"
                 style={{ width: `${stats.progression}%` }}
@@ -479,35 +488,35 @@ export default function InventairePage() {
                 {
                   label: 'Total',
                   value: stats.total,
-                  color: 'text-gray-900'
+                  color: 'text-gray-900 dark:text-white'
                 },
                 {
                   label: 'Saisis',
                   value: stats.saisies,
-                  color: 'text-primary-600'
+                  color: 'text-primary-600 dark:text-primary-400'
                 },
                 {
                   label: 'Sans écart',
                   value: stats.sansEcart,
-                  color: 'text-green-600'
+                  color: 'text-green-600 dark:text-green-400'
                 },
                 {
                   label: 'Manquants',
                   value: stats.manquants,
-                  color: 'text-red-600'
+                  color: 'text-red-600 dark:text-red-400'
                 },
                 {
                   label: 'Excédents',
                   value: stats.excedents,
-                  color: 'text-blue-600'
+                  color: 'text-blue-600 dark:text-blue-400'
                 },
               ].map((s) => (
                 <div key={s.label}
-                  className="bg-gray-50 rounded-xl p-3 text-center">
+                  className="bg-gray-50 rounded-xl p-3 text-center dark:bg-gray-800">
                   <p className={`text-xl font-bold ${s.color}`}>
                     {s.value}
                   </p>
-                  <p className="text-xs text-gray-500 mt-0.5">{s.label}</p>
+                  <p className="text-xs text-gray-500 mt-0.5 dark:text-gray-400">{s.label}</p>
                 </div>
               ))}
             </div>
@@ -555,7 +564,7 @@ export default function InventairePage() {
           {/* Tableau de saisie */}
           <div className="card p-0 overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="bg-gray-50 border-b border-gray-200">
+              <thead className="bg-gray-50 border-b border-gray-200 dark:bg-gray-800 dark:border-gray-700">
                 <tr>
                   <th className="table-header w-10">#</th>
                   <th className="table-header">Référence</th>
@@ -575,7 +584,7 @@ export default function InventairePage() {
                 {lignesFiltrees.length === 0 ? (
                   <tr>
                     <td colSpan={8}
-                      className="text-center py-12 text-gray-400">
+                      className="text-center py-12 text-gray-400 dark:text-gray-500">
                       Aucun article trouvé
                     </td>
                   </tr>
@@ -597,15 +606,16 @@ export default function InventairePage() {
           {/* Footer sticky */}
           <div className="fixed bottom-0 left-0 right-0 bg-white
                           border-t border-gray-200 shadow-lg p-4 z-20
-                          lg:pl-72">
+                          lg:pl-72
+                          dark:bg-gray-900 dark:border-gray-800">
             <div className="max-w-7xl mx-auto flex items-center
                             justify-between">
-              <p className="text-sm text-gray-600">
-                <span className="font-bold text-primary-600">
+              <p className="text-sm text-gray-600 dark:text-gray-300">
+                <span className="font-bold text-primary-600 dark:text-primary-400">
                   {stats.saisies}
                 </span>
                 /{stats.total} articles saisis —
-                <span className="text-red-600 font-medium ml-1">
+                <span className="text-red-600 font-medium ml-1 dark:text-red-400">
                   {stats.avecEcart} écart(s)
                 </span>
               </p>
@@ -633,13 +643,14 @@ export default function InventairePage() {
           {/* Succès */}
           <div className="card text-center">
             <div className="w-16 h-16 bg-green-100 rounded-full
-                            flex items-center justify-center mx-auto mb-4">
-              <CheckCircle className="w-8 h-8 text-green-600" />
+                            flex items-center justify-center mx-auto mb-4
+                            dark:bg-green-900/30">
+              <CheckCircle className="w-8 h-8 text-green-600 dark:text-green-400" />
             </div>
-            <h3 className="text-xl font-bold text-gray-900">
+            <h3 className="text-xl font-bold text-gray-900 dark:text-white">
               Inventaire validé avec succès !
             </h3>
-            <p className="text-gray-500 mt-2">
+            <p className="text-gray-500 mt-2 dark:text-gray-400">
               Les stocks ont été mis à jour selon les quantités physiques
             </p>
           </div>
@@ -650,21 +661,21 @@ export default function InventairePage() {
               {
                 label: 'Total lignes',
                 value: resultat.resume?.totalLignes || 0,
-                color: 'bg-gray-50 text-gray-700',
+                color: 'bg-gray-50 text-gray-700 dark:bg-gray-800 dark:text-gray-300',
                 icon: ClipboardList
               },
               {
                 label: 'Écarts corrigés',
                 value: resultat.resume?.nbEcarts || 0,
                 color: resultat.resume?.nbEcarts > 0
-                  ? 'bg-orange-50 text-orange-700'
-                  : 'bg-green-50 text-green-700',
+                  ? 'bg-orange-50 text-orange-700 dark:bg-orange-900/20 dark:text-orange-400'
+                  : 'bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-400',
                 icon: AlertTriangle
               },
               {
                 label: 'Sans écart',
                 value: resultat.resume?.nbSansEcart || 0,
-                color: 'bg-green-50 text-green-700',
+                color: 'bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-400',
                 icon: CheckCircle
               },
             ].map((s) => (
@@ -680,12 +691,12 @@ export default function InventairePage() {
           {/* Détail des écarts */}
           {resultat.resultats?.filter((r) => r.ecart !== 0).length > 0 && (
             <div className="card">
-              <h4 className="font-semibold text-gray-900 mb-3">
+              <h4 className="font-semibold text-gray-900 mb-3 dark:text-white">
                 Détail des corrections
               </h4>
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
-                  <thead className="bg-gray-50 border-b border-gray-200">
+                  <thead className="bg-gray-50 border-b border-gray-200 dark:bg-gray-800 dark:border-gray-700">
                     <tr>
                       <th className="table-header">Article</th>
                       <th className="table-header text-center">Avant</th>
@@ -699,10 +710,10 @@ export default function InventairePage() {
                       .map((r, i) => (
                         <tr key={i}
                           className="border-b border-gray-100
-                                     last:border-0">
+                                     last:border-0 dark:border-gray-800">
                           <td className="table-cell">
                             <p className="text-sm font-medium
-                                          text-gray-900">
+                                          text-gray-900 dark:text-white">
                               {r.articleId}
                             </p>
                           </td>
@@ -716,8 +727,8 @@ export default function InventairePage() {
                             <span className={clsx(
                               'font-bold text-sm px-2 py-0.5 rounded-full',
                               r.ecart > 0
-                                ? 'bg-blue-100 text-blue-700'
-                                : 'bg-red-100 text-red-700'
+                                ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
+                                : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
                             )}>
                               {r.ecart > 0 ? `+${r.ecart}` : r.ecart}
                             </span>

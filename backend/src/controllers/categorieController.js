@@ -2,13 +2,32 @@ const Categorie = require('../models/Categorie');
 const Article = require('../models/Article');
 const { success, error } = require('../utils/apiResponse');
 
+// Générer code catégorie automatique (CAT-001, CAT-002...)
+const genererCodeCategorie = async () => {
+  const dernier = await Categorie.findOne(
+    { code: { $regex: '^CAT-' } },
+    { code: 1 },
+    { sort: { code: -1 } }
+  );
+  let numero = 1;
+  if (dernier) {
+    const parts = dernier.code.split('-');
+    numero = parseInt(parts[parts.length - 1]) + 1;
+  }
+  return `CAT-${String(numero).padStart(3, '0')}`;
+};
 
+// @desc    Créer une catégorie
+// @route   POST /api/categories
 const creerCategorie = async (req, res) => {
   try {
-    const { code, nom, description } = req.body;
+    const { nom, description } = req.body;
 
-    const existante = await Categorie.findOne({ code: code.toUpperCase() });
-    if (existante) return error(res, 'Ce code catégorie existe déjà.', 400);
+    if (!nom) {
+      return error(res, 'Le nom de la catégorie est requis.', 400);
+    }
+
+    const code = await genererCodeCategorie();
 
     const categorie = await Categorie.create({ code, nom, description });
     return success(res, categorie, 'Catégorie créée.', 201);
@@ -17,12 +36,12 @@ const creerCategorie = async (req, res) => {
   }
 };
 
-
+// @desc    Liste des catégories
+// @route   GET /api/categories
 const getCategories = async (req, res) => {
   try {
     const categories = await Categorie.find({ isActive: true }).sort({ nom: 1 });
 
-    // Compter les articles par catégorie
     const categoriesAvecCount = await Promise.all(
       categories.map(async (cat) => {
         const count = await Article.countDocuments({
@@ -39,7 +58,8 @@ const getCategories = async (req, res) => {
   }
 };
 
-
+// @desc    Détail d'une catégorie
+// @route   GET /api/categories/:id
 const getCategorie = async (req, res) => {
   try {
     const categorie = await Categorie.findById(req.params.id);
@@ -50,12 +70,16 @@ const getCategorie = async (req, res) => {
   }
 };
 
-
+// @desc    Modifier une catégorie
+// @route   PUT /api/categories/:id
 const modifierCategorie = async (req, res) => {
   try {
+    // Le code n'est jamais modifiable une fois généré
+    const { nom, description } = req.body;
+
     const categorie = await Categorie.findByIdAndUpdate(
       req.params.id,
-      req.body,
+      { nom, description },
       { new: true, runValidators: true }
     );
     if (!categorie) return error(res, 'Catégorie introuvable.', 404);
@@ -65,9 +89,10 @@ const modifierCategorie = async (req, res) => {
   }
 };
 
+// @desc    Supprimer une catégorie
+// @route   DELETE /api/categories/:id
 const supprimerCategorie = async (req, res) => {
   try {
-    // Vérifier si des articles utilisent cette catégorie
     const nbArticles = await Article.countDocuments({
       categorie: req.params.id,
       isDeleted: false

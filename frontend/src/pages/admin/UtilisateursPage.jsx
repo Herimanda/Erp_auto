@@ -17,18 +17,18 @@ import { clsx } from 'clsx';
 // ── Config rôles ───────────────────────────────────────────────────────────
 const ROLES = [
   { v: 'administrateur', l: 'Administrateur',
-    color: 'bg-red-100 text-red-700'      },
+    color: 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400' },
   { v: 'gestionnaire',   l: 'Gestionnaire',
-    color: 'bg-purple-100 text-purple-700' },
+    color: 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-400' },
   { v: 'caissier',       l: 'Caissier',
-    color: 'bg-blue-100 text-blue-700'    },
+    color: 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-400' },
   { v: 'magasinier',     l: 'Magasinier',
-    color: 'bg-green-100 text-green-700'  },
+    color: 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400' },
 ];
 
 const getRoleConfig = (role) =>
   ROLES.find((r) => r.v === role) ||
-  { l: role, color: 'bg-gray-100 text-gray-600' };
+  { l: role, color: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-300' };
 
 // ── Schémas Zod ────────────────────────────────────────────────────────────
 const schemaCreate = z.object({
@@ -105,7 +105,7 @@ function UserForm({ user, onSuccess }) {
           <input {...register('nom')} className="input-field"
             placeholder="Rakoto" />
           {errors.nom && (
-            <p className="text-red-500 text-xs mt-1">
+            <p className="text-red-500 dark:text-red-400 text-xs mt-1">
               {errors.nom.message}
             </p>
           )}
@@ -115,7 +115,7 @@ function UserForm({ user, onSuccess }) {
           <input {...register('prenom')} className="input-field"
             placeholder="Jean" />
           {errors.prenom && (
-            <p className="text-red-500 text-xs mt-1">
+            <p className="text-red-500 dark:text-red-400 text-xs mt-1">
               {errors.prenom.message}
             </p>
           )}
@@ -125,7 +125,7 @@ function UserForm({ user, onSuccess }) {
           <input {...register('email')} type="email"
             className="input-field" placeholder="jean@erp.mg" />
           {errors.email && (
-            <p className="text-red-500 text-xs mt-1">
+            <p className="text-red-500 dark:text-red-400 text-xs mt-1">
               {errors.email.message}
             </p>
           )}
@@ -148,7 +148,7 @@ function UserForm({ user, onSuccess }) {
               placeholder="Min. 6 caractères"
             />
             {errors.motDePasse && (
-              <p className="text-red-500 text-xs mt-1">
+              <p className="text-red-500 dark:text-red-400 text-xs mt-1">
                 {errors.motDePasse.message}
               </p>
             )}
@@ -160,7 +160,7 @@ function UserForm({ user, onSuccess }) {
       <div>
         <label className="label">Magasins accessibles</label>
         {magasins.length === 0 ? (
-          <p className="text-sm text-gray-400">
+          <p className="text-sm text-gray-400 dark:text-gray-500">
             Aucun magasin disponible
           </p>
         ) : (
@@ -170,6 +170,7 @@ function UserForm({ user, onSuccess }) {
                 key={m._id}
                 className="flex items-center gap-2 p-2.5 rounded-lg
                            border border-gray-200 hover:bg-gray-50
+                           dark:border-gray-700 dark:hover:bg-gray-800
                            cursor-pointer text-sm"
               >
                 <input
@@ -178,10 +179,10 @@ function UserForm({ user, onSuccess }) {
                   {...register('magasins')}
                   className="w-4 h-4 text-primary-600"
                 />
-                <span className="font-medium text-gray-700">
+                <span className="font-medium text-gray-700 dark:text-gray-200">
                   {m.nom}
                 </span>
-                <span className="text-xs text-gray-400 ml-auto">
+                <span className="text-xs text-gray-400 dark:text-gray-500 ml-auto">
                   {m.code}
                 </span>
               </label>
@@ -314,7 +315,7 @@ export default function UtilisateursPage() {
       <div>
         <PageHeader title="Utilisateurs" />
         <div className="card text-center py-12">
-          <p className="text-red-500 font-medium">
+          <p className="text-red-500 dark:text-red-400 font-medium">
             Erreur de chargement : {queryError.message}
           </p>
           <button
@@ -360,7 +361,7 @@ export default function UtilisateursPage() {
                 'px-3 py-2 rounded-lg text-sm font-medium',
                 !roleFiltre
                   ? 'bg-primary-600 text-white'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
               )}
             >
               Tous
@@ -373,7 +374,7 @@ export default function UtilisateursPage() {
                   'px-3 py-2 rounded-lg text-sm font-medium',
                   roleFiltre === r.v
                     ? 'bg-primary-600 text-white'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
                 )}
               >
                 {r.l}
@@ -391,8 +392,8 @@ export default function UtilisateursPage() {
                             border-t-transparent rounded-full animate-spin" />
           </div>
         ) : users.length === 0 ? (
-          <div className="text-center py-16 text-gray-400">
-            <Users className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+          <div className="text-center py-16 text-gray-400 dark:text-gray-500">
+            <Users className="w-12 h-12 mx-auto mb-3 text-gray-300 dark:text-gray-600" />
             <p className="font-medium">Aucun utilisateur trouvé</p>
           </div>
         ) : (
@@ -422,13 +423,15 @@ export default function UtilisateursPage() {
                           {u.prenom?.[0]}{u.nom?.[0]}
                         </div>
                         <div>
-                          <p className="font-medium text-gray-900 text-sm">
+                          <p className="font-medium text-gray-900 dark:text-white text-sm">
                             {u.prenom} {u.nom}
                           </p>
                         </div>
                       </div>
                     </Td>
-                    <Td className="text-sm text-gray-500">{u.email}</Td>
+                    <Td className="text-sm text-gray-500 dark:text-gray-400">
+                      {u.email}
+                    </Td>
                     <Td>
                       <span className={clsx(
                         'text-xs font-medium px-2 py-0.5 rounded-full',
@@ -443,19 +446,20 @@ export default function UtilisateursPage() {
                           <span
                             key={m._id || i}
                             className="text-xs bg-gray-100 text-gray-600
+                                       dark:bg-gray-800 dark:text-gray-300
                                        px-1.5 py-0.5 rounded font-mono"
                           >
                             {m.code || m}
                           </span>
                         ))}
                         {(u.magasins?.length || 0) > 2 && (
-                          <span className="text-xs text-gray-400">
+                          <span className="text-xs text-gray-400 dark:text-gray-500">
                             +{u.magasins.length - 2}
                           </span>
                         )}
                       </div>
                     </Td>
-                    <Td className="text-xs text-gray-400">
+                    <Td className="text-xs text-gray-400 dark:text-gray-500">
                       {u.dernierConnexion
                         ? formatDateTime(u.dernierConnexion)
                         : 'Jamais'}
@@ -475,7 +479,9 @@ export default function UtilisateursPage() {
                             setShowForm(true);
                           }}
                           className="p-1.5 rounded-lg hover:bg-gray-100
-                                     text-gray-400 hover:text-blue-600"
+                                     text-gray-400 hover:text-blue-600
+                                     dark:hover:bg-gray-800 dark:text-gray-500
+                                     dark:hover:text-blue-400"
                           title="Modifier"
                         >
                           <Edit2 className="w-4 h-4" />
@@ -486,7 +492,9 @@ export default function UtilisateursPage() {
                             setShowReset(true);
                           }}
                           className="p-1.5 rounded-lg hover:bg-gray-100
-                                     text-gray-400 hover:text-yellow-600"
+                                     text-gray-400 hover:text-yellow-600
+                                     dark:hover:bg-gray-800 dark:text-gray-500
+                                     dark:hover:text-yellow-400"
                           title="Réinitialiser mot de passe"
                         >
                           <Key className="w-4 h-4" />
@@ -497,10 +505,10 @@ export default function UtilisateursPage() {
                             isActive: !u.isActive
                           })}
                           className={clsx(
-                            'p-1.5 rounded-lg hover:bg-gray-100',
+                            'p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800',
                             u.isActive
-                              ? 'text-gray-400 hover:text-red-600'
-                              : 'text-gray-400 hover:text-green-600'
+                              ? 'text-gray-400 hover:text-red-600 dark:text-gray-500 dark:hover:text-red-400'
+                              : 'text-gray-400 hover:text-green-600 dark:text-gray-500 dark:hover:text-green-400'
                           )}
                           title={u.isActive ? 'Désactiver' : 'Activer'}
                         >

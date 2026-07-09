@@ -123,7 +123,7 @@ export default function ArticlesPage() {
               {articles.map((art) => (
                 <Tr key={art._id}>
                   <Td>
-                    <span className="font-mono text-xs bg-gray-100
+                    <span className="font-mono text-xs bg-gray-100 dark:bg-gray-800 dark:text-gray-300
                                      px-2 py-0.5 rounded">
                       {art.reference}
                     </span>

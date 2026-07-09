@@ -15,8 +15,8 @@ import useAuthStore from '../../store/authStore';
 import { clsx } from 'clsx';
 
 // ── Formulaire ─────────────────────────────────────────────────────────────
+// Schéma Zod — retirer le champ code
 const schema = z.object({
-  code:        z.string().min(1, 'Code requis'),
   nom:         z.string().min(1, 'Nom requis'),
   description: z.string().optional(),
 });
@@ -31,7 +31,6 @@ function CategorieForm({ categorie, onSuccess }) {
     resolver: zodResolver(schema),
     defaultValues: categorie
       ? {
-          code:        categorie.code,
           nom:         categorie.nom,
           description: categorie.description || ''
         }
@@ -51,34 +50,36 @@ function CategorieForm({ categorie, onSuccess }) {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-      <div className="grid grid-cols-2 gap-4">
+      {/* Affichage du code en lecture seule si modification */}
+      {categorie && (
         <div>
-          <label className="label">Code *</label>
+          <label className="label">Code catégorie</label>
           <input
-            {...register('code')}
-            className="input-field uppercase"
-            placeholder="FILTRE"
+            value={categorie.code}
+            disabled
+            className="input-field bg-gray-50 dark:bg-gray-900
+                       text-gray-500 font-mono cursor-not-allowed"
           />
-          {errors.code && (
-            <p className="text-red-500 text-xs mt-1">
-              {errors.code.message}
-            </p>
-          )}
+          <p className="text-xs text-gray-400 mt-1">
+            Ce code est généré automatiquement et ne peut pas être modifié.
+          </p>
         </div>
-        <div>
-          <label className="label">Nom *</label>
-          <input
-            {...register('nom')}
-            className="input-field"
-            placeholder="Filtres moteur"
-          />
-          {errors.nom && (
-            <p className="text-red-500 text-xs mt-1">
-              {errors.nom.message}
-            </p>
-          )}
-        </div>
+      )}
+
+      <div>
+        <label className="label">Nom *</label>
+        <input
+          {...register('nom')}
+          className="input-field"
+          placeholder="Filtres moteur"
+        />
+        {errors.nom && (
+          <p className="text-red-500 text-xs mt-1">
+            {errors.nom.message}
+          </p>
+        )}
       </div>
+
       <div>
         <label className="label">Description</label>
         <textarea
@@ -88,6 +89,9 @@ function CategorieForm({ categorie, onSuccess }) {
           placeholder="Description optionnelle..."
         />
       </div>
+
+
+
       <button
         type="submit"
         disabled={isLoading}
