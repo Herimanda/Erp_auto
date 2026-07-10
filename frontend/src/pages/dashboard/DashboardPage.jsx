@@ -33,7 +33,7 @@ export default function DashboardPage() {
       <div className="flex items-start justify-between">
         <div>
           <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-50">
-            {salut}, {note}  👋
+            {salut} 👋 {note}  
           </h2>
           <p className="text-gray-500 dark:text-gray-50 mt-1">
             {magasinActif
