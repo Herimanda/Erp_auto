@@ -86,58 +86,67 @@ export default function Topbar({ title }) {
             </button>
 
 
-            {showMagasins && (
+          {showMagasins && (
+            <>
+              <div
+                className="fixed inset-0 z-40"
+                onClick={() => setShowMagasins(false)}
+              />
 
-              <>
+              <div
+                className="absolute right-0 top-full mt-1
+                          w-64 max-w-[calc(100vw-1rem)]
+                          bg-white dark:bg-gray-800
+                          border border-gray-200
+                          dark:border-gray-700
+                          rounded-xl shadow-lg
+                          z-50 py-1"
+              >
 
-                <div
-                  className="fixed inset-0 z-40"
-                  onClick={() => setShowMagasins(false)}
-                />
-
-
-                <div
-                  className="absolute right-0 top-full mt-1
-                             w-64 max-w-[calc(100vw-1rem)]
-                             bg-white dark:bg-gray-800
-                             border border-gray-200
-                             dark:border-gray-700
-                             rounded-xl shadow-lg
-                             z-50 py-1"
+                {/* NOUVELLE OPTION : Tous les magasins */}
+                <button
+                  onClick={() => {
+                    setMagasinActif(null);
+                    setShowMagasins(false);
+                  }}
+                  className={clsx(
+                    'w-full text-left px-4 py-2 text-sm truncate',
+                    'hover:bg-gray-50 dark:hover:bg-gray-700',
+                    'transition-colors flex items-center gap-2',
+                    !magasinActif
+                      ? 'text-primary-600 font-semibold'
+                      : 'text-gray-700 dark:text-gray-200'
+                  )}
                 >
-                
-                  {user.magasins.map((mag) => (
+                  <Store className="w-3.5 h-3.5" />
+                  Tous les magasins
+                </button>
 
-                    <button
+                <div className="my-1 border-t border-gray-100 dark:border-gray-700" />
 
-                      key={mag._id}
+                {user.magasins.map((mag) => (
+                  <button
+                    key={mag._id}
+                    onClick={() => {
+                      setMagasinActif(mag);
+                      setShowMagasins(false);
+                    }}
+                    className={clsx(
+                      'w-full text-left px-4 py-2 text-sm truncate',
+                      'hover:bg-gray-50 dark:hover:bg-gray-700',
+                      'transition-colors',
+                      magasinActif?._id === mag._id
+                        ? 'text-primary-600 font-medium'
+                        : 'text-gray-700 dark:text-gray-200'
+                    )}
+                  >
+                    {mag.nom}
+                  </button>
+                ))}
 
-                      onClick={() => {
-                        setMagasinActif(mag);
-                        setShowMagasins(false);
-                      }}
-
-                      className={clsx(
-                        'w-full text-left px-4 py-2 text-sm truncate',
-                        'hover:bg-gray-50 dark:hover:bg-gray-700',
-                        'transition-colors',
-
-                        magasinActif?._id === mag._id
-                          ? 'text-primary-600 font-medium'
-                          : 'text-gray-700 dark:text-gray-200'
-                      )}
-
-                    >
-                      {mag.nom}
-                    </button>
-
-                  ))}
-
-                </div>
-
-              </>
-
-            )}
+              </div>
+            </>
+          )}
 
           </div>
 
