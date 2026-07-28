@@ -27,7 +27,13 @@ const app = express();
 
 // Middlewares globaux
 app.use(helmet());
-app.use(cors({ origin: 'http://localhost:5173', credentials: true }));
+app.use(cors({
+  origin: [
+    'http://localhost:5173',
+    'https://ton-frontend.vercel.app'  // ← à remplacer par ta vraie URL une fois connue
+  ],
+  credentials: true
+}));
 app.use(morgan('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
