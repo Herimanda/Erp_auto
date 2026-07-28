@@ -30,7 +30,7 @@ app.use(helmet());
 app.use(cors({
   origin: [
     'http://localhost:5173',
-    'https://ton-frontend.vercel.app'  // ← à remplacer par ta vraie URL une fois connue
+    'https://erp-auto-two.vercel.app/login'
   ],
   credentials: true
 }));
