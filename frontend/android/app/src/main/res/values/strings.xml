@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">ERP Auto</string>
+    <string name="title_activity_main">ERP Auto</string>
+    <string name="package_name">com.Lolimaid.erpauto</string>
+    <string name="custom_url_scheme">com.Lolimaid.erpauto</string>
+</resources>

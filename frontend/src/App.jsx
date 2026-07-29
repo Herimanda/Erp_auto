@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import MainLayout from './layouts/MainLayout';
 import ProtectedRoute from './components/guards/ProtectedRoute';
@@ -21,6 +22,7 @@ import MagasinsPage from './pages/admin/MagasinsPage';
 import RapportsPage from './pages/rapports/RapportsPage';
 import AuditPage from './pages/admin/AudtiPage';
 import ParametresPage from './pages/admin/ParametresPage';
+import useAuthStore from './store/authStore';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -32,6 +34,14 @@ const queryClient = new QueryClient({
 });
 
 export default function App() {
+    const [ready, setReady] = useState(false);
+  const init = useAuthStore((s) => s.init);
+
+  useEffect(() => {
+    init().finally(() => setReady(true));
+  }, []);
+
+  if (!ready) return null;
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
