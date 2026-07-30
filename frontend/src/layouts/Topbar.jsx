@@ -19,12 +19,13 @@ export default function Topbar({ title }) {
   const API_BASE = import.meta.env.VITE_API_URL.replace(/\/api\/?$/, '');
 
   return (
-    <header
-      className="h-16 bg-white dark:bg-gray-900 border-b
-                 border-gray-200 dark:border-gray-800
-                 flex items-center justify-between
-                 px-3 sm:px-6 shrink-0 z-10 gap-2"
-    >
+<header
+  style={{ paddingTop: 'var(--safe-area-top)' }}
+  className="h-16 bg-white dark:bg-gray-900 border-b
+             border-gray-200 dark:border-gray-800
+             flex items-center justify-between
+             px-3 sm:px-6 shrink-0 z-10 gap-2"
+>
 
       {/* Gauche */}
       <div className="flex items-center gap-2 sm:gap-4 min-w-0">

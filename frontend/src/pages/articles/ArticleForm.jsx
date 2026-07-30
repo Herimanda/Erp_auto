@@ -88,50 +88,22 @@ export default function ArticleForm({ article, onSuccess }) {
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       {/* Image */}
-      <div className="flex items-center gap-4">
-        <div
-          onClick={() => fileRef.current?.click()}
-          className="w-24 h-24 rounded-xl border-2 border-dashed
-                     border-gray-300 flex items-center justify-center
-                     cursor-pointer hover:border-primary-400
-                     hover:bg-primary-50 transition-colors shrink-0
-                     overflow-hidden"
-        >
-          {imagePreview ? (
-            <img
-              src={imagePreview}
-              alt="preview"
-              className="w-full h-full object-cover"
-            />
-          ) : (
-            <div className="text-center">
-              <Upload className="w-6 h-6 text-gray-400 mx-auto" />
-              <p className="text-xs text-gray-400 mt-1">Image</p>
-            </div>
-          )}
-        </div>
-        <div>
-          <p className="text-sm text-gray-600 font-medium">Photo produit</p>
-          <p className="text-xs text-gray-400">JPG, PNG, WEBP — max 2 Mo</p>
-          {imagePreview && (
-            <button
-              type="button"
-              onClick={() => { setImagePreview(null); setImageFile(null); }}
-              className="text-xs text-red-500 hover:text-red-700 mt-1
-                         flex items-center gap-1"
-            >
-              <X className="w-3 h-3" /> Supprimer
-            </button>
-          )}
-        </div>
-        <input
-          ref={fileRef}
-          type="file"
-          accept="image/*"
-          onChange={handleImageChange}
-          className="hidden"
-        />
-      </div>
+<div className="flex items-center gap-4">
+  <NativeImagePicker
+    preview={imagePreview}
+    onImageSelected={(file, preview) => {
+      setImageFile(file);
+      setImagePreview(preview);
+    }}
+    onClear={() => { setImagePreview(null); setImageFile(null); }}
+  />
+  <div>
+    <p className="text-sm text-gray-600 dark:text-gray-300 font-medium">
+      Photo produit
+    </p>
+    <p className="text-xs text-gray-400">JPG, PNG — max 2 Mo</p>
+  </div>
+</div>
 
       {/* Grille */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

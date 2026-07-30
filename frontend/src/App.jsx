@@ -23,6 +23,8 @@ import RapportsPage from './pages/rapports/RapportsPage';
 import AuditPage from './pages/admin/AudtiPage';
 import ParametresPage from './pages/admin/ParametresPage';
 import useAuthStore from './store/authStore';
+import { initStatusBar, initKeyboard } from './utils/nativeSetup';
+import { SplashScreen } from '@capacitor/splash-screen';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -37,9 +39,18 @@ export default function App() {
     const [ready, setReady] = useState(false);
   const init = useAuthStore((s) => s.init);
 
-  useEffect(() => {
-    init().finally(() => setReady(true));
-  }, []);
+useEffect(() => {
+  Promise.all([
+    init(),
+    initStatusBar(),
+    initKeyboard()
+  ]).finally(async () => {
+    setReady(true);
+    if (Capacitor.isNativePlatform()) {
+      await SplashScreen.hide();
+    }
+  });
+}, []);
 
   if (!ready) return null;
   return (

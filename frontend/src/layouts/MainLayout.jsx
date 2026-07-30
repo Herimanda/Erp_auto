@@ -5,6 +5,7 @@ import Topbar from './Topbar';
 import useUiStore from '../store/uiStore';
 import { clsx } from 'clsx';
 import { navigation } from '../config/navigation';
+import { useBackButton } from '../hooks/useBackButton';
 
 // Trouver le titre de la page depuis la config
 const getPageTitle = (pathname) => {
@@ -17,6 +18,8 @@ const getPageTitle = (pathname) => {
 };
 
 export default function MainLayout() {
+  useBackButton();
+  
   const { sidebarOpen } = useUiStore();
   const location = useLocation();
   const title = getPageTitle(location.pathname);

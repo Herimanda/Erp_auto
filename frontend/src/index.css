@@ -1,6 +1,11 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 @import "tailwindcss";
 
+:root {
+  --safe-area-top: env(safe-area-inset-top, 0px);
+  --safe-area-bottom: env(safe-area-inset-bottom, 0px);
+}
+
 /* Active le dark mode avec la classe .dark sur <html> */
 @custom-variant dark (&:where(.dark, .dark *));
 
