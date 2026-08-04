@@ -20,11 +20,11 @@ const schema = z.object({
 });
 
 export default function ArticleForm({ article, onSuccess }) {
-  const [imagePreview, setImagePreview] = useState(
-    article?.image
-      ? `http://localhost:5000/${article.image}`
-      : null
-  );
+const [imagePreview, setImagePreview] = useState(
+  article?.image
+    ? `${import.meta.env.VITE_API_URL.replace("/api", "")}/${article.image}`
+    : null
+);
   const [imageFile, setImageFile] = useState(null);
   const fileRef = useRef();
 

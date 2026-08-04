@@ -22,11 +22,11 @@ export default function ArticleDetail({ articleId }) {
       {/* Infos article */}
       <div className="flex gap-4">
         {article.image ? (
-          <img
-            src={`http://localhost:5000/${article.image}`}
-            alt={article.designation}
-            className="w-20 h-20 rounded-xl object-cover shrink-0"
-          />
+      <img
+        src={`${import.meta.env.VITE_API_URL.replace("/api", "")}/${article.image}`}
+        alt={article.designation}
+        className="w-20 h-20 rounded-xl object-cover shrink-0"
+      />
         ) : (
           <div className="w-20 h-20 rounded-xl bg-gray-100
                           flex items-center justify-center shrink-0">

@@ -25,6 +25,7 @@ export default function ArticlesPage() {
   const [showForm, setShowForm] = useState(false);
   const [showDetail, setShowDetail] = useState(false);
   const [selected, setSelected] = useState(null);
+  const API_BASE_URL = import.meta.env.VITE_API_URL.replace("/api", "");
 
   const { data, isLoading } = useArticles({
     search, categorie, page, limit: 15
@@ -131,12 +132,11 @@ export default function ArticlesPage() {
                   <Td>
                     <div className="flex items-center gap-3">
                       {art.image ? (
-                        <img
-                          src={`http://localhost:5000/${art.image}`}
-                          alt={art.designation}
-                          className="w-8 h-8 rounded-lg object-cover
-                                     shrink-0"
-                        />
+                      <img
+                        src={`${API_BASE_URL}/${art.image}`}
+                        alt={art.designation}
+                        className="w-8 h-8 rounded-lg object-cover shrink-0"
+                      />
                       ) : (
                         <div className="w-8 h-8 rounded-lg bg-gray-100
                                         shrink-0" />
