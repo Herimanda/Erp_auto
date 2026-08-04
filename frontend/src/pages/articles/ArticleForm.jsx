@@ -5,6 +5,7 @@ import { z } from 'zod';
 import { Upload, X } from 'lucide-react';
 import { useCategories, useCreateArticle, useUpdateArticle }
   from '../../hooks/useArticles';
+import NativeImagePicker from './NativeImagePicker'; 
 
 const schema = z.object({
   reference:    z.string().min(1, 'Référence requise'),
