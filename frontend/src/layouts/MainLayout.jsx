@@ -1,11 +1,11 @@
-import { Outlet, useLocation } from 'react-router-dom';
-import { Toaster } from 'react-hot-toast';
-import Sidebar from './Sidebar';
-import Topbar from './Topbar';
-import useUiStore from '../store/uiStore';
-import { clsx } from 'clsx';
-import { navigation } from '../config/navigation';
-import { useBackButton } from '../hooks/useBackButton';
+import { Outlet, useLocation } from "react-router-dom";
+import { Toaster } from "react-hot-toast";
+import Sidebar from "./Sidebar";
+import Topbar from "./Topbar";
+import useUiStore from "../store/uiStore";
+import { clsx } from "clsx";
+import { navigation } from "../config/navigation";
+import { useBackButton } from "../hooks/useBackButton";
 
 // Trouver le titre de la page depuis la config
 const getPageTitle = (pathname) => {
@@ -14,12 +14,12 @@ const getPageTitle = (pathname) => {
       if (item.path === pathname) return item.label;
     }
   }
-  return 'ERP Auto';
+  return "ERP Auto";
 };
 
 export default function MainLayout() {
   useBackButton();
-  
+
   const { sidebarOpen } = useUiStore();
   const location = useLocation();
   const title = getPageTitle(location.pathname);
@@ -35,16 +35,18 @@ export default function MainLayout() {
       )}
 
       {/* Sidebar */}
-      <div className={clsx(
-        'fixed lg:relative inset-y-0 left-0 z-30',
-        'lg:flex shrink-0',
-        sidebarOpen ? 'flex' : 'hidden lg:flex'
-      )}>
+      <div
+        className={clsx(
+          "fixed lg:relative inset-y-0 left-0 z-30",
+          "lg:flex shrink-0",
+          sidebarOpen ? "flex" : "hidden lg:flex",
+        )}
+      >
         <Sidebar />
       </div>
 
       {/* Contenu principal */}
-      <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
+      <div className="flex flex-col flex-1 min-w-0 overflow-x-hidden">
         <Topbar title={title} />
 
         {/* Page */}
@@ -59,17 +61,17 @@ export default function MainLayout() {
         toastOptions={{
           duration: 3000,
           style: {
-            background: '#1e2a3b',
-            color: '#fff',
-            borderRadius: '10px',
-            fontSize: '14px'
+            background: "#1e2a3b",
+            color: "#fff",
+            borderRadius: "10px",
+            fontSize: "14px",
           },
           success: {
-            iconTheme: { primary: '#22c55e', secondary: '#fff' }
+            iconTheme: { primary: "#22c55e", secondary: "#fff" },
           },
           error: {
-            iconTheme: { primary: '#ef4444', secondary: '#fff' }
-          }
+            iconTheme: { primary: "#ef4444", secondary: "#fff" },
+          },
         }}
       />
     </div>

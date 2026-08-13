@@ -1,6 +1,3 @@
-import { create } from 'zustand';
-import { storage } from '../utils/storage';
-
 const useAuthStore = create((set, get) => ({
   user: null,
   token: null,
@@ -21,6 +18,11 @@ const useAuthStore = create((set, get) => ({
     set({ user, token });
   },
 
+  // ➕ Action manquante
+  setMagasinActif: (magasin) => {
+    set({ magasinActif: magasin });
+  },
+
   logout: async () => {
     await storage.remove('token');
     await storage.remove('user');
@@ -33,5 +35,3 @@ const useAuthStore = create((set, get) => ({
     return user ? roles.includes(user.role) : false;
   }
 }));
-
-export default useAuthStore;
