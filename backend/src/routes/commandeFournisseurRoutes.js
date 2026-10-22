@@ -6,6 +6,7 @@ const {
   modifierCommande, getCommandes, getCommande
 } = require('../controllers/commandeFournisseurController');
 const { protect, authorize } = require('../middlewares/auth');
+const { exigerMagasin } = require('../utils/magasinScope');
 
 router.use(protect);
 
@@ -13,6 +14,7 @@ router.route('/')
   .get(getCommandes)
   .post(
     authorize('administrateur', 'gestionnaire'),
+    exigerMagasin(['body', 'magasinId']),
     creerCommande
   );
 

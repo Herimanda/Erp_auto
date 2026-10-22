@@ -1,39 +1,36 @@
-const Transfert = require('../models/Transfert');
-const Stock = require('../models/Stock');
-const MouvementStock = require('../models/MouvementStock');
-const generateNumero = require('../utils/generateNumero');
-const { success, error } = require('../utils/apiResponse');
-const { notifierParRole } = require('../utils/NotificationHelper');
-
+const Transfert = require("../models/Transfert");
+const Stock = require("../models/Stock");
+const MouvementStock = require("../models/MouvementStock");
+const generateNumero = require("../utils/generateNumero");
+const { success, error } = require("../utils/apiResponse");
+const { notifierParRole } = require("../utils/NotificationHelper");
+const { filtreMagasin, peutAcceder } = require("../utils/magasinScope");
 
 const creerTransfert = async (req, res) => {
   try {
-    const {
-      magasinSource, magasinDestination,
-      lignes, notes
-    } = req.body;
+    const { magasinSource, magasinDestination, lignes, notes } = req.body;
 
     if (magasinSource === magasinDestination) {
-      return error(res, 'Source et destination identiques.', 400);
+      return error(res, "Source et destination identiques.", 400);
     }
 
     // Vérifier stocks disponibles
     for (const ligne of lignes) {
       const stock = await Stock.findOne({
         article: ligne.article,
-        magasin: magasinSource
+        magasin: magasinSource,
       });
       if (!stock || stock.quantite < ligne.quantiteDemandee) {
         return error(
           res,
           `Stock insuffisant pour l'article ${ligne.article}. 
            Disponible: ${stock?.quantite || 0}`,
-          400
+          400,
         );
       }
     }
 
-    const numero = await generateNumero(Transfert, 'TRF');
+    const numero = await generateNumero(Transfert, "TRF");
 
     const transfert = await Transfert.create({
       numero,
@@ -42,79 +39,77 @@ const creerTransfert = async (req, res) => {
       lignes,
       notes,
       demandePar: req.user._id,
-      statut: 'en_attente'
+      statut: "en_attente",
     });
 
     return success(
       res,
       await transfert.populate([
-        { path: 'magasinSource', select: 'nom code' },
-        { path: 'magasinDestination', select: 'nom code' },
-        { path: 'lignes.article', select: 'designation reference' },
-        { path: 'demandePar', select: 'nom prenom' }
+        { path: "magasinSource", select: "nom code" },
+        { path: "magasinDestination", select: "nom code" },
+        { path: "lignes.article", select: "designation reference" },
+        { path: "demandePar", select: "nom prenom" },
       ]),
-      'Demande de transfert créée.',
-      201
+      "Demande de transfert créée.",
+      201,
     );
   } catch (err) {
     return error(res, err.message);
   }
   await notifierParRole(
-  ['administrateur', 'gestionnaire', 'magasinier'],
-  {
-    type: 'transfert_attente',
-    titre: 'Nouveau transfert à valider',
-    message: `Transfert ${numero} en attente de validation`,
-    lien: '/transferts',
-    entiteId: transfert._id
-  },
-  magasinDestination
-);
+    ["administrateur", "gestionnaire", "magasinier"],
+    {
+      type: "transfert_attente",
+      titre: "Nouveau transfert à valider",
+      message: `Transfert ${numero} en attente de validation`,
+      lien: "/transferts",
+      entiteId: transfert._id,
+    },
+    magasinDestination,
+  );
 };
-
 
 const validerTransfert = async (req, res) => {
   try {
     const transfert = await Transfert.findById(req.params.id);
-    if (!transfert) return error(res, 'Transfert introuvable.', 404);
+    if (!transfert) return error(res, "Transfert introuvable.", 404);
 
-    if (transfert.statut !== 'en_attente') {
+    if (transfert.statut !== "en_attente") {
       return error(res, `Transfert déjà ${transfert.statut}.`, 400);
     }
 
-    transfert.statut = 'valide';
+    transfert.statut = "valide";
     transfert.validePar = req.user._id;
     transfert.dateValidation = new Date();
     await transfert.save();
 
-    return success(res, transfert, 'Transfert validé.');
+    return success(res, transfert, "Transfert validé.");
   } catch (err) {
     return error(res, err.message);
   }
 };
 
-
 const expedierTransfert = async (req, res) => {
   try {
     const transfert = await Transfert.findById(req.params.id);
-    if (!transfert) return error(res, 'Transfert introuvable.', 404);
+    if (!transfert) return error(res, "Transfert introuvable.", 404);
 
-    if (transfert.statut !== 'valide') {
-      return error(res, 'Le transfert doit être validé avant expédition.', 400);
+    if (transfert.statut !== "valide") {
+      return error(res, "Le transfert doit être validé avant expédition.", 400);
     }
 
     // Déduire stock source + créer mouvements
     for (const ligne of transfert.lignes) {
       const stock = await Stock.findOne({
         article: ligne.article,
-        magasin: transfert.magasinSource
+        magasin: transfert.magasinSource,
       });
 
       if (!stock || stock.quantite < ligne.quantiteDemandee) {
         return error(
           res,
           `Stock insuffisant pour expédition. Article: ${ligne.article}`,
-          400
+          400,
         );
       }
 
@@ -123,7 +118,7 @@ const expedierTransfert = async (req, res) => {
       await stock.save();
 
       await MouvementStock.create({
-        type: 'transfert_sortant',
+        type: "transfert_sortant",
         article: ligne.article,
         magasin: transfert.magasinSource,
         quantite: ligne.quantiteDemandee,
@@ -132,19 +127,22 @@ const expedierTransfert = async (req, res) => {
         reference: transfert.numero,
         magasinSource: transfert.magasinSource,
         magasinDestination: transfert.magasinDestination,
-        utilisateur: req.user._id
+        utilisateur: req.user._id,
       });
     }
 
-    transfert.statut = 'expedie';
+    transfert.statut = "expedie";
     await transfert.save();
 
-    return success(res, transfert, 'Transfert expédié. Stock source mis à jour.');
+    return success(
+      res,
+      transfert,
+      "Transfert expédié. Stock source mis à jour.",
+    );
   } catch (err) {
     return error(res, err.message);
   }
 };
-
 
 const receptionnerTransfert = async (req, res) => {
   try {
@@ -152,32 +150,31 @@ const receptionnerTransfert = async (req, res) => {
     // quantitesRecues : [{ articleId, quantite }]
 
     const transfert = await Transfert.findById(req.params.id);
-    if (!transfert) return error(res, 'Transfert introuvable.', 404);
+    if (!transfert) return error(res, "Transfert introuvable.", 404);
 
-    if (transfert.statut !== 'expedie') {
-      return error(res, 'Le transfert doit être expédié avant réception.', 400);
+    if (transfert.statut !== "expedie") {
+      return error(res, "Le transfert doit être expédié avant réception.", 400);
     }
 
     // Ajouter stock destination
     for (const ligne of transfert.lignes) {
       const qteRecue = quantitesRecues
-        ? quantitesRecues.find(
-            q => q.articleId === ligne.article.toString()
-          )?.quantite || ligne.quantiteDemandee
+        ? quantitesRecues.find((q) => q.articleId === ligne.article.toString())
+            ?.quantite || ligne.quantiteDemandee
         : ligne.quantiteDemandee;
 
       ligne.quantiteRecue = qteRecue;
 
       let stockDest = await Stock.findOne({
         article: ligne.article,
-        magasin: transfert.magasinDestination
+        magasin: transfert.magasinDestination,
       });
 
       if (!stockDest) {
         stockDest = await Stock.create({
           article: ligne.article,
           magasin: transfert.magasinDestination,
-          quantite: 0
+          quantite: 0,
         });
       }
 
@@ -186,7 +183,7 @@ const receptionnerTransfert = async (req, res) => {
       await stockDest.save();
 
       await MouvementStock.create({
-        type: 'transfert_entrant',
+        type: "transfert_entrant",
         article: ligne.article,
         magasin: transfert.magasinDestination,
         quantite: qteRecue,
@@ -195,49 +192,55 @@ const receptionnerTransfert = async (req, res) => {
         reference: transfert.numero,
         magasinSource: transfert.magasinSource,
         magasinDestination: transfert.magasinDestination,
-        utilisateur: req.user._id
+        utilisateur: req.user._id,
       });
     }
 
-    transfert.statut = 'recu';
+    transfert.statut = "recu";
     transfert.receptionPar = req.user._id;
     transfert.dateReception = new Date();
     await transfert.save();
 
-    return success(res, transfert, 'Transfert réceptionné. Stock destination mis à jour.');
+    return success(
+      res,
+      transfert,
+      "Transfert réceptionné. Stock destination mis à jour.",
+    );
   } catch (err) {
     return error(res, err.message);
   }
   await notifierParRole(
-  ['administrateur', 'gestionnaire'],
-  {
-    type: 'transfert_recu',
-    titre: 'Transfert réceptionné',
-    message: `Transfert ${transfert.numero} reçu avec succès`,
-    lien: '/transferts',
-    entiteId: transfert._id
-  },
-  transfert.magasinSource
-);
+    ["administrateur", "gestionnaire"],
+    {
+      type: "transfert_recu",
+      titre: "Transfert réceptionné",
+      message: `Transfert ${transfert.numero} reçu avec succès`,
+      lien: "/transferts",
+      entiteId: transfert._id,
+    },
+    transfert.magasinSource,
+  );
 };
-
-
 
 const annulerTransfert = async (req, res) => {
   try {
     const transfert = await Transfert.findById(req.params.id);
-    if (!transfert) return error(res, 'Transfert introuvable.', 404);
+    if (!transfert) return error(res, "Transfert introuvable.", 404);
 
-    if (['recu', 'annule'].includes(transfert.statut)) {
-      return error(res, `Impossible d'annuler un transfert ${transfert.statut}.`, 400);
+    if (["recu", "annule"].includes(transfert.statut)) {
+      return error(
+        res,
+        `Impossible d'annuler un transfert ${transfert.statut}.`,
+        400,
+      );
     }
 
     // Si déjà expédié, remettre le stock source
-    if (transfert.statut === 'expedie') {
+    if (transfert.statut === "expedie") {
       for (const ligne of transfert.lignes) {
         const stock = await Stock.findOne({
           article: ligne.article,
-          magasin: transfert.magasinSource
+          magasin: transfert.magasinSource,
         });
         if (stock) {
           stock.quantite += ligne.quantiteDemandee;
@@ -246,35 +249,39 @@ const annulerTransfert = async (req, res) => {
       }
     }
 
-    transfert.statut = 'annule';
+    transfert.statut = "annule";
     await transfert.save();
 
-    return success(res, transfert, 'Transfert annulé.');
+    return success(res, transfert, "Transfert annulé.");
   } catch (err) {
     return error(res, err.message);
   }
 };
 
-
 const getTransferts = async (req, res) => {
   try {
     const {
-      statut, magasinSource,
-      magasinDestination, page = 1, limit = 20
+      statut,
+      magasinSource,
+      magasinDestination,
+      page = 1,
+      limit = 20,
     } = req.query;
 
     const filtre = {};
     if (statut) filtre.statut = statut;
-    if (magasinSource) filtre.magasinSource = magasinSource;
+    const f = filtreMagasin(req.user, magasin);
+    if (f.refuse) return error(res, "Accès refusé à ce magasin.", 403);
+    if (f.valeur) filtre.magasin = f.valeur;
     if (magasinDestination) filtre.magasinDestination = magasinDestination;
 
     const total = await Transfert.countDocuments(filtre);
     const transferts = await Transfert.find(filtre)
-      .populate('magasinSource', 'nom code')
-      .populate('magasinDestination', 'nom code')
-      .populate('lignes.article', 'designation reference')
-      .populate('demandePar', 'nom prenom')
-      .populate('validePar', 'nom prenom')
+      .populate("magasinSource", "nom code")
+      .populate("magasinDestination", "nom code")
+      .populate("lignes.article", "designation reference")
+      .populate("demandePar", "nom prenom")
+      .populate("validePar", "nom prenom")
       .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
       .limit(Number(limit));
@@ -282,10 +289,11 @@ const getTransferts = async (req, res) => {
     return success(res, {
       transferts,
       pagination: {
-        total, page: Number(page),
+        total,
+        page: Number(page),
         limit: Number(limit),
-        totalPages: Math.ceil(total / limit)
-      }
+        totalPages: Math.ceil(total / limit),
+      },
     });
   } catch (err) {
     return error(res, err.message);
@@ -293,6 +301,10 @@ const getTransferts = async (req, res) => {
 };
 
 module.exports = {
-  creerTransfert, validerTransfert, expedierTransfert,
-  receptionnerTransfert, annulerTransfert, getTransferts
+  creerTransfert,
+  validerTransfert,
+  expedierTransfert,
+  receptionnerTransfert,
+  annulerTransfert,
+  getTransferts,
 };

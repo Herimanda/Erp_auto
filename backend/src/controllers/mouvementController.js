@@ -1,28 +1,31 @@
-const Stock = require('../models/Stock');
-const Article = require('../models/Article');
-const MouvementStock = require('../models/MouvementStock');
-const { success, error } = require('../utils/apiResponse');
-const { notifierParRole } = require('../utils/NotificationHelper');
+const Stock = require("../models/Stock");
+const Article = require("../models/Article");
+const MouvementStock = require("../models/MouvementStock");
+const { success, error } = require("../utils/apiResponse");
+const { notifierParRole } = require("../utils/NotificationHelper");
+const { filtreMagasin, peutAcceder } = require('../utils/magasinScope');
 
 // Fonction utilitaire : mettre à jour le stock
 const updateStock = async (articleId, magasinId, quantite, type) => {
   let stock = await Stock.findOne({
     article: articleId,
-    magasin: magasinId
+    magasin: magasinId,
   });
 
   if (!stock) {
     stock = await Stock.create({
       article: articleId,
       magasin: magasinId,
-      quantite: 0
+      quantite: 0,
     });
   }
 
   const quantiteAvant = stock.quantite;
   const entreesTypes = [
-    'achat_fournisseur', 'retour_client',
-    'ajustement_positif', 'transfert_entrant'
+    "achat_fournisseur",
+    "retour_client",
+    "ajustement_positif",
+    "transfert_entrant",
   ];
 
   if (entreesTypes.includes(type)) {
@@ -30,7 +33,7 @@ const updateStock = async (articleId, magasinId, quantite, type) => {
   } else {
     if (stock.quantite < quantite) {
       throw new Error(
-        `Stock insuffisant. Disponible: ${stock.quantite}, Demandé: ${quantite}`
+        `Stock insuffisant. Disponible: ${stock.quantite}, Demandé: ${quantite}`,
       );
     }
     stock.quantite -= quantite;
@@ -42,15 +45,15 @@ const updateStock = async (articleId, magasinId, quantite, type) => {
   const article = await Article.findById(articleId);
   if (article && stock.quantite <= article.stockMinimum) {
     await notifierParRole(
-      ['administrateur', 'gestionnaire'],
+      ["administrateur", "gestionnaire"],
       {
-        type: 'stock_minimum',
-        titre: stock.quantite === 0 ? 'Rupture de stock' : 'Stock faible',
+        type: "stock_minimum",
+        titre: stock.quantite === 0 ? "Rupture de stock" : "Stock faible",
         message: `${article.designation} : ${stock.quantite} unité(s) restante(s) (seuil: ${article.stockMinimum})`,
-        lien: '/stocks',
-        entiteId: article._id
+        lien: "/stocks",
+        entiteId: article._id,
       },
-      magasinId
+      magasinId,
     );
   }
 
@@ -62,23 +65,33 @@ const updateStock = async (articleId, magasinId, quantite, type) => {
 const entreeStock = async (req, res) => {
   try {
     const {
-      articleId, magasinId, quantite,
-      type, motif, reference, prixUnitaire
+      articleId,
+      magasinId,
+      quantite,
+      type,
+      motif,
+      reference,
+      prixUnitaire,
     } = req.body;
 
     const entreesValides = [
-      'achat_fournisseur', 'retour_client',
-      'ajustement_positif', 'transfert_entrant'
+      "achat_fournisseur",
+      "retour_client",
+      "ajustement_positif",
+      "transfert_entrant",
     ];
     if (!entreesValides.includes(type)) {
-      return error(res, 'Type d\'entrée invalide.', 400);
+      return error(res, "Type d'entrée invalide.", 400);
     }
 
     const article = await Article.findById(articleId);
-    if (!article) return error(res, 'Article introuvable.', 404);
+    if (!article) return error(res, "Article introuvable.", 404);
 
     const { quantiteAvant, quantiteApres } = await updateStock(
-      articleId, magasinId, quantite, type
+      articleId,
+      magasinId,
+      quantite,
+      type,
     );
 
     const mouvement = await MouvementStock.create({
@@ -91,18 +104,18 @@ const entreeStock = async (req, res) => {
       prixUnitaire: prixUnitaire || article.prixAchat,
       motif,
       reference,
-      utilisateur: req.user._id
+      utilisateur: req.user._id,
     });
 
     return success(
       res,
       await mouvement.populate([
-        { path: 'article', select: 'designation reference' },
-        { path: 'magasin', select: 'nom code' },
-        { path: 'utilisateur', select: 'nom prenom' }
+        { path: "article", select: "designation reference" },
+        { path: "magasin", select: "nom code" },
+        { path: "utilisateur", select: "nom prenom" },
       ]),
-      'Entrée de stock enregistrée.',
-      201
+      "Entrée de stock enregistrée.",
+      201,
     );
   } catch (err) {
     return error(res, err.message);
@@ -113,24 +126,26 @@ const entreeStock = async (req, res) => {
 
 const sortieStock = async (req, res) => {
   try {
-    const {
-      articleId, magasinId, quantite,
-      type, motif, reference
-    } = req.body;
+    const { articleId, magasinId, quantite, type, motif, reference } = req.body;
 
     const sortiesValides = [
-      'vente', 'retour_fournisseur',
-      'ajustement_negatif', 'transfert_sortant'
+      "vente",
+      "retour_fournisseur",
+      "ajustement_negatif",
+      "transfert_sortant",
     ];
     if (!sortiesValides.includes(type)) {
-      return error(res, 'Type de sortie invalide.', 400);
+      return error(res, "Type de sortie invalide.", 400);
     }
 
     const article = await Article.findById(articleId);
-    if (!article) return error(res, 'Article introuvable.', 404);
+    if (!article) return error(res, "Article introuvable.", 404);
 
     const { quantiteAvant, quantiteApres } = await updateStock(
-      articleId, magasinId, quantite, type
+      articleId,
+      magasinId,
+      quantite,
+      type,
     );
 
     const mouvement = await MouvementStock.create({
@@ -142,18 +157,18 @@ const sortieStock = async (req, res) => {
       quantiteApres,
       motif,
       reference,
-      utilisateur: req.user._id
+      utilisateur: req.user._id,
     });
 
     return success(
       res,
       await mouvement.populate([
-        { path: 'article', select: 'designation reference' },
-        { path: 'magasin', select: 'nom code' },
-        { path: 'utilisateur', select: 'nom prenom' }
+        { path: "article", select: "designation reference" },
+        { path: "magasin", select: "nom code" },
+        { path: "utilisateur", select: "nom prenom" },
       ]),
-      'Sortie de stock enregistrée.',
-      201
+      "Sortie de stock enregistrée.",
+      201,
     );
   } catch (err) {
     return error(res, err.message);
@@ -164,34 +179,29 @@ const sortieStock = async (req, res) => {
 
 const ajustementStock = async (req, res) => {
   try {
-    const {
-      articleId, magasinId,
-      nouvelleQuantite, motif
-    } = req.body;
+    const { articleId, magasinId, nouvelleQuantite, motif } = req.body;
 
-    const motifsValides = ['casse', 'perte', 'vol', 'correction_erreur'];
+    const motifsValides = ["casse", "perte", "vol", "correction_erreur"];
     if (!motifsValides.includes(motif)) {
-      return error(res, 'Motif invalide.', 400);
+      return error(res, "Motif invalide.", 400);
     }
 
     let stock = await Stock.findOne({
       article: articleId,
-      magasin: magasinId
+      magasin: magasinId,
     });
 
     if (!stock) {
       stock = await Stock.create({
         article: articleId,
         magasin: magasinId,
-        quantite: 0
+        quantite: 0,
       });
     }
 
     const quantiteAvant = stock.quantite;
     const difference = nouvelleQuantite - quantiteAvant;
-    const type = difference >= 0
-      ? 'ajustement_positif'
-      : 'ajustement_negatif';
+    const type = difference >= 0 ? "ajustement_positif" : "ajustement_negatif";
 
     stock.quantite = nouvelleQuantite;
     await stock.save();
@@ -200,15 +210,15 @@ const ajustementStock = async (req, res) => {
     const article = await Article.findById(articleId);
     if (article && stock.quantite <= article.stockMinimum) {
       await notifierParRole(
-        ['administrateur', 'gestionnaire'],
+        ["administrateur", "gestionnaire"],
         {
-          type: 'stock_minimum',
-          titre: stock.quantite === 0 ? 'Rupture de stock' : 'Stock faible',
+          type: "stock_minimum",
+          titre: stock.quantite === 0 ? "Rupture de stock" : "Stock faible",
           message: `${article.designation} : ${stock.quantite} unité(s) restante(s) (seuil: ${article.stockMinimum})`,
-          lien: '/stocks',
-          entiteId: article._id
+          lien: "/stocks",
+          entiteId: article._id,
         },
-        magasinId
+        magasinId,
       );
     }
 
@@ -220,16 +230,16 @@ const ajustementStock = async (req, res) => {
       quantiteAvant,
       quantiteApres: nouvelleQuantite,
       motif,
-      utilisateur: req.user._id
+      utilisateur: req.user._id,
     });
 
     return success(
       res,
       await mouvement.populate([
-        { path: 'article', select: 'designation reference' },
-        { path: 'magasin', select: 'nom code' }
+        { path: "article", select: "designation reference" },
+        { path: "magasin", select: "nom code" },
       ]),
-      `Stock ajusté : ${quantiteAvant} → ${nouvelleQuantite}`
+      `Stock ajusté : ${quantiteAvant} → ${nouvelleQuantite}`,
     );
   } catch (err) {
     return error(res, err.message);
@@ -241,13 +251,19 @@ const ajustementStock = async (req, res) => {
 const getHistorique = async (req, res) => {
   try {
     const {
-      magasin, article, type,
-      dateDebut, dateFin,
-      page = 1, limit = 30
+      magasin,
+      article,
+      type,
+      dateDebut,
+      dateFin,
+      page = 1,
+      limit = 30,
     } = req.query;
 
     const filtre = {};
-    if (magasin) filtre.magasin = magasin;
+    const f = filtreMagasin(req.user, magasin);
+    if (f.refuse) return error(res, "Accès refusé à ce magasin.", 403);
+    if (f.valeur) filtre.magasin = f.valeur;
     if (article) filtre.article = article;
     if (type) filtre.type = type;
     if (dateDebut || dateFin) {
@@ -262,11 +278,11 @@ const getHistorique = async (req, res) => {
 
     const total = await MouvementStock.countDocuments(filtre);
     const mouvements = await MouvementStock.find(filtre)
-      .populate('article', 'designation reference')
-      .populate('magasin', 'nom code')
-      .populate('utilisateur', 'nom prenom')
-      .populate('magasinSource', 'nom code')
-      .populate('magasinDestination', 'nom code')
+      .populate("article", "designation reference")
+      .populate("magasin", "nom code")
+      .populate("utilisateur", "nom prenom")
+      .populate("magasinSource", "nom code")
+      .populate("magasinDestination", "nom code")
       .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
       .limit(Number(limit));
@@ -277,17 +293,17 @@ const getHistorique = async (req, res) => {
         total,
         page: Number(page),
         limit: Number(limit),
-        totalPages: Math.ceil(total / limit)
-      }
+        totalPages: Math.ceil(total / limit),
+      },
     });
   } catch (err) {
     return error(res, err.message);
   }
 };
 
-
-
 module.exports = {
-  entreeStock, sortieStock,
-  ajustementStock, getHistorique
+  entreeStock,
+  sortieStock,
+  ajustementStock,
+  getHistorique,
 };

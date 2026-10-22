@@ -1,16 +1,20 @@
-const Devis = require('../models/Devis');
-const Article = require('../models/Article');
-const Stock = require('../models/Stock');
-const generateNumero = require('../utils/generateNumero');
-const { calculerTotaux } = require('../utils/calculLignes');
-const { success, error } = require('../utils/apiResponse');
+const Devis = require("../models/Devis");
+const Article = require("../models/Article");
+const Stock = require("../models/Stock");
+const generateNumero = require("../utils/generateNumero");
+const { calculerTotaux } = require("../utils/calculLignes");
+const { success, error } = require("../utils/apiResponse");
+const { filtreMagasin, peutAcceder } = require("../utils/magasinScope");
 
 const creerDevis = async (req, res) => {
   try {
     const {
-      client, magasin, lignes,
+      client,
+      magasin,
+      lignes,
       remiseGlobale = 0,
-      dateValidite, notes
+      dateValidite,
+      notes,
     } = req.body;
 
     // Enrichir les lignes
@@ -24,51 +28,67 @@ const creerDevis = async (req, res) => {
           quantite: ligne.quantite,
           prixUnitaire: ligne.prixUnitaire || article.prixVente,
           tva: ligne.tva || article.tva,
-          remise: ligne.remise || 0
+          remise: ligne.remise || 0,
         };
-      })
+      }),
     );
 
-    const { lignes: lignesCalc, totalHT, totalTVA, totalTTC } =
-      calculerTotaux(lignesEnrichies, remiseGlobale);
+    const {
+      lignes: lignesCalc,
+      totalHT,
+      totalTVA,
+      totalTTC,
+    } = calculerTotaux(lignesEnrichies, remiseGlobale);
 
-    const numero = await generateNumero(Devis, 'DEV');
+    const numero = await generateNumero(Devis, "DEV");
 
     const devis = await Devis.create({
-      numero, client, magasin,
+      numero,
+      client,
+      magasin,
       lignes: lignesCalc,
-      totalHT, totalTVA, totalTTC,
-      remiseGlobale, dateValidite,
-      notes, creePar: req.user._id
+      totalHT,
+      totalTVA,
+      totalTTC,
+      remiseGlobale,
+      dateValidite,
+      notes,
+      creePar: req.user._id,
     });
 
     return success(
       res,
       await devis.populate([
-        { path: 'client', select: 'nom prenom societe numeroClient' },
-        { path: 'magasin', select: 'nom code' },
-        { path: 'lignes.article', select: 'designation reference' },
-        { path: 'creePar', select: 'nom prenom' }
+        { path: "client", select: "nom prenom societe numeroClient" },
+        { path: "magasin", select: "nom code" },
+        { path: "lignes.article", select: "designation reference" },
+        { path: "creePar", select: "nom prenom" },
       ]),
-      'Devis créé avec succès.', 201
+      "Devis créé avec succès.",
+      201,
     );
   } catch (err) {
     return error(res, err.message);
   }
 };
 
-
 const getDevisList = async (req, res) => {
   try {
     const {
-      client, magasin, statut,
-      dateDebut, dateFin,
-      page = 1, limit = 20
+      client,
+      magasin,
+      statut,
+      dateDebut,
+      dateFin,
+      page = 1,
+      limit = 20,
     } = req.query;
 
     const filtre = {};
     if (client) filtre.client = client;
-    if (magasin) filtre.magasin = magasin;
+    const f = filtreMagasin(req.user, magasin);
+    if (f.refuse) return error(res, "Accès refusé à ce magasin.", 403);
+    if (f.valeur) filtre.magasin = f.valeur;
     if (statut) filtre.statut = statut;
     if (dateDebut || dateFin) {
       filtre.createdAt = {};
@@ -82,9 +102,9 @@ const getDevisList = async (req, res) => {
 
     const total = await Devis.countDocuments(filtre);
     const devis = await Devis.find(filtre)
-      .populate('client', 'nom prenom societe numeroClient')
-      .populate('magasin', 'nom code')
-      .populate('creePar', 'nom prenom')
+      .populate("client", "nom prenom societe numeroClient")
+      .populate("magasin", "nom code")
+      .populate("creePar", "nom prenom")
       .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
       .limit(Number(limit));
@@ -92,40 +112,42 @@ const getDevisList = async (req, res) => {
     return success(res, {
       devis,
       pagination: {
-        total, page: Number(page),
+        total,
+        page: Number(page),
         limit: Number(limit),
-        totalPages: Math.ceil(total / limit)
-      }
+        totalPages: Math.ceil(total / limit),
+      },
     });
   } catch (err) {
     return error(res, err.message);
   }
 };
 
-
 const getDevis = async (req, res) => {
   try {
     const devis = await Devis.findById(req.params.id)
-      .populate('client')
-      .populate('magasin')
-      .populate('lignes.article', 'designation reference prixVente')
-      .populate('creePar', 'nom prenom');
+      .populate("client")
+      .populate("magasin")
+      .populate("lignes.article", "designation reference prixVente")
+      .populate("creePar", "nom prenom");
 
-    if (!devis) return error(res, 'Devis introuvable.', 404);
+    if (!devis) return error(res, "Devis introuvable.", 404);
+    if (!peutAcceder(req.user, facture.magasin)) {
+      return error(res, "Facture introuvable.", 404); // 404 pour ne pas révéler l'existence
+    }
     return success(res, devis);
   } catch (err) {
     return error(res, err.message);
   }
 };
 
-
 const modifierDevis = async (req, res) => {
   try {
     const devis = await Devis.findById(req.params.id);
-    if (!devis) return error(res, 'Devis introuvable.', 404);
+    if (!devis) return error(res, "Devis introuvable.", 404);
 
-    if (devis.statut !== 'brouillon') {
-      return error(res, 'Seul un devis brouillon peut être modifié.', 400);
+    if (devis.statut !== "brouillon") {
+      return error(res, "Seul un devis brouillon peut être modifié.", 400);
     }
 
     const { lignes, remiseGlobale = 0, dateValidite, notes } = req.body;
@@ -140,13 +162,17 @@ const modifierDevis = async (req, res) => {
             quantite: ligne.quantite,
             prixUnitaire: ligne.prixUnitaire || article?.prixVente,
             tva: ligne.tva || article?.tva || 20,
-            remise: ligne.remise || 0
+            remise: ligne.remise || 0,
           };
-        })
+        }),
       );
 
-      const { lignes: lignesCalc, totalHT, totalTVA, totalTTC } =
-        calculerTotaux(lignesEnrichies, remiseGlobale);
+      const {
+        lignes: lignesCalc,
+        totalHT,
+        totalTVA,
+        totalTTC,
+      } = calculerTotaux(lignesEnrichies, remiseGlobale);
 
       devis.lignes = lignesCalc;
       devis.totalHT = totalHT;
@@ -159,70 +185,69 @@ const modifierDevis = async (req, res) => {
     if (notes !== undefined) devis.notes = notes;
 
     await devis.save();
-    return success(res, devis, 'Devis modifié.');
+    return success(res, devis, "Devis modifié.");
   } catch (err) {
     return error(res, err.message);
   }
 };
 
-
 const changerStatutDevis = async (req, res) => {
   try {
     const { statut } = req.body;
-    const statutsValides = ['brouillon', 'envoye', 'accepte', 'refuse'];
+    const statutsValides = ["brouillon", "envoye", "accepte", "refuse"];
 
     if (!statutsValides.includes(statut)) {
-      return error(res, 'Statut invalide.', 400);
+      return error(res, "Statut invalide.", 400);
     }
 
     const devis = await Devis.findByIdAndUpdate(
       req.params.id,
       { statut },
-      { new: true }
+      { new: true },
     );
 
-    if (!devis) return error(res, 'Devis introuvable.', 404);
+    if (!devis) return error(res, "Devis introuvable.", 404);
     return success(res, devis, `Devis ${statut}.`);
   } catch (err) {
     return error(res, err.message);
   }
 };
 
-
 const convertirEnFacture = async (req, res) => {
   try {
-    const devis = await Devis.findById(req.params.id)
-      .populate('lignes.article');
+    const devis = await Devis.findById(req.params.id).populate(
+      "lignes.article",
+    );
 
-    if (!devis) return error(res, 'Devis introuvable.', 404);
+    if (!devis) return error(res, "Devis introuvable.", 404);
 
-    if (!['accepte', 'envoye'].includes(devis.statut)) {
-      return error(res, 'Le devis doit être accepté ou envoyé.', 400);
+    if (!["accepte", "envoye"].includes(devis.statut)) {
+      return error(res, "Le devis doit être accepté ou envoyé.", 400);
     }
 
     // Vérifier stocks disponibles
     for (const ligne of devis.lignes) {
       const stock = await Stock.findOne({
         article: ligne.article._id,
-        magasin: devis.magasin
+        magasin: devis.magasin,
       });
       if (!stock || stock.quantite < ligne.quantite) {
         return error(
           res,
           `Stock insuffisant pour ${ligne.designation}. 
            Disponible: ${stock?.quantite || 0}`,
-          400
+          400,
         );
       }
     }
 
     // Créer la facture
-    const Facture = require('../models/Facture');
-    const numeroFacture = await generateNumero(Facture, 'FAC');
+    const Facture = require("../models/Facture");
+    const numeroFacture = await generateNumero(Facture, "FAC");
 
     const facture = await Facture.create({
       numero: numeroFacture,
-      type: req.body.type || 'comptoir',
+      type: req.body.type || "comptoir",
       client: devis.client,
       magasin: devis.magasin,
       lignes: devis.lignes,
@@ -234,20 +259,20 @@ const convertirEnFacture = async (req, res) => {
       montantRestant: devis.totalTTC,
       devisOrigine: devis._id,
       notes: devis.notes,
-      creePar: req.user._id
+      creePar: req.user._id,
     });
 
     // Mettre à jour statut devis
-    devis.statut = 'accepte';
+    devis.statut = "accepte";
     await devis.save();
 
     return success(
       res,
       await facture.populate([
-        { path: 'client', select: 'nom prenom societe' },
-        { path: 'magasin', select: 'nom code' }
+        { path: "client", select: "nom prenom societe" },
+        { path: "magasin", select: "nom code" },
       ]),
-      'Devis converti en facture avec succès.'
+      "Devis converti en facture avec succès.",
     );
   } catch (err) {
     return error(res, err.message);
@@ -255,6 +280,10 @@ const convertirEnFacture = async (req, res) => {
 };
 
 module.exports = {
-  creerDevis, getDevisList, getDevis,
-  modifierDevis, changerStatutDevis, convertirEnFacture
+  creerDevis,
+  getDevisList,
+  getDevis,
+  modifierDevis,
+  changerStatutDevis,
+  convertirEnFacture,
 };

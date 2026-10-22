@@ -1,30 +1,39 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
 const {
-  creerDevis, getDevisList, getDevis,
-  modifierDevis, changerStatutDevis, convertirEnFacture
-} = require('../controllers/devisController');
-const { protect, authorize } = require('../middlewares/auth');
+  creerDevis,
+  getDevisList,
+  getDevis,
+  modifierDevis,
+  changerStatutDevis,
+  convertirEnFacture,
+} = require("../controllers/devisController");
+const { protect, authorize } = require("../middlewares/auth");
+import { exigerMagasin } from "../utils/magasinScope";
 
 router.use(protect);
 
-router.route('/')
+router
+  .route("/")
   .get(getDevisList)
-  .post(authorize('administrateur', 'gestionnaire', 'caissier'), creerDevis);
+  .post(authorize("administrateur", "gestionnaire", "caissier"), creerDevis);
+ 
 
-router.route('/:id')
+router
+  .route("/:id")
   .get(getDevis)
-  .put(authorize('administrateur', 'gestionnaire', 'caissier'), modifierDevis);
+  .put(authorize("administrateur", "gestionnaire", "caissier"), modifierDevis);
 
 router.put(
-  '/:id/statut',
-  authorize('administrateur', 'gestionnaire'),
-  changerStatutDevis
+  "/:id/statut",
+  authorize("administrateur", "gestionnaire"),
+  changerStatutDevis,
 );
 router.post(
-  '/:id/convertir',
-  authorize('administrateur', 'gestionnaire', 'caissier'),
-  convertirEnFacture
+  "/:id/convertir",
+  authorize("administrateur", "gestionnaire", "caissier"),
+   exigerMagasin(["body", "magasin"]),
+  convertirEnFacture,
 );
 
 module.exports = router;

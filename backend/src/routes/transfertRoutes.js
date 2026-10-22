@@ -5,6 +5,7 @@ const {
   receptionnerTransfert, annulerTransfert, getTransferts
 } = require('../controllers/transfertController');
 const { protect, authorize } = require('../middlewares/auth');
+const { exigerMagasin } = require('../utils/magasinScope');
 
 router.use(protect);
 
@@ -12,6 +13,7 @@ router.route('/')
   .get(getTransferts)
   .post(
     authorize('administrateur', 'gestionnaire', 'magasinier'),
+    exigerMagasin(['body', 'magasinSource']),
     creerTransfert
   );
 

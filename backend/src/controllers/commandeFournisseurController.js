@@ -1,9 +1,10 @@
-const CommandeFournisseur = require('../models/CommandeFournisseur');
-const Stock = require('../models/Stock');
-const MouvementStock = require('../models/MouvementStock');
-const Article = require('../models/Article');
-const generateNumero = require('../utils/generateNumero');
-const { success, error } = require('../utils/apiResponse');
+const CommandeFournisseur = require("../models/CommandeFournisseur");
+const Stock = require("../models/Stock");
+const MouvementStock = require("../models/MouvementStock");
+const Article = require("../models/Article");
+const generateNumero = require("../utils/generateNumero");
+const { success, error } = require("../utils/apiResponse");
+const { filtreMagasin, peutAcceder } = require("../utils/magasinScope");
 
 // Calculer les totaux d'une commande
 const calculerTotaux = (lignes) => {
@@ -14,13 +15,10 @@ const calculerTotaux = (lignes) => {
   }, 0);
 };
 
-
 const creerCommande = async (req, res) => {
   try {
-    const {
-      fournisseur, magasin, lignes,
-      dateLivraisonPrevue, notes
-    } = req.body;
+    const { fournisseur, magasin, lignes, dateLivraisonPrevue, notes } =
+      req.body;
 
     // Enrichir les lignes avec désignations articles
     const lignesEnrichies = await Promise.all(
@@ -28,56 +26,58 @@ const creerCommande = async (req, res) => {
         const article = await Article.findById(ligne.article);
         return {
           ...ligne,
-          designation: article?.designation || '',
-          prixUnitaire: ligne.prixUnitaire || article?.prixAchat || 0
+          designation: article?.designation || "",
+          prixUnitaire: ligne.prixUnitaire || article?.prixAchat || 0,
         };
-      })
+      }),
     );
 
     const totalHT = calculerTotaux(lignesEnrichies);
-    const numero = await generateNumero(CommandeFournisseur, 'CMD');
+    const numero = await generateNumero(CommandeFournisseur, "CMD");
 
     const commande = await CommandeFournisseur.create({
-      numero, fournisseur, magasin,
+      numero,
+      fournisseur,
+      magasin,
       lignes: lignesEnrichies,
-      totalHT, dateLivraisonPrevue,
-      notes, creePar: req.user._id
+      totalHT,
+      dateLivraisonPrevue,
+      notes,
+      creePar: req.user._id,
     });
 
     return success(
       res,
       await commande.populate([
-        { path: 'fournisseur', select: 'raisonSociale reference' },
-        { path: 'magasin', select: 'nom code' },
-        { path: 'lignes.article', select: 'designation reference' }
+        { path: "fournisseur", select: "raisonSociale reference" },
+        { path: "magasin", select: "nom code" },
+        { path: "lignes.article", select: "designation reference" },
       ]),
-      'Commande fournisseur créée.',
-      201
+      "Commande fournisseur créée.",
+      201,
     );
   } catch (err) {
     return error(res, err.message);
   }
 };
 
-
 const validerCommande = async (req, res) => {
   try {
     const commande = await CommandeFournisseur.findById(req.params.id);
-    if (!commande) return error(res, 'Commande introuvable.', 404);
+    if (!commande) return error(res, "Commande introuvable.", 404);
 
-    if (commande.statut !== 'brouillon') {
-      return error(res, 'Seul un brouillon peut être validé.', 400);
+    if (commande.statut !== "brouillon") {
+      return error(res, "Seul un brouillon peut être validé.", 400);
     }
 
-    commande.statut = 'validee';
+    commande.statut = "validee";
     await commande.save();
 
-    return success(res, commande, 'Commande validée.');
+    return success(res, commande, "Commande validée.");
   } catch (err) {
     return error(res, err.message);
   }
 };
-
 
 const receptionnerCommande = async (req, res) => {
   try {
@@ -85,17 +85,17 @@ const receptionnerCommande = async (req, res) => {
     // lignesRecues: [{ articleId, quantiteRecue, prixUnitaire }]
 
     const commande = await CommandeFournisseur.findById(req.params.id);
-    if (!commande) return error(res, 'Commande introuvable.', 404);
+    if (!commande) return error(res, "Commande introuvable.", 404);
 
-    if (!['validee', 'en_cours'].includes(commande.statut)) {
-      return error(res, 'La commande doit être validée pour réception.', 400);
+    if (!["validee", "en_cours"].includes(commande.statut)) {
+      return error(res, "La commande doit être validée pour réception.", 400);
     }
 
     let toutRecu = true;
 
     for (const ligneRecue of lignesRecues) {
       const ligneCom = commande.lignes.find(
-        l => l.article.toString() === ligneRecue.articleId
+        (l) => l.article.toString() === ligneRecue.articleId,
       );
       if (!ligneCom) continue;
 
@@ -111,14 +111,14 @@ const receptionnerCommande = async (req, res) => {
       // Entrée de stock
       let stock = await Stock.findOne({
         article: ligneRecue.articleId,
-        magasin: commande.magasin
+        magasin: commande.magasin,
       });
 
       if (!stock) {
         stock = await Stock.create({
           article: ligneRecue.articleId,
           magasin: commande.magasin,
-          quantite: 0
+          quantite: 0,
         });
       }
 
@@ -128,14 +128,13 @@ const receptionnerCommande = async (req, res) => {
 
       // Mettre à jour prix achat article
       if (ligneRecue.prixUnitaire) {
-        await Article.findByIdAndUpdate(
-          ligneRecue.articleId,
-          { prixAchat: ligneRecue.prixUnitaire }
-        );
+        await Article.findByIdAndUpdate(ligneRecue.articleId, {
+          prixAchat: ligneRecue.prixUnitaire,
+        });
       }
 
       await MouvementStock.create({
-        type: 'achat_fournisseur',
+        type: "achat_fournisseur",
         article: ligneRecue.articleId,
         magasin: commande.magasin,
         quantite: ligneRecue.quantiteRecue,
@@ -143,55 +142,63 @@ const receptionnerCommande = async (req, res) => {
         quantiteApres: stock.quantite,
         prixUnitaire: ligneRecue.prixUnitaire || ligneCom.prixUnitaire,
         reference: commande.numero,
-        utilisateur: req.user._id
+        utilisateur: req.user._id,
       });
     }
 
-    commande.statut = toutRecu ? 'recue' : 'en_cours';
+    commande.statut = toutRecu ? "recue" : "en_cours";
     commande.dateLivraisonReelle = toutRecu ? new Date() : undefined;
     await commande.save();
 
     return success(
       res,
       await commande.populate([
-        { path: 'fournisseur', select: 'raisonSociale' },
-        { path: 'magasin', select: 'nom code' },
-        { path: 'lignes.article', select: 'designation reference' }
+        { path: "fournisseur", select: "raisonSociale" },
+        { path: "magasin", select: "nom code" },
+        { path: "lignes.article", select: "designation reference" },
       ]),
-      `Réception enregistrée. Statut : ${commande.statut}`
+      `Réception enregistrée. Statut : ${commande.statut}`,
     );
   } catch (err) {
     return error(res, err.message);
   }
 };
 
-
 const annulerCommande = async (req, res) => {
   try {
     const commande = await CommandeFournisseur.findById(req.params.id);
-    if (!commande) return error(res, 'Commande introuvable.', 404);
-
-    if (['recue', 'annulee'].includes(commande.statut)) {
-      return error(res, `Impossible d'annuler une commande ${commande.statut}.`, 400);
+    if (!commande) return error(res, "Commande introuvable.", 404);
+    if (!peutAcceder(req.user, commande.magasin)) {
+      return error(res, "Commande introuvable.", 404); // 404 pour ne pas révéler l'existence
     }
 
-    commande.statut = 'annulee';
+    if (["recue", "annulee"].includes(commande.statut)) {
+      return error(
+        res,
+        `Impossible d'annuler une commande ${commande.statut}.`,
+        400,
+      );
+    }
+
+    commande.statut = "annulee";
     await commande.save();
 
-    return success(res, commande, 'Commande annulée.');
+    return success(res, commande, "Commande annulée.");
   } catch (err) {
     return error(res, err.message);
   }
 };
 
-
 const modifierCommande = async (req, res) => {
   try {
     const commande = await CommandeFournisseur.findById(req.params.id);
-    if (!commande) return error(res, 'Commande introuvable.', 404);
+    if (!commande) return error(res, "Commande introuvable.", 404);
+    if (!peutAcceder(req.user, facture.magasin)) {
+      return error(res, "Facture introuvable.", 404); // 404 pour ne pas révéler l'existence
+    }
 
-    if (commande.statut !== 'brouillon') {
-      return error(res, 'Seul un brouillon peut être modifié.', 400);
+    if (commande.statut !== "brouillon") {
+      return error(res, "Seul un brouillon peut être modifié.", 400);
     }
 
     const { lignes, dateLivraisonPrevue, notes } = req.body;
@@ -202,10 +209,10 @@ const modifierCommande = async (req, res) => {
           const article = await Article.findById(ligne.article);
           return {
             ...ligne,
-            designation: article?.designation || '',
-            prixUnitaire: ligne.prixUnitaire || article?.prixAchat || 0
+            designation: article?.designation || "",
+            prixUnitaire: ligne.prixUnitaire || article?.prixAchat || 0,
           };
-        })
+        }),
       );
       commande.lignes = lignesEnrichies;
       commande.totalHT = calculerTotaux(lignesEnrichies);
@@ -216,24 +223,29 @@ const modifierCommande = async (req, res) => {
 
     await commande.save();
 
-    return success(res, commande, 'Commande modifiée.');
+    return success(res, commande, "Commande modifiée.");
   } catch (err) {
     return error(res, err.message);
   }
 };
 
-
 const getCommandes = async (req, res) => {
   try {
     const {
-      fournisseur, magasin, statut,
-      dateDebut, dateFin,
-      page = 1, limit = 20
+      fournisseur,
+      magasin,
+      statut,
+      dateDebut,
+      dateFin,
+      page = 1,
+      limit = 20,
     } = req.query;
 
     const filtre = {};
     if (fournisseur) filtre.fournisseur = fournisseur;
-    if (magasin) filtre.magasin = magasin;
+    const f = filtreMagasin(req.user, magasin);
+    if (f.refuse) return error(res, "Accès refusé à ce magasin.", 403);
+    if (f.valeur) filtre.magasin = f.valeur;
     if (statut) filtre.statut = statut;
     if (dateDebut || dateFin) {
       filtre.createdAt = {};
@@ -247,9 +259,9 @@ const getCommandes = async (req, res) => {
 
     const total = await CommandeFournisseur.countDocuments(filtre);
     const commandes = await CommandeFournisseur.find(filtre)
-      .populate('fournisseur', 'raisonSociale reference')
-      .populate('magasin', 'nom code')
-      .populate('creePar', 'nom prenom')
+      .populate("fournisseur", "raisonSociale reference")
+      .populate("magasin", "nom code")
+      .populate("creePar", "nom prenom")
       .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
       .limit(Number(limit));
@@ -257,26 +269,29 @@ const getCommandes = async (req, res) => {
     return success(res, {
       commandes,
       pagination: {
-        total, page: Number(page),
+        total,
+        page: Number(page),
         limit: Number(limit),
-        totalPages: Math.ceil(total / limit)
-      }
+        totalPages: Math.ceil(total / limit),
+      },
     });
   } catch (err) {
     return error(res, err.message);
   }
 };
 
-
 const getCommande = async (req, res) => {
   try {
     const commande = await CommandeFournisseur.findById(req.params.id)
-      .populate('fournisseur')
-      .populate('magasin', 'nom code adresse')
-      .populate('lignes.article', 'designation reference prixAchat')
-      .populate('creePar', 'nom prenom');
+      .populate("fournisseur")
+      .populate("magasin", "nom code adresse")
+      .populate("lignes.article", "designation reference prixAchat")
+      .populate("creePar", "nom prenom");
 
-    if (!commande) return error(res, 'Commande introuvable.', 404);
+    if (!commande) return error(res, "Commande introuvable.", 404);
+    if (!peutAcceder(req.user, facture.magasin)) {
+      return error(res, "Facture introuvable.", 404); // 404 pour ne pas révéler l'existence
+    }
     return success(res, commande);
   } catch (err) {
     return error(res, err.message);
@@ -284,7 +299,11 @@ const getCommande = async (req, res) => {
 };
 
 module.exports = {
-  creerCommande, validerCommande,
-  receptionnerCommande, annulerCommande,
-  modifierCommande, getCommandes, getCommande
+  creerCommande,
+  validerCommande,
+  receptionnerCommande,
+  annulerCommande,
+  modifierCommande,
+  getCommandes,
+  getCommande,
 };

@@ -6,6 +6,7 @@ const {
   getFacturesImpayees
 } = require('../controllers/factureController');
 const { protect, authorize } = require('../middlewares/auth');
+const { exigerMagasin } = require('../middlewares/../utils/magasinScope');
 
 router.use(protect);
 
@@ -13,9 +14,9 @@ router.use(protect);
 router.get('/alertes/impayes', getFacturesImpayees);
 
 router.route('/')
-  .get(getFactures)
   .post(
     authorize('administrateur', 'gestionnaire', 'caissier'),
+    exigerMagasin(['body', 'magasin']),
     creerFacture
   );
 
